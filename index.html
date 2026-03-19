@@ -19,10 +19,10 @@ body{background:var(--bg);color:var(--white);font-family:'Jost',sans-serif;font-
 body.locked{overflow:hidden}
 
 /* ── CURSOR ── */
-#cursor{display:none;position:fixed;z-index:99999;pointer-events:none;width:10px;height:10px;background:var(--white);border:1.5px solid rgba(0,0,0,0.35);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;will-change:transform}
+#cursor{position:fixed;z-index:99999;pointer-events:none;width:10px;height:10px;background:var(--white);border:1.5px solid rgba(0,0,0,0.35);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;will-change:transform}
 #cursor.big{width:28px;height:28px}
 #cursor.tap{width:6px;height:6px;background:var(--amber)}
-#cursor-ring{display:none;position:fixed;z-index:99998;pointer-events:none;width:32px;height:32px;border:1px solid rgba(255,255,255,0.32);border-radius:50%;transform:translate(-50%,-50%);transition:width .25s,height .25s;will-change:transform}
+#cursor-ring{position:fixed;z-index:99998;pointer-events:none;width:32px;height:32px;border:1px solid rgba(255,255,255,0.32);border-radius:50%;transform:translate(-50%,-50%);transition:width .25s,height .25s;will-change:transform}
 #cursor-ring.big{width:48px;height:48px}
 @media(hover:none){#cursor,#cursor-ring{display:none}body{cursor:auto}}
 
@@ -128,7 +128,7 @@ nav.hide{transform:translateY(-100%)}
 .hero-stat-k{font-family:'Space Mono',monospace;font-weight:700;font-size:.58rem;color:var(--g4);text-transform:uppercase;letter-spacing:2px;margin-top:5px}
 
 /* ══ SECTIONS ══ */
-section{position:relative;z-index:3;contain:layout style}
+section{position:relative;z-index:3}
 .sec-eyebrow{display:flex;align-items:center;gap:16px;margin-bottom:52px}
 .sec-eyebrow-label{font-family:'Space Mono',monospace;font-weight:700;font-size:.75rem;color:var(--g1);text-transform:uppercase;letter-spacing:4px;flex-shrink:0}
 .sec-eyebrow-num{font-family:'Space Mono',monospace;font-weight:700;font-size:.6rem;letter-spacing:2px;flex-shrink:0;color:var(--g5)}
@@ -163,7 +163,7 @@ section{position:relative;z-index:3;contain:layout style}
 #work{padding:84px 0;border-bottom:1px solid var(--border)}
 #work .sec-eyebrow{padding:0 64px}
 .work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.work-card{background:var(--bg);text-decoration:none;display:flex;flex-direction:column;overflow:hidden;transition:background .25s;cursor:none;-webkit-tap-highlight-color:transparent;position:relative;contain:layout}
+.work-card{background:var(--bg);text-decoration:none;display:flex;flex-direction:column;overflow:hidden;transition:background .25s;cursor:none;-webkit-tap-highlight-color:transparent;position:relative}
 .work-card:hover{background:var(--surface)}
 .work-img{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:var(--ink)}
 .work-img img,.work-img iframe,.work-img video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border:none;transition:filter .4s ease,transform .6s ease}
@@ -295,7 +295,8 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
 body.admin-editing .work-card{outline:1px dashed rgba(224,169,58,.3)}
 body.admin-editing .work-card:hover{outline-color:rgba(224,169,58,.7)}
 .card-edit-overlay{position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;gap:8px}
-body.admin-editing .work-card:hover .card-edit-overlay{display:flex}
+body.admin-editing .work-card .card-edit-overlay{display:flex;opacity:0;transition:opacity .2s}
+body.admin-editing .work-card:hover .card-edit-overlay{opacity:1}
 .card-edit-btn{font-family:'Space Mono',monospace;font-weight:700;font-size:.55rem;color:var(--white);border:1px solid rgba(255,255,255,.3);padding:7px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:2px;background:rgba(0,0,0,.6);transition:all .2s}
 .card-edit-btn:hover{background:rgba(255,255,255,.15)}
 .card-edit-btn.del{color:var(--red);border-color:rgba(255,58,42,.4)}
@@ -420,6 +421,7 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
   <button class="admin-tb-btn" id="tb-edit-mode">&#9998; Edit Mode</button>
   <button class="admin-tb-btn" id="tb-preview">&#128065; Preview</button>
   <button class="admin-tb-btn" id="tb-save">&#10003; Save Changes</button>
+  <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
   <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
   <button class="admin-tb-btn admin-tb-logout" id="tb-logout">Logout</button>
 </div>
@@ -870,13 +872,9 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
    SUPABASE CONFIG — paste your keys here
 ═══════════════════════════════════════════════ */
 var SUPA_URL = 'https://gqkvywzqqdxydiifftpe.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxa3Z5d3pxcWR4eWRpaWZmdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDU0NDQsImV4cCI6MjA4OTUyMTQ0NH0.Q5A4w4wasdgZFuf4DWLcfqIKKN1uGzs0H7yjDNzJP38';  // ← paste your anon key between the quotes
-var supa = null;
-try {
-  supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-} catch(e) {
-  console.warn('Supabase init failed — running in offline mode:', e);
-}
+var SUPA_KEY = 'PASTE_YOUR_ANON_KEY_HERE';  // ← paste your anon key between the quotes
+var supa=null;
+try{supa=supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){console.warn('Supabase init failed:',e);}
 
 /* ═══════════════════════════════════════════════
    PROJECT DATA + RENDER
@@ -906,7 +904,13 @@ async function loadFromSupabase(){
     var {data:content,  error:ce} = await supa.from('site_content').select('*');
     if(!pe && projects && projects.length > 0){
       // Map DB columns to frontend shape
+      var localData=null; try{ var ls=localStorage.getItem('at_portfolio'); if(ls) localData=JSON.parse(ls); }catch(e){}
       DATA.projects = projects.map(function(p){
+        var thumb=p.thumb||'';
+        if(thumb==='__local__'&&localData){
+          var lp=(localData.projects||[]).find(function(x){return String(x.id)===String(p.id);});
+          if(lp&&lp.thumb) thumb=lp.thumb;
+        }
         return {
           id:         String(p.id),
           title:      p.title||'',
@@ -914,7 +918,7 @@ async function loadFromSupabase(){
           url:        p.url||'',
           accent:     p.accent||'#e05c3a',
           videoEmbed: p.video_embed||'',
-          thumb:      p.thumb||''
+          thumb:      thumb
         };
       });
       renderProjects();
@@ -954,13 +958,15 @@ async function loadFromSupabase(){
 
 async function saveProjectToSupabase(proj){
   if(!supa) return proj.id;
+  var thumbForDB=proj.thumb||'';
+  if(thumbForDB.startsWith('data:')&&thumbForDB.length>500*1024) thumbForDB='__local__';
   var row = {
     title:       proj.title,
     type:        proj.type,
     url:         proj.url,
     accent:      proj.accent,
     video_embed: proj.videoEmbed||'',
-    thumb:       proj.thumb||'',
+    thumb:       thumbForDB,
     sort_order:  0
   };
   if(proj.id && isNaN(Number(proj.id))){
@@ -1037,7 +1043,7 @@ function renderProjects(){
     card.style.setProperty('--ca', p.accent);
     var mediaHtml = p.videoEmbed
       ? '<div class="work-img">'+getVideoEmbed(p.videoEmbed)+'<div class="work-bar"></div></div>'
-      : '<div class="work-img"><img src="'+p.thumb+'" alt="'+p.title+'" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project &#8599;</div></div><div class="work-bar"></div></div>';
+      : '<div class="work-img">'+(p.thumb?'<img src="'+p.thumb+'" alt="'+p.title+'" loading="lazy">':'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--ink)"><span style="font-family:Space Mono,monospace;font-size:.55rem;color:var(--g4);letter-spacing:2px">NO IMAGE</span></div>')+'<div class="work-overlay"><div class="work-cta">View Project &#8599;</div></div><div class="work-bar"></div></div>';
     card.innerHTML = mediaHtml +
       '<div class="work-info"><div class="work-title">'+p.title+'</div><div class="work-type">'+p.type+'</div></div>'+
       '<div class="card-edit-overlay"><button class="card-edit-btn" data-id="'+p.id+'">&#9998; Edit</button><button class="card-edit-btn del" data-del="'+p.id+'">&#10005; Remove</button></div>';
@@ -1119,22 +1125,19 @@ var SFX = (function(){
 (function(){
   var dot=document.getElementById('cursor'), ring=document.getElementById('cursor-ring');
   var mx=0,my=0,rx=0,ry=0;
-  var cursorShown = false;
+  var cursorShown=false;
   document.addEventListener('mousemove',function(e){
     mx=e.clientX;my=e.clientY;
     dot.style.left=mx+'px';dot.style.top=my+'px';
-    if(!cursorShown){
-      cursorShown=true;
-      document.body.style.cursor='none';
-      dot.style.display='block';
-      ring.style.display='block';
-    }
+    if(!cursorShown){cursorShown=true;document.body.style.cursor='none';dot.style.display='block';ring.style.display='block';}
   },{passive:true});
   (function lerp(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;ring.style.left=Math.round(rx*10)/10+'px';ring.style.top=Math.round(ry*10)/10+'px';requestAnimationFrame(lerp);})();
-  document.querySelectorAll('a,button,.about-tag,.lang-cell,.work-card,.nav-ch,.email-copy').forEach(function(el){
+  document.querySelectorAll('a,button,.about-tag,.lang-cell,.nav-ch,.email-copy').forEach(function(el){
     el.addEventListener('mouseenter',function(){dot.classList.add('big');ring.classList.add('big')});
     el.addEventListener('mouseleave',function(){dot.classList.remove('big');ring.classList.remove('big')});
   });
+  document.addEventListener('mouseover',function(e){ if(e.target.closest('.work-card')){dot.classList.add('big');ring.classList.add('big');} });
+  document.addEventListener('mouseout',function(e){ if(e.target.closest('.work-card')&&!e.relatedTarget?.closest('.work-card')){dot.classList.remove('big');ring.classList.remove('big');} });
   document.addEventListener('mousedown',function(){dot.classList.add('tap')});
   document.addEventListener('mouseup',function(){dot.classList.remove('tap')});
 })();
@@ -1278,8 +1281,6 @@ main{padding:13mm 10mm 12mm;display:flex;flex-direction:column;gap:7mm}
 .print-btn{position:fixed;bottom:20pt;right:20pt;background:var(--g5);color:var(--g2);border:1px solid var(--border);padding:8pt 16pt;font-family:'Space Mono',monospace;font-size:6.5pt;letter-spacing:2px;text-transform:uppercase;cursor:pointer;z-index:200;transition:all .2s}
 .print-btn:hover{background:var(--g4);color:var(--g1)}
 </style>
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>
 </head>
 <body>
 <div id="scanlines"></div><div id="vignette"></div><div id="crt-beam"></div>
@@ -1425,12 +1426,14 @@ var Admin = (function(){
   /* TOOLBAR BUTTONS */
   document.getElementById('tb-toggle-panel').addEventListener('click', togglePanel);
   document.getElementById('tb-logout').addEventListener('click',function(){
-    loggedIn=false; editMode=false; panelOpen=false;
+    loggedIn=false; editMode=false; panelOpen=false; previewMode=false;
     toolbar.classList.remove('active');
     panel.classList.remove('active','open');
     document.body.classList.remove('admin-editing');
     document.querySelector('#app nav').style.top='';
     document.getElementById('hero').style.paddingTop='';
+    toolbar.style.opacity=''; toolbar.style.pointerEvents='';
+    document.getElementById('tb-preview').innerHTML='&#128065; Preview';
     document.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');});
   });
 
@@ -1446,43 +1449,43 @@ var Admin = (function(){
     });
   });
 
+  var previewMode = false;
   document.getElementById('tb-preview').addEventListener('click',function(){
-    var isPrev = panel.classList.contains('open');
-    panel.classList.toggle('open',false); panelOpen=false;
-    toolbar.style.opacity = isPrev ? '1' : '0.15';
-    this.textContent = isPrev ? '&#128065; Preview' : '&#128065; Exit Preview';
-    this.innerHTML = isPrev ? '&#128065; Preview' : '&#128065; Exit Preview';
+    previewMode = !previewMode;
+    if(previewMode){
+      panel.classList.remove('open'); panelOpen=false;
+      toolbar.style.opacity='0.12'; toolbar.style.pointerEvents='none';
+      this.style.pointerEvents='auto'; this.style.opacity='1';
+      this.innerHTML='&#128065; Exit Preview';
+    } else {
+      toolbar.style.opacity='1'; toolbar.style.pointerEvents='';
+      this.innerHTML='&#128065; Preview';
+    }
   });
 
   document.getElementById('tb-save').addEventListener('click', async function(){
-    var b = this;
-    b.innerHTML = '&#8987; Saving...'; b.style.color = 'var(--amber)';
-
-    // Push projects to Supabase
-    for(var i=0; i<DATA.projects.length; i++){
-      var newId = await saveProjectToSupabase(DATA.projects[i]);
-      DATA.projects[i].id = newId;
+    var b=this; b.innerHTML='&#8987; Saving...'; b.style.color='var(--amber)';
+    var errors=[];
+    for(var i=0;i<DATA.projects.length;i++){
+      try{ var nid=await saveProjectToSupabase(DATA.projects[i]); DATA.projects[i].id=nid; }catch(e){ errors.push('Project: '+e.message); }
     }
-
-    // Push content
-    var hn = document.getElementById('hero-name-el');
-    var hb = document.getElementById('hero-bio-el');
-    var at = document.getElementById('about-text-el');
-    if(hn) await saveContentToSupabase('hero_name', hn.innerHTML);
-    if(hb) await saveContentToSupabase('hero_bio',  hb.textContent);
-    if(at) await saveContentToSupabase('about_text', at.textContent);
-
-    // Push custom sections
-    for(var j=0; j<(DATA.customSections||[]).length; j++){
-      var newSid = await saveSectionToSupabase(DATA.customSections[j]);
-      DATA.customSections[j].id = newSid;
+    try{
+      var hn=document.getElementById('hero-name-el'),hb=document.getElementById('hero-bio-el'),at=document.getElementById('about-text-el');
+      if(hn) await saveContentToSupabase('hero_name',hn.innerHTML);
+      if(hb) await saveContentToSupabase('hero_bio',hb.textContent);
+      if(at) await saveContentToSupabase('about_text',at.textContent);
+    }catch(e){ errors.push('Content: '+e.message); }
+    for(var j=0;j<(DATA.customSections||[]).length;j++){
+      try{ var ns=await saveSectionToSupabase(DATA.customSections[j]); DATA.customSections[j].id=ns; }catch(e){ errors.push('Section: '+e.message); }
     }
-
-    // Also keep localStorage as fallback
     saveData(DATA);
-
-    b.innerHTML = '&#10003; Saved!'; b.style.color = 'var(--lime)';
-    setTimeout(function(){ b.innerHTML = '&#10003; Save Changes'; b.style.color = ''; }, 2000);
+    if(errors.length>0){
+      b.innerHTML='&#9888; Partial Save'; b.style.color='var(--amber)';
+      alert('Saved locally but Supabase had errors:\n'+errors.join('\n')+'\n\nTip: Large GIF/image files may exceed limits. Host on Imgur and paste URL instead.');
+    } else {
+      b.innerHTML='&#10003; Saved!'; b.style.color='var(--lime)';
+    }
+    setTimeout(function(){ b.innerHTML='&#10003; Save Changes'; b.style.color=''; },2500);
   });
 
   document.getElementById('close-panel').addEventListener('click',function(){ panel.classList.remove('open'); panelOpen=false; });
@@ -1542,6 +1545,10 @@ var Admin = (function(){
   // Thumbnail file upload
   document.getElementById('modal-thumb-file').addEventListener('change',function(){
     var file=this.files[0]; if(!file) return;
+    if(file.size > 400*1024){
+      var kb=Math.round(file.size/1024);
+      alert('File is '+kb+'KB — large files may not sync across browsers.\n\nTip: compress at ezgif.com or host on Imgur and paste the URL instead.');
+    }
     var reader=new FileReader();
     reader.onload=function(e){
       document.getElementById('modal-thumb-preview').src=e.target.result;
@@ -1657,6 +1664,17 @@ var Admin = (function(){
     var btn = this;
     btn.innerHTML = '&#10003; Downloaded!';
     setTimeout(function(){ btn.innerHTML = '&#11015; Export HTML'; }, 2200);
+  });
+
+  document.getElementById('tb-export').addEventListener('click',function(){
+    var src='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+    var frozen=JSON.stringify(DATA);
+    src=src.replace(/var DATA = loadData\(\);/,'var DATA = '+frozen+';');
+    var blob=new Blob([src],{type:'text/html'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='portfolio.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    var btn=this; btn.innerHTML='&#10003; Downloaded!';
+    setTimeout(function(){btn.innerHTML='&#11015; Export HTML';},2200);
   });
 
 })();
