@@ -872,7 +872,7 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
    SUPABASE CONFIG — paste your keys here
 ═══════════════════════════════════════════════ */
 var SUPA_URL = 'https://gqkvywzqqdxydiifftpe.supabase.co';
-var SUPA_KEY = 'PASTE_YOUR_ANON_KEY_HERE';  // ← paste your anon key between the quotes
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxa3Z5d3pxcWR4eWRpaWZmdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDU0NDQsImV4cCI6MjA4OTUyMTQ0NH0.Q5A4w4wasdgZFuf4DWLcfqIKKN1uGzs0H7yjDNzJP38';  // ← paste your anon key between the quotes
 var supa=null;
 try{supa=supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){console.warn('Supabase init failed:',e);}
 
