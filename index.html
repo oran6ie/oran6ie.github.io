@@ -904,13 +904,7 @@ async function loadFromSupabase(){
     var {data:content,  error:ce} = await supa.from('site_content').select('*');
     if(!pe && projects && projects.length > 0){
       // Map DB columns to frontend shape
-      var localData=null; try{ var ls=localStorage.getItem('at_portfolio'); if(ls) localData=JSON.parse(ls); }catch(e){}
       DATA.projects = projects.map(function(p){
-        var thumb=p.thumb||'';
-        if(thumb==='__local__'&&localData){
-          var lp=(localData.projects||[]).find(function(x){return String(x.id)===String(p.id);});
-          if(lp&&lp.thumb) thumb=lp.thumb;
-        }
         return {
           id:         String(p.id),
           title:      p.title||'',
@@ -918,7 +912,7 @@ async function loadFromSupabase(){
           url:        p.url||'',
           accent:     p.accent||'#e05c3a',
           videoEmbed: p.video_embed||'',
-          thumb:      thumb
+          thumb:      p.thumb||''
         };
       });
       renderProjects();
@@ -956,10 +950,29 @@ async function loadFromSupabase(){
   }
 }
 
+async function uploadThumbToStorage(dataUrl, projId){
+  try{
+    var arr=dataUrl.split(','),mime=arr[0].match(/:(.*?);/)[1];
+    var ext=mime.includes('gif')?'gif':mime.includes('png')?'png':'jpg';
+    var bstr=atob(arr[1]),n=bstr.length,u8=new Uint8Array(n);
+    for(var i=0;i<n;i++) u8[i]=bstr.charCodeAt(i);
+    var blob=new Blob([u8],{type:mime});
+    var path='thumbs/'+projId+'-'+Date.now()+'.'+ext;
+    var {error}=await supa.storage.from('portfolio').upload(path,blob,{upsert:true,contentType:mime});
+    if(error){console.warn('Storage upload:',error);return null;}
+    return supa.storage.from('portfolio').getPublicUrl(path).data.publicUrl;
+  }catch(e){console.warn('uploadThumb:',e);return null;}
+}
+
 async function saveProjectToSupabase(proj){
   if(!supa) return proj.id;
   var thumbForDB=proj.thumb||'';
-  if(thumbForDB.startsWith('data:')&&thumbForDB.length>500*1024) thumbForDB='__local__';
+  if(thumbForDB.startsWith('data:')){
+    var pid=(proj.id&&!isNaN(Number(proj.id)))?String(proj.id):'new-'+Date.now();
+    var url=await uploadThumbToStorage(thumbForDB,pid);
+    if(url){thumbForDB=url;proj.thumb=url;}
+    else thumbForDB='';
+  }
   var row = {
     title:       proj.title,
     type:        proj.type,
@@ -1125,19 +1138,15 @@ var SFX = (function(){
 (function(){
   var dot=document.getElementById('cursor'), ring=document.getElementById('cursor-ring');
   var mx=0,my=0,rx=0,ry=0;
-  var cursorShown=false;
-  document.addEventListener('mousemove',function(e){
-    mx=e.clientX;my=e.clientY;
-    dot.style.left=mx+'px';dot.style.top=my+'px';
-    if(!cursorShown){cursorShown=true;document.body.style.cursor='none';dot.style.display='block';ring.style.display='block';}
-  },{passive:true});
+  var _cs=false;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';if(!_cs){_cs=true;document.body.style.cursor='none';dot.style.display='block';ring.style.display='block';}},{passive:true});
   (function lerp(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;ring.style.left=Math.round(rx*10)/10+'px';ring.style.top=Math.round(ry*10)/10+'px';requestAnimationFrame(lerp);})();
   document.querySelectorAll('a,button,.about-tag,.lang-cell,.nav-ch,.email-copy').forEach(function(el){
     el.addEventListener('mouseenter',function(){dot.classList.add('big');ring.classList.add('big')});
     el.addEventListener('mouseleave',function(){dot.classList.remove('big');ring.classList.remove('big')});
   });
-  document.addEventListener('mouseover',function(e){ if(e.target.closest('.work-card')){dot.classList.add('big');ring.classList.add('big');} });
-  document.addEventListener('mouseout',function(e){ if(e.target.closest('.work-card')&&!e.relatedTarget?.closest('.work-card')){dot.classList.remove('big');ring.classList.remove('big');} });
+  document.addEventListener('mouseover',function(e){if(e.target.closest('.work-card')){dot.classList.add('big');ring.classList.add('big');}});
+  document.addEventListener('mouseout',function(e){if(e.target.closest('.work-card')&&!e.relatedTarget?.closest('.work-card')){dot.classList.remove('big');ring.classList.remove('big');}});
   document.addEventListener('mousedown',function(){dot.classList.add('tap')});
   document.addEventListener('mouseup',function(){dot.classList.remove('tap')});
 })();
@@ -1281,6 +1290,8 @@ main{padding:13mm 10mm 12mm;display:flex;flex-direction:column;gap:7mm}
 .print-btn{position:fixed;bottom:20pt;right:20pt;background:var(--g5);color:var(--g2);border:1px solid var(--border);padding:8pt 16pt;font-family:'Space Mono',monospace;font-size:6.5pt;letter-spacing:2px;text-transform:uppercase;cursor:pointer;z-index:200;transition:all .2s}
 .print-btn:hover{background:var(--g4);color:var(--g1)}
 </style>
+<!-- Supabase -->
+<scr"+"ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>
 </head>
 <body>
 <div id="scanlines"></div><div id="vignette"></div><div id="crt-beam"></div>
@@ -1426,13 +1437,12 @@ var Admin = (function(){
   /* TOOLBAR BUTTONS */
   document.getElementById('tb-toggle-panel').addEventListener('click', togglePanel);
   document.getElementById('tb-logout').addEventListener('click',function(){
-    loggedIn=false; editMode=false; panelOpen=false; previewMode=false;
-    toolbar.classList.remove('active');
-    panel.classList.remove('active','open');
+    loggedIn=false;editMode=false;panelOpen=false;previewMode=false;
+    toolbar.classList.remove('active');panel.classList.remove('active','open');
     document.body.classList.remove('admin-editing');
     document.querySelector('#app nav').style.top='';
     document.getElementById('hero').style.paddingTop='';
-    toolbar.style.opacity=''; toolbar.style.pointerEvents='';
+    toolbar.style.opacity='';toolbar.style.pointerEvents='';
     document.getElementById('tb-preview').innerHTML='&#128065; Preview';
     document.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');});
   });
@@ -1449,43 +1459,33 @@ var Admin = (function(){
     });
   });
 
-  var previewMode = false;
+  var previewMode=false;
   document.getElementById('tb-preview').addEventListener('click',function(){
-    previewMode = !previewMode;
-    if(previewMode){
-      panel.classList.remove('open'); panelOpen=false;
-      toolbar.style.opacity='0.12'; toolbar.style.pointerEvents='none';
-      this.style.pointerEvents='auto'; this.style.opacity='1';
-      this.innerHTML='&#128065; Exit Preview';
-    } else {
-      toolbar.style.opacity='1'; toolbar.style.pointerEvents='';
-      this.innerHTML='&#128065; Preview';
-    }
+    previewMode=!previewMode;
+    if(previewMode){panel.classList.remove('open');panelOpen=false;toolbar.style.opacity='0.12';toolbar.style.pointerEvents='none';this.style.pointerEvents='auto';this.style.opacity='1';this.innerHTML='&#128065; Exit Preview';}
+    else{toolbar.style.opacity='1';toolbar.style.pointerEvents='';this.style.pointerEvents='';this.style.opacity='';this.innerHTML='&#128065; Preview';}
   });
 
   document.getElementById('tb-save').addEventListener('click', async function(){
     var b=this; b.innerHTML='&#8987; Saving...'; b.style.color='var(--amber)';
-    var errors=[];
+    var errs=[];
     for(var i=0;i<DATA.projects.length;i++){
-      try{ var nid=await saveProjectToSupabase(DATA.projects[i]); DATA.projects[i].id=nid; }catch(e){ errors.push('Project: '+e.message); }
+      try{var nid=await saveProjectToSupabase(DATA.projects[i]);DATA.projects[i].id=nid;}catch(e){errs.push('Project "'+DATA.projects[i].title+'": '+e.message);}
     }
     try{
       var hn=document.getElementById('hero-name-el'),hb=document.getElementById('hero-bio-el'),at=document.getElementById('about-text-el');
-      if(hn) await saveContentToSupabase('hero_name',hn.innerHTML);
-      if(hb) await saveContentToSupabase('hero_bio',hb.textContent);
-      if(at) await saveContentToSupabase('about_text',at.textContent);
-    }catch(e){ errors.push('Content: '+e.message); }
+      if(hn)await saveContentToSupabase('hero_name',hn.innerHTML);
+      if(hb)await saveContentToSupabase('hero_bio',hb.textContent);
+      if(at)await saveContentToSupabase('about_text',at.textContent);
+    }catch(e){errs.push('Content: '+e.message);}
     for(var j=0;j<(DATA.customSections||[]).length;j++){
-      try{ var ns=await saveSectionToSupabase(DATA.customSections[j]); DATA.customSections[j].id=ns; }catch(e){ errors.push('Section: '+e.message); }
+      try{var ns=await saveSectionToSupabase(DATA.customSections[j]);DATA.customSections[j].id=ns;}catch(e){errs.push('Section: '+e.message);}
     }
     saveData(DATA);
-    if(errors.length>0){
-      b.innerHTML='&#9888; Partial Save'; b.style.color='var(--amber)';
-      alert('Saved locally but Supabase had errors:\n'+errors.join('\n')+'\n\nTip: Large GIF/image files may exceed limits. Host on Imgur and paste URL instead.');
-    } else {
-      b.innerHTML='&#10003; Saved!'; b.style.color='var(--lime)';
-    }
-    setTimeout(function(){ b.innerHTML='&#10003; Save Changes'; b.style.color=''; },2500);
+    renderProjects();
+    if(errs.length>0){b.innerHTML='&#9888; Partial Save';b.style.color='var(--amber)';console.warn('Save errors:',errs);alert('Some saves failed:\n'+errs.join('\n'));}
+    else{b.innerHTML='&#10003; Saved!';b.style.color='var(--lime)';}
+    setTimeout(function(){b.innerHTML='&#10003; Save Changes';b.style.color='';},2500);
   });
 
   document.getElementById('close-panel').addEventListener('click',function(){ panel.classList.remove('open'); panelOpen=false; });
@@ -1545,10 +1545,7 @@ var Admin = (function(){
   // Thumbnail file upload
   document.getElementById('modal-thumb-file').addEventListener('change',function(){
     var file=this.files[0]; if(!file) return;
-    if(file.size > 400*1024){
-      var kb=Math.round(file.size/1024);
-      alert('File is '+kb+'KB — large files may not sync across browsers.\n\nTip: compress at ezgif.com or host on Imgur and paste the URL instead.');
-    }
+    if(file.size>1.5*1024*1024) alert('File is '+Math.round(file.size/1024)+'KB — very large files may be slow to upload. Consider compressing at ezgif.com first.');
     var reader=new FileReader();
     reader.onload=function(e){
       document.getElementById('modal-thumb-preview').src=e.target.result;
@@ -1668,12 +1665,10 @@ var Admin = (function(){
 
   document.getElementById('tb-export').addEventListener('click',function(){
     var src='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
-    var frozen=JSON.stringify(DATA);
-    src=src.replace(/var DATA = loadData\(\);/,'var DATA = '+frozen+';');
     var blob=new Blob([src],{type:'text/html'});
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='portfolio.html';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    var btn=this; btn.innerHTML='&#10003; Downloaded!';
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='portfolio.html';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    var btn=this;btn.innerHTML='&#10003; Downloaded!';
     setTimeout(function(){btn.innerHTML='&#11015; Export HTML';},2200);
   });
 
