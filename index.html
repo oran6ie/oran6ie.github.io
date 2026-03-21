@@ -252,7 +252,7 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
 .admin-btn.secondary:hover{color:var(--g2);border-color:var(--g4)}
 .admin-btn.danger{background:transparent;color:var(--red);border:1px solid var(--red)}
 .admin-btn.danger:hover{background:var(--red);color:var(--white)}
-.admin-error{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--red);letter-spacing:1px;display:none}
+.admin-error{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--red);letter-spacing:1px;display:none;word-break:break-word;max-width:280px}
 .admin-error.show{display:block}
 
 /* Admin toolbar (top bar when logged in) */
@@ -641,7 +641,7 @@ body.light #theme-toggle{color:var(--g2)}
 <div id="admin-login-overlay" class="hidden">
   <div class="admin-login-box">
     <div class="admin-login-title">Admin Access</div>
-    <input class="admin-input" id="admin-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="admin-input" id="admin-user" type="email" placeholder="Email" autocomplete="email">
     <input class="admin-input" id="admin-pass" type="password" placeholder="Password" autocomplete="off">
     <div class="admin-error" id="admin-error">Incorrect credentials</div>
     <button class="admin-btn" id="admin-login-btn">Login</button>
@@ -660,7 +660,6 @@ body.light #theme-toggle{color:var(--g2)}
   <button class="admin-tb-btn" id="tb-undo" title="Undo last change" style="opacity:.5" disabled>&#8617; Undo</button>
   <button class="admin-tb-btn" id="tb-redo" title="Nothing to redo" disabled style="opacity:.35">&#8618; Redo</button>
   <button class="admin-tb-btn" id="tb-save">&#10003; Save Changes</button>
-  <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
   <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
   <button class="admin-tb-btn admin-tb-logout" id="tb-logout">Logout</button>
 </div>
@@ -1135,6 +1134,9 @@ body.light #theme-toggle{color:var(--g2)}
    SUPABASE CONFIG — paste your keys here
 ═══════════════════════════════════════════════ */
 var SUPA_URL = 'https://gqkvywzqqdxydiifftpe.supabase.co';
+/* ⚠ This is the public anon key — safe to expose. Real security is
+   enforced by Supabase RLS policies on your tables + Auth session.
+   Never put the service_role key here. */
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxa3Z5d3pxcWR4eWRpaWZmdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDU0NDQsImV4cCI6MjA4OTUyMTQ0NH0.Q5A4w4wasdgZFuf4DWLcfqIKKN1uGzs0H7yjDNzJP38';  // ← paste your anon key between the quotes
 var supa=null;
 try{supa=supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){console.warn('Supabase init failed:',e);}
@@ -1213,6 +1215,10 @@ async function loadFromSupabase(){
   }
 }
 
+/* ── Shared admin config — global so both the Admin module and
+   saveProjectToSupabase() can access it without scope issues ── */
+var ADMIN_UUID = '42ffe4c2-2dc1-49f9-bcdb-731946042110';
+
 async function uploadThumbToStorage(dataUrl, projId){
   try{
     var arr=dataUrl.split(','),mime=arr[0].match(/:(.*?);/)[1];
@@ -1229,6 +1235,9 @@ async function uploadThumbToStorage(dataUrl, projId){
 
 async function saveProjectToSupabase(proj){
   if(!supa) return proj.id;
+  // Auth guard — verify session is still valid before writing
+  var { data: { user: guardUser } } = await supa.auth.getUser();
+  if(!guardUser || guardUser.id !== ADMIN_UUID){ console.warn('Not authenticated'); return proj.id; }
   var thumbForDB=proj.thumb||'';
   if(thumbForDB.startsWith('data:')){
     var pid=(proj.id&&!isNaN(Number(proj.id)))?String(proj.id):'new-'+Date.now();
@@ -2132,33 +2141,85 @@ body.light #theme-toggle{color:var(--g2)}
    ADMIN SYSTEM
 ═══════════════════════════════════════════════ */
 var Admin = (function(){
-  var CREDS = {u:'oran6ie', p:'alankritportfolio@200110'};
+  /* ── Supabase Auth — no credentials stored in frontend ── */
+
   var loggedIn = false, editMode = false, panelOpen = false;
   var _editSnapshots = {};
+  var previewMode = false; // declare here so logout can reset it
 
   var overlay = document.getElementById('admin-login-overlay');
   var toolbar  = document.getElementById('admin-toolbar');
   var panel    = document.getElementById('admin-panel');
 
-  /* LOGIN */
+  /* ── Show login or toggle panel ── */
   document.getElementById('admin-trigger').addEventListener('click',function(e){
-    e.preventDefault(); if(loggedIn) return togglePanel(); overlay.classList.remove('hidden');
+    e.preventDefault();
+    if(loggedIn) return togglePanel();
+    overlay.classList.remove('hidden');
+    // Clear any previous error
+    document.getElementById('admin-error').classList.remove('show');
   });
-  document.getElementById('admin-cancel-btn').addEventListener('click',function(){overlay.classList.add('hidden');});
+  document.getElementById('admin-cancel-btn').addEventListener('click',function(){
+    overlay.classList.add('hidden');
+  });
   document.getElementById('admin-login-btn').addEventListener('click',doLogin);
   document.getElementById('admin-user').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('admin-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
-  function doLogin(){
-    var u=document.getElementById('admin-user').value.trim();
-    var p=document.getElementById('admin-pass').value;
-    if(u===CREDS.u && p===CREDS.p){
-      loggedIn=true; overlay.classList.add('hidden');
-      document.getElementById('admin-error').classList.remove('show');
-      activateAdmin();
-    } else {
-      document.getElementById('admin-error').classList.add('show');
+  /* ── Login via Supabase Auth ── */
+  async function doLogin(){
+    if(!supa){ showError('Supabase not connected.'); return; }
+    var email = document.getElementById('admin-user').value.trim();
+    var pass  = document.getElementById('admin-pass').value;
+    // Show loading state
+    var btn = document.getElementById('admin-login-btn');
+    btn.textContent = 'Signing in...'; btn.disabled = true;
+    try {
+      var { data, error } = await supa.auth.signInWithPassword({ email: email, password: pass });
+      if(error || !data.user){ showError('Incorrect credentials'); return; }
+      // Extra check: only allow the admin email
+      if(data.user.id !== ADMIN_UUID){
+        await supa.auth.signOut();
+        showError('Access denied.'); return;
+      }
+      onLoginSuccess();
+    } catch(e) {
+      showError('Login failed: ' + e.message);
+    } finally {
+      btn.textContent = 'Login'; btn.disabled = false;
     }
+  }
+
+  function showError(msg){
+    var el = document.getElementById('admin-error');
+    el.textContent = msg; el.classList.add('show');
+  }
+
+  function onLoginSuccess(){
+    loggedIn = true;
+    overlay.classList.add('hidden');
+    document.getElementById('admin-error').classList.remove('show');
+    activateAdmin();
+  }
+
+  /* ── Session check on page load — stay logged in after refresh ── */
+  if(supa){
+    supa.auth.getUser().then(function(res){
+      var user = res && res.data && res.data.user;
+      if(user && user.id === ADMIN_UUID){
+        loggedIn = true;
+        activateAdmin();
+      }
+    });
+    // Also listen for auth state changes (e.g. token refresh)
+    supa.auth.onAuthStateChange(function(event, session){
+      if(event === 'SIGNED_IN' && session && session.user.id === ADMIN_UUID){
+        if(!loggedIn){ loggedIn=true; activateAdmin(); }
+      }
+      if(event === 'SIGNED_OUT'){
+        loggedIn=false;
+      }
+    });
   }
 
   function activateAdmin(){
@@ -2190,7 +2251,9 @@ var Admin = (function(){
     });
   }
 
-  document.getElementById('tb-logout').addEventListener('click',function(){
+  document.getElementById('tb-logout').addEventListener('click', async function(){
+    // Sign out from Supabase (invalidates session server-side)
+    if(supa){ try{ await supa.auth.signOut(); }catch(e){} }
     loggedIn=false;editMode=false;panelOpen=false;previewMode=false;
     toolbar.classList.remove('active');panel.classList.remove('active','open');
     document.body.classList.remove('admin-editing');
@@ -2216,7 +2279,6 @@ var Admin = (function(){
     });
   });
 
-  var previewMode=false;
   document.getElementById('tb-preview').addEventListener('click',function(){
     previewMode=!previewMode;
     if(previewMode){panel.classList.remove('open');panelOpen=false;toolbar.style.opacity='0.12';toolbar.style.pointerEvents='none';this.style.pointerEvents='auto';this.style.opacity='1';this.innerHTML='&#128065; Exit Preview';}
@@ -2385,8 +2447,8 @@ var Admin = (function(){
     renderProjects(); renderAdminProjects();
   });
 
-  function deleteProject(id){
-    deleteProjectFromSupabase(id);
+  async function deleteProject(id){
+    await deleteProjectFromSupabase(id);
     DATA.projects=DATA.projects.filter(function(p){return p.id!==id;});
     renderProjects(); renderAdminProjects();
   }
@@ -2397,10 +2459,16 @@ var Admin = (function(){
     (DATA.customSections||[]).forEach(function(s,i){
       var div=document.createElement('div'); div.className='admin-proj-item';
       div.innerHTML='<div class="admin-proj-info"><div class="admin-proj-title">'+s.heading+'</div><div class="admin-proj-type">'+s.type+' section</div></div><div class="admin-proj-actions"><button class="admin-icon-btn del" data-del-sec="'+s.id+'">&#10005;</button></div>';
-      div.querySelector('[data-del-sec]').addEventListener('click',function(){
-        deleteSectionFromSupabase(s.id);
-        DATA.customSections=DATA.customSections.filter(function(x){return x.id!==s.id;});
-        renderCustomSections(); renderAdminSections();
+      div.querySelector('[data-del-sec]').addEventListener('click', async function(){
+        try{
+          await deleteSectionFromSupabase(s.id);
+          DATA.customSections = DATA.customSections.filter(function(x){ return x.id !== s.id; });
+          renderCustomSections();
+          renderAdminSections();
+        } catch(e){
+          console.error('Section delete failed:', e);
+          alert('Could not delete section. Please try again.');
+        }
       });
       list.appendChild(div);
     });
@@ -2424,22 +2492,7 @@ var Admin = (function(){
   });
 
   /* EXPORT */
-  document.getElementById('tb-export').addEventListener('click', function(){
-    var heroNameHTML = document.getElementById('hero-name-el').innerHTML;
-    var heroBioHTML  = document.getElementById('hero-bio-el').innerHTML;
-    var aboutHTML    = document.getElementById('about-text-el').innerHTML;
-    var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-    var frozenData = JSON.stringify(DATA);
-    src = src.replace(/var DATA = loadData\(\);/, 'var DATA = ' + frozenData + ';');
-    var blob = new Blob([src], {type: 'text/html'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'portfolio.html';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    var btn = this;
-    btn.innerHTML = '&#10003; Downloaded!';
-    setTimeout(function(){ btn.innerHTML = '&#11015; Export HTML'; }, 2200);
-  });
+
 
   document.getElementById('tb-export').addEventListener('click',function(){
     var src='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
