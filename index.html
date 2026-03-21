@@ -15,7 +15,7 @@
   --white:#f4f4f4;--g1:#e0e0e0;--g2:#c4c4c4;--g3:#969696;--g4:#686868;--g5:#3c3c3c;
   --red:#ff3a2a;--amber:#e0a93a;--cyan:#3ad4c8;--lime:#a0d060;
 }
-html{font-size:17px;scroll-behavior:smooth}
+html{font-size:17px;scroll-behavior:smooth;overflow-x:hidden}
 body{background:var(--bg);color:var(--white);font-family:'Jost',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 body.locked{overflow:hidden}
 
@@ -25,7 +25,25 @@ body.locked{overflow:hidden}
 #cursor.tap{width:6px;height:6px;background:var(--amber)}
 #cursor-ring{position:fixed;z-index:99998;pointer-events:none;width:32px;height:32px;border:1px solid rgba(255,255,255,0.32);border-radius:50%;transform:translate(-50%,-50%);transition:width .25s,height .25s;will-change:transform}
 #cursor-ring.big{width:48px;height:48px}
+
+@media(max-width:640px){
+  /* Mobile safety patch: reduce header crowding on smaller phones */
+  nav{padding:0 10px}
+  .nav-channels{display:none}
+  .nav-right{gap:4px}
+  /* Keep the volume button visible, but hide the slider on small screens */
+  #vol-control,#vol-control.visible{display:flex!important}
+  #vol-slider{display:none!important}
+  .btn-cv{padding:0 8px}
+  .nav-status{gap:3px}
+  .work-grid{grid-template-columns:1fr}
+  .hero-stats{display:none}
+}
 @media(hover:none){
+  /* Larger tap targets on touch devices */
+  .nav-ch{min-height:44px}
+  #theme-toggle,#vol-mute,.btn-cv{min-height:44px;min-width:44px}
+
   #cursor,#cursor-ring{display:none!important}
   .cur-trail{display:none!important}
   body{cursor:auto!important}
@@ -109,11 +127,12 @@ nav.hide{transform:translateY(-100%)}
 .nav-ch-label{font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;color:var(--g3);letter-spacing:2px;padding:0 12px;height:36px;display:flex;align-items:center;text-transform:uppercase;transition:color .2s}
 .nav-ch:hover .nav-ch-label,.nav-ch.active .nav-ch-label{color:var(--white)}
 .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .nav-status{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;color:var(--g3);text-transform:uppercase;letter-spacing:2px}
 /* GREEN dot */
 .nav-dot{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px 2px var(--lime),0 0 16px 5px rgba(160,208,96,.45),0 0 30px 8px rgba(160,208,96,.22);animation:green-glow 2s ease-in-out infinite}
 @keyframes green-glow{0%,100%{box-shadow:0 0 6px 2px var(--lime),0 0 16px 5px rgba(160,208,96,.45)}50%{box-shadow:0 0 10px 4px var(--lime),0 0 28px 10px rgba(160,208,96,.35)}}
-.btn-cv{font-family:'Space Mono',monospace;font-weight:700;font-size:.58rem;color:var(--g3);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--border);background:transparent;padding:0 12px;height:36px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn-cv{font-family:'Space Mono',monospace;font-weight:700;font-size:.58rem;color:var(--g3);letter-spacing:2px;text-transform:uppercase;border:1px solid var(--border);background:transparent;padding:0 12px;height:36px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;flex-shrink:0}
 .btn-cv:hover{border-color:var(--amber);color:var(--amber)}
 .btn-cv svg{width:12px;height:12px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round}
 #nav-flash{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:0}
@@ -252,7 +271,7 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
 .admin-btn.secondary:hover{color:var(--g2);border-color:var(--g4)}
 .admin-btn.danger{background:transparent;color:var(--red);border:1px solid var(--red)}
 .admin-btn.danger:hover{background:var(--red);color:var(--white)}
-.admin-error{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--red);letter-spacing:1px;display:none;word-break:break-word;max-width:280px}
+.admin-error{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--red);letter-spacing:1px;display:none}
 .admin-error.show{display:block}
 
 /* Admin toolbar (top bar when logged in) */
@@ -341,8 +360,10 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
 @media(max-width:1024px){
   nav{padding:0 24px;height:58px}
   .nav-channels{gap:4px}
-  .nav-status{display:none}
+  /* FIX: hide "Available" text but keep green dot visible */
+  .nav-status{gap:4px;font-size:0}
   .btn-cv span{display:none}
+  .nav-right{gap:8px}
   #hero{padding:0 36px 60px}
   .hero-bottom{flex-direction:column;align-items:flex-start}
   .hero-scroll{display:none}
@@ -357,14 +378,41 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
   footer{padding:16px 36px}
   #admin-panel{width:360px}
 }
+/* ── MOBILE ≤768px ── */
 @media(max-width:768px){
   html{font-size:15px}
   .cur-trail{display:none!important}
-  nav{height:52px;padding:0 16px}
+
+  /* NAV — collapse channels, keep logo + essential controls */
+  nav{height:52px;padding:0 14px}
+  /* Hide nav channel number labels — keep just the letter labels */
   .nav-ch-num{display:none}
-  .nav-ch-label{font-size:.5rem;padding:0 8px;height:30px}
-  .nav-ch-num{display:none}
-  .btn-cv{height:30px;padding:0 8px}
+  .nav-ch-label{font-size:.48rem;padding:0 7px;height:28px;letter-spacing:.5px}
+  /* Reduce gap between channels */
+  .nav-channels{gap:2px}
+
+  /* nav-right — tighter gap, no overflow */
+  .nav-right{gap:6px}
+
+  /* Theme toggle — keep visible, smaller */
+  #theme-toggle{width:28px;height:28px;font-size:.8rem;flex-shrink:0}
+
+  /* Volume — hide slider on mobile, keep just mute icon */
+  #vol-slider{display:none}
+  #vol-mute{width:28px;height:28px;font-size:.75rem;flex-shrink:0}
+
+  /* CV button — icon only, no text */
+  .btn-cv{height:28px;padding:0 7px;gap:0}
+  .btn-cv span{display:none}
+  .btn-cv svg{width:13px;height:13px}
+
+  /* Status dot — hide text, keep dot */
+  /* FIX: dot remains visible, text hidden by font-size:0 */
+  .nav-dot{flex-shrink:0}
+  .nav-status{gap:4px;font-size:0}
+  .nav-status .nav-dot{width:7px;height:7px}
+
+  /* HERO */
   #hero{padding:0 20px 52px;min-height:100svh}
   .hero-ticker{height:34px;top:52px}
   .hero-name{font-size:clamp(3rem,16vw,5.5rem);margin-bottom:28px}
@@ -372,30 +420,76 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
   .hero-bio{font-size:.92rem}
   .hero-stats{gap:28px}
   .hero-stat-v{font-size:2.4rem}
+
+  /* WORK */
   .work-grid{grid-template-columns:1fr 1fr}
+
+  /* EXPERIENCE */
   #experience{padding:52px 20px}
   .xp-item{grid-template-columns:1fr;gap:8px;padding:28px 0}
   .xp-dates{text-align:left;display:flex;align-items:center;gap:10px}
   .xp-role{font-size:1rem}
+
+  /* ABOUT */
   .about-left,.about-right{padding:52px 20px!important}
   .about-heading{font-size:2.6rem}
+
+  /* EDUCATION */
   #education{padding:52px 20px}
   .edu-degree.reveal{font-size:1.9rem}
+
+  /* CONTACT */
   #contact{padding:52px 20px;gap:24px}
   .contact-heading{font-size:clamp(2.4rem,10vw,4rem)}
-  .contact-links{gap:16px}
+  .contact-links{gap:16px;flex-direction:column;align-items:center}
+
+  /* FOOTER */
   footer{padding:12px 20px;flex-direction:column;gap:5px;text-align:center}
+
+  /* MISC */
   #work .sec-eyebrow{padding:0 20px}
   .sec-eyebrow{margin-bottom:36px}
   .intro-body{padding:32px 24px}
   .i-topbar{display:none}
   #admin-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
+
+  /* Prevent horizontal overflow */
+  section{overflow-x:hidden}
 }
+/* ── MOBILE ≤480px ── */
 @media(max-width:480px){
+  /* NAV — very small screens, collapse channels entirely */
+  .nav-channels{display:none}        /* hide channel buttons — use bottom TV nav */
+  nav{padding:0 12px}
+  .nav-logo{font-size:1.2rem}
+
+  /* Keep essential controls visible and tappable (min 44px tap target) */
+  #theme-toggle{width:32px;height:32px}
+  #vol-mute{width:32px;height:32px}
+  .btn-cv{height:32px;padding:0 8px}
+  .nav-dot{width:7px;height:7px}
+
+  /* WORK — single column */
   .work-grid{grid-template-columns:1fr}
+
+  /* HERO — hide stats on very small screens */
   .hero-stats{display:none}
+
+  /* ABOUT tags — smaller */
+  .about-tag{font-size:.62rem;padding:5px 10px}
+
+  /* CONTACT links — stack vertically */
+  .contact-links{flex-direction:column;align-items:center;gap:12px}
+
+  /* Ensure nothing overflows */
+  .hero-meta{font-size:.5rem}
+  .hero-bio{font-size:.88rem}
 }
 @media(hover:none){
+  /* Larger tap targets on touch devices */
+  .nav-ch{min-height:44px}
+  #theme-toggle,#vol-mute,.btn-cv{min-height:44px;min-width:44px}
+
   .work-card:active .work-img img{filter:blur(4px) brightness(.38);transform:scale(1.05)}
   .work-card:active .work-overlay{opacity:1}
   .work-card:active .work-bar{opacity:1}
@@ -403,7 +497,7 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
 }
 
 /* ── VOLUME CONTROL ── */
-#vol-control{display:none;align-items:center;gap:8px}
+#vol-control{display:none;align-items:center;gap:8px;flex-shrink:0}
 #vol-control.visible{display:flex}
 #vol-mute{background:transparent;border:1px solid var(--border);color:var(--g3);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.82rem;transition:all .2s;flex-shrink:0;padding:0}
 #vol-mute:hover{border-color:var(--g3);color:var(--white)}
@@ -427,16 +521,89 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
 .reveal-delay-5{transition-delay:.5s}
 
 /* ── LIGHT MODE ── */
+/* ── LIGHT MODE — all overrides here ── */
 body.light{
-  --bg:#f0ede8;--ink:#e4e0d8;--surface:#d8d4cc;
-  --border:#c0bbb0;--border2:#ccc8c0;
-  --white:#111111;--g1:#222222;--g2:#333333;--g3:#555555;--g4:#888888;--g5:#aaaaaa;
+  --bg:#f2efe9;--ink:#e6e2da;--surface:#dad6ce;
+  --border:#b8b3a8;--border2:#cac6be;
+  --white:#111111;--g1:#1a1a1a;--g2:#2e2e2e;--g3:#4a4a4a;--g4:#6e6e6e;--g5:#999999;
   background:var(--bg);
 }
 body.light #scanlines{opacity:.04}
-body.light #vignette{opacity:.4}
-body.light #crt-beam{opacity:.3}
+body.light #vignette{opacity:.35}
+body.light #crt-beam{opacity:.25}
 body.light .hero-map{opacity:.04;mix-blend-mode:multiply}
+
+/* Project modal — soften the pitch-black overlay */
+body.light #proj-modal{background:rgba(200,196,188,.88);backdrop-filter:blur(8px)}
+body.light .pm-box{background:#f5f2ec;border-color:var(--border)}
+body.light .pm-eyebrow{color:var(--g4)}
+body.light .pm-title{color:var(--g1)}
+body.light .pm-type{color:var(--g4)}
+body.light .pm-footer{border-top-color:var(--border)}
+body.light .pm-link{color:var(--g3);border-bottom-color:var(--border)}
+body.light .pm-link:hover{color:#1a7a74;border-bottom-color:#1a7a74}
+body.light .pm-close{background:rgba(240,238,232,.8);border-color:var(--border);color:var(--g3)}
+
+/* Work card overlay — lighten so text is readable */
+body.light .work-cta{background:rgba(242,239,233,.75);color:var(--g1);border-color:rgba(0,0,0,.15)}
+body.light .work-card:hover .work-img img{filter:blur(4px) brightness(.85)}
+body.light .work-info{background:var(--bg)}
+body.light .work-grid{background:var(--border)}
+
+/* Arsenal icons — tint background for light mode */
+body.light .arsenal-icon rect{fill:#d8d4cc!important}
+body.light .arsenal-icon text{fill:#444!important}
+body.light .arsenal-icon polygon{fill:#555!important}
+body.light .arsenal-icon line{stroke:#555!important}
+body.light .arsenal-track{background:var(--border)}
+body.light .arsenal-fill{background:linear-gradient(90deg,var(--g4),var(--g2))}
+
+/* Language grid */
+body.light .lang-grid{background:var(--border)}
+body.light .lang-cell{background:var(--bg)}
+body.light .lang-cell:hover{background:var(--surface)}
+
+/* Section eyebrow rule — visible on light bg */
+body.light .sec-eyebrow-rule{background:var(--border)}
+body.light .sec-eyebrow-num{color:var(--g4)}
+
+/* About tags */
+body.light .about-tag{border-color:var(--border);color:var(--g3)}
+body.light .about-tag:hover{border-color:#1a7a74;color:#1a7a74}
+
+/* Education year */
+body.light .edu-year{color:var(--g4)}
+
+/* XP items */
+body.light .xp-item{border-bottom-color:var(--border)}
+body.light .xp-dates{color:var(--g4)}
+body.light .xp-company{color:var(--g4)}
+body.light .xp-loc{color:var(--g4)}
+
+/* Contact */
+body.light .contact-pre{color:var(--g4)}
+body.light .contact-sub{color:var(--g3)}
+body.light .contact-link{color:var(--g3);border-bottom-color:var(--border)}
+body.light .contact-link:hover{color:#1a7a74;border-bottom-color:#1a7a74}
+body.light .email-copy:hover{color:#1a7a74;border-color:#1a7a74}
+
+/* Footer */
+body.light footer{background:var(--ink);border-top-color:var(--border)}
+body.light .footer-txt{color:var(--g4)}
+body.light .footer-admin-link{color:var(--border)}
+
+/* Ticker */
+body.light .hero-ticker{background:rgba(242,239,233,.85)}
+body.light .hero-ticker-track{color:var(--g4)}
+
+/* Intro body — slightly less opaque so light bg shows through subtly */
+body.light .intro-body{background:rgba(0,0,0,.65)}
+
+/* Back-to-top */
+body.light #back-top{background:var(--ink);color:var(--g3)}
+
+/* Film grain — subtle in light mode */
+body.light #grain{opacity:.018;mix-blend-mode:multiply}
 #theme-toggle{
   background:transparent;border:1px solid var(--border);
   color:var(--g3);width:32px;height:32px;
@@ -615,6 +782,17 @@ body.light #vol-mute{color:var(--g3)}
 body.light .lang-cell{background:var(--bg)}
 body.light .lang-cell:hover{background:var(--surface)}
 body.light #theme-toggle{color:var(--g2)}
+
+/* ── SITE VERSION ── */
+#site-version{
+  font-family:'Space Mono',monospace;font-size:.48rem;
+  color:#2a2a2a;letter-spacing:2px;
+  text-transform:uppercase;
+  transition:color .3s;
+  cursor:default;
+  user-select:none;
+}
+#site-version:hover{color:var(--g5)}
 </style>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"></noscript>
 <!-- Supabase -->
@@ -641,7 +819,7 @@ body.light #theme-toggle{color:var(--g2)}
 <div id="admin-login-overlay" class="hidden">
   <div class="admin-login-box">
     <div class="admin-login-title">Admin Access</div>
-    <input class="admin-input" id="admin-user" type="email" placeholder="Email" autocomplete="email">
+    <input class="admin-input" id="admin-user" type="text" placeholder="Username" autocomplete="off">
     <input class="admin-input" id="admin-pass" type="password" placeholder="Password" autocomplete="off">
     <div class="admin-error" id="admin-error">Incorrect credentials</div>
     <button class="admin-btn" id="admin-login-btn">Login</button>
@@ -660,6 +838,7 @@ body.light #theme-toggle{color:var(--g2)}
   <button class="admin-tb-btn" id="tb-undo" title="Undo last change" style="opacity:.5" disabled>&#8617; Undo</button>
   <button class="admin-tb-btn" id="tb-redo" title="Nothing to redo" disabled style="opacity:.35">&#8618; Redo</button>
   <button class="admin-tb-btn" id="tb-save">&#10003; Save Changes</button>
+  <!-- FIX: removed duplicate export button -->
   <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
   <button class="admin-tb-btn admin-tb-logout" id="tb-logout">Logout</button>
 </div>
@@ -807,7 +986,7 @@ body.light #theme-toggle{color:var(--g2)}
     <a class="nav-ch" data-target="experience"><div class="nav-ch-num">03</div><div class="nav-ch-label">Experience</div></a>
     <a class="nav-ch" data-target="contact"><div class="nav-ch-num">04</div><div class="nav-ch-label">Contact</div></a>
   </div>
-  <div class="nav-right" style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+  <div class="nav-right">
     <button id="theme-toggle" title="Toggle light/dark mode">☾</button>
     <div id="vol-control">
     <button id="vol-mute" title="Mute/Unmute">&#128266;</button>
@@ -1097,13 +1276,14 @@ body.light #theme-toggle{color:var(--g2)}
     <button class="email-copy" id="email-copy-btn" title="Copy email: alan55krit@gmail.com"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 4l7 5 7-5"/></svg></button>
     <a class="contact-link" href="https://www.behance.net/oran6ie" target="_blank">Behance</a>
     <a class="contact-link" href="https://www.linkedin.com/in/alankritthapa/" target="_blank">LinkedIn</a>
-    <a class="contact-link" href="http://youtube.com/@oran6ie" target="_blank">YouTube</a>
+    <a class="contact-link" href="https://youtube.com/@oran6ie" target="_blank">YouTube</a>
   </div>
 </section>
 
 <footer>
   <div class="footer-txt">behance.net/oran6ie &nbsp;&middot;&nbsp; linkedin.com/in/alankritthapa &nbsp;&middot;&nbsp; @oran6ie</div>
   <div style="display:flex;align-items:center;gap:16px">
+    <span id="site-version"></span>
     <div class="footer-txt">&copy; 2026 Alankrit Thapa</div>
     <a class="footer-admin-link" id="admin-trigger" href="#">&#9675;</a>
   </div>
@@ -1134,9 +1314,6 @@ body.light #theme-toggle{color:var(--g2)}
    SUPABASE CONFIG — paste your keys here
 ═══════════════════════════════════════════════ */
 var SUPA_URL = 'https://gqkvywzqqdxydiifftpe.supabase.co';
-/* ⚠ This is the public anon key — safe to expose. Real security is
-   enforced by Supabase RLS policies on your tables + Auth session.
-   Never put the service_role key here. */
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxa3Z5d3pxcWR4eWRpaWZmdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDU0NDQsImV4cCI6MjA4OTUyMTQ0NH0.Q5A4w4wasdgZFuf4DWLcfqIKKN1uGzs0H7yjDNzJP38';  // ← paste your anon key between the quotes
 var supa=null;
 try{supa=supabase.createClient(SUPA_URL,SUPA_KEY);}catch(e){console.warn('Supabase init failed:',e);}
@@ -1215,10 +1392,6 @@ async function loadFromSupabase(){
   }
 }
 
-/* ── Shared admin config — global so both the Admin module and
-   saveProjectToSupabase() can access it without scope issues ── */
-var ADMIN_UUID = '42ffe4c2-2dc1-49f9-bcdb-731946042110';
-
 async function uploadThumbToStorage(dataUrl, projId){
   try{
     var arr=dataUrl.split(','),mime=arr[0].match(/:(.*?);/)[1];
@@ -1268,13 +1441,15 @@ async function saveProjectToSupabase(proj){
 async function deleteProjectFromSupabase(id){
   if(!supa) return;
   if(!isNaN(Number(id))){
-    await supa.from('projects').delete().eq('id', Number(id));
+    var {error} = await supa.from('projects').delete().eq('id', Number(id));
+    if(error) throw new Error('Project delete failed: '+error.message);
   }
 }
 
 async function saveContentToSupabase(key, value){
   if(!supa) return;
-  await supa.from('site_content').upsert({key:key, value:value}, {onConflict:'key'});
+  var {error} = await supa.from('site_content').upsert({key:key, value:value}, {onConflict:'key'});
+  if(error) throw new Error('Content save failed ('+key+'): '+error.message);
 }
 
 async function saveSectionToSupabase(sec){
@@ -1287,8 +1462,14 @@ async function saveSectionToSupabase(sec){
     sort_order:   0
   };
   if(sec.id && isNaN(Number(sec.id))){
+    // New section — temp string id, insert and return new numeric id
     var {data,error} = await supa.from('custom_sections').insert([row]).select();
-    if(!error && data && data[0]) return String(data[0].id);
+    if(error) throw new Error('Section insert failed: '+error.message);
+    if(data && data[0]) return String(data[0].id);
+  } else if(sec.id && !isNaN(Number(sec.id))){
+    // Existing section — update by numeric id
+    var {error} = await supa.from('custom_sections').update(row).eq('id', Number(sec.id));
+    if(error) throw new Error('Section update failed (id='+sec.id+'): '+error.message);
   }
   return sec.id;
 }
@@ -1296,7 +1477,8 @@ async function saveSectionToSupabase(sec){
 async function deleteSectionFromSupabase(id){
   if(!supa) return;
   if(!isNaN(Number(id))){
-    await supa.from('custom_sections').delete().eq('id', Number(id));
+    var {error} = await supa.from('custom_sections').delete().eq('id', Number(id));
+    if(error) throw new Error('Section delete failed: '+error.message);
   }
 }
 
@@ -1589,10 +1771,13 @@ var SFX = (function(){
 html{font-size:10.5pt;background:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:'Jost',sans-serif;color:var(--g1);background:#111;display:flex;justify-content:center;padding:24pt 0 48pt;position:relative;overflow-x:hidden}
 @media print{
-  body{background:#fff;padding:0;color:#111}
+  html,body{width:210mm!important;min-width:210mm!important;max-width:none!important;overflow:visible!important}
+  body{background:#fff!important;padding:0!important;color:#111!important;display:block!important}
   #scanlines,#vignette,#crt-beam,.print-btn{display:none!important}
-  .page{box-shadow:none;background:#fff}
-  .cv-sidebar{background:#111;-webkit-print-color-adjust:exact}
+  .page{width:210mm!important;max-width:none!important;min-height:297mm!important;grid-template-columns:68mm 1fr!important;box-shadow:none!important;background:#fff!important;margin:0!important}
+  aside{padding:14mm 9mm 12mm!important;border-right:1px solid var(--border)!important;border-bottom:none!important;gap:8mm!important}
+  main{padding:13mm 10mm 12mm!important;gap:7mm!important}
+  .cv-sidebar{background:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 /* CRT effects */
 #scanlines{position:fixed;inset:0;z-index:100;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.11) 0,rgba(0,0,0,0.11) 1px,transparent 1px,transparent 3px);animation:sr 12s linear infinite}
@@ -1661,6 +1846,26 @@ main{padding:13mm 10mm 12mm;display:flex;flex-direction:column;gap:7mm}
 .print-btn{position:fixed;bottom:20pt;right:20pt;background:var(--g5);color:var(--g2);border:1px solid var(--border);padding:8pt 16pt;font-family:'Space Mono',monospace;font-size:6.5pt;letter-spacing:2px;text-transform:uppercase;cursor:pointer;z-index:200;transition:all .2s}
 .print-btn:hover{background:var(--g4);color:var(--g1)}
 
+/* Mobile CV layout: prevent zoomed-in A4 rendering on phones */
+@media screen and (max-width:900px){
+  html{font-size:16px}
+  body{padding:0;background:var(--bg)}
+  .page{width:100%;max-width:100vw;min-height:auto;grid-template-columns:1fr;box-shadow:none}
+  aside{padding:24px 18px;border-right:none;border-bottom:1px solid var(--border);gap:18px}
+  main{padding:24px 18px 32px;gap:18px}
+  .s-mono{font-size:2.35rem;padding-bottom:14px}
+  .s-role,.m-sub{font-size:.72rem;letter-spacing:2px}
+  .m-name{font-size:2.7rem;line-height:.95}
+  .m-bio,.s-val,.sk-name,.lang-n,.edu-s,.xp-p{font-size:.95rem;line-height:1.7}
+  .s-lbl,.m-eye,.m-slbl,.xp-c,.edu-l,.lang-l,.s-key,.fbar{font-size:.68rem;letter-spacing:1.5px}
+  .xp,.edu-r{grid-template-columns:1fr;gap:6px}
+  .xp-d,.edu-d{text-align:left;padding-top:0;font-size:.72rem}
+  .xp-r{font-size:1.02rem}
+  .edu-deg{font-size:1.45rem}
+  .tag{font-size:.62rem;padding:6px 10px}
+  .print-btn{bottom:14px;right:14px;padding:10px 14px;font-size:.7rem}
+}
+
 /* ── SCROLL ANIMATIONS ── */
 .reveal{opacity:0;transform:translateY(32px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
 .reveal.in{opacity:1;transform:none}
@@ -1675,16 +1880,89 @@ main{padding:13mm 10mm 12mm;display:flex;flex-direction:column;gap:7mm}
 .reveal-delay-5{transition-delay:.5s}
 
 /* ── LIGHT MODE ── */
+/* ── LIGHT MODE — all overrides here ── */
 body.light{
-  --bg:#f0ede8;--ink:#e4e0d8;--surface:#d8d4cc;
-  --border:#c0bbb0;--border2:#ccc8c0;
-  --white:#111111;--g1:#222222;--g2:#333333;--g3:#555555;--g4:#888888;--g5:#aaaaaa;
+  --bg:#f2efe9;--ink:#e6e2da;--surface:#dad6ce;
+  --border:#b8b3a8;--border2:#cac6be;
+  --white:#111111;--g1:#1a1a1a;--g2:#2e2e2e;--g3:#4a4a4a;--g4:#6e6e6e;--g5:#999999;
   background:var(--bg);
 }
 body.light #scanlines{opacity:.04}
-body.light #vignette{opacity:.4}
-body.light #crt-beam{opacity:.3}
+body.light #vignette{opacity:.35}
+body.light #crt-beam{opacity:.25}
 body.light .hero-map{opacity:.04;mix-blend-mode:multiply}
+
+/* Project modal — soften the pitch-black overlay */
+body.light #proj-modal{background:rgba(200,196,188,.88);backdrop-filter:blur(8px)}
+body.light .pm-box{background:#f5f2ec;border-color:var(--border)}
+body.light .pm-eyebrow{color:var(--g4)}
+body.light .pm-title{color:var(--g1)}
+body.light .pm-type{color:var(--g4)}
+body.light .pm-footer{border-top-color:var(--border)}
+body.light .pm-link{color:var(--g3);border-bottom-color:var(--border)}
+body.light .pm-link:hover{color:#1a7a74;border-bottom-color:#1a7a74}
+body.light .pm-close{background:rgba(240,238,232,.8);border-color:var(--border);color:var(--g3)}
+
+/* Work card overlay — lighten so text is readable */
+body.light .work-cta{background:rgba(242,239,233,.75);color:var(--g1);border-color:rgba(0,0,0,.15)}
+body.light .work-card:hover .work-img img{filter:blur(4px) brightness(.85)}
+body.light .work-info{background:var(--bg)}
+body.light .work-grid{background:var(--border)}
+
+/* Arsenal icons — tint background for light mode */
+body.light .arsenal-icon rect{fill:#d8d4cc!important}
+body.light .arsenal-icon text{fill:#444!important}
+body.light .arsenal-icon polygon{fill:#555!important}
+body.light .arsenal-icon line{stroke:#555!important}
+body.light .arsenal-track{background:var(--border)}
+body.light .arsenal-fill{background:linear-gradient(90deg,var(--g4),var(--g2))}
+
+/* Language grid */
+body.light .lang-grid{background:var(--border)}
+body.light .lang-cell{background:var(--bg)}
+body.light .lang-cell:hover{background:var(--surface)}
+
+/* Section eyebrow rule — visible on light bg */
+body.light .sec-eyebrow-rule{background:var(--border)}
+body.light .sec-eyebrow-num{color:var(--g4)}
+
+/* About tags */
+body.light .about-tag{border-color:var(--border);color:var(--g3)}
+body.light .about-tag:hover{border-color:#1a7a74;color:#1a7a74}
+
+/* Education year */
+body.light .edu-year{color:var(--g4)}
+
+/* XP items */
+body.light .xp-item{border-bottom-color:var(--border)}
+body.light .xp-dates{color:var(--g4)}
+body.light .xp-company{color:var(--g4)}
+body.light .xp-loc{color:var(--g4)}
+
+/* Contact */
+body.light .contact-pre{color:var(--g4)}
+body.light .contact-sub{color:var(--g3)}
+body.light .contact-link{color:var(--g3);border-bottom-color:var(--border)}
+body.light .contact-link:hover{color:#1a7a74;border-bottom-color:#1a7a74}
+body.light .email-copy:hover{color:#1a7a74;border-color:#1a7a74}
+
+/* Footer */
+body.light footer{background:var(--ink);border-top-color:var(--border)}
+body.light .footer-txt{color:var(--g4)}
+body.light .footer-admin-link{color:var(--border)}
+
+/* Ticker */
+body.light .hero-ticker{background:rgba(242,239,233,.85)}
+body.light .hero-ticker-track{color:var(--g4)}
+
+/* Intro body — slightly less opaque so light bg shows through subtly */
+body.light .intro-body{background:rgba(0,0,0,.65)}
+
+/* Back-to-top */
+body.light #back-top{background:var(--ink);color:var(--g3)}
+
+/* Film grain — subtle in light mode */
+body.light #grain{opacity:.018;mix-blend-mode:multiply}
 #theme-toggle{
   background:transparent;border:1px solid var(--border);
   color:var(--g3);width:32px;height:32px;
@@ -1870,7 +2148,7 @@ body.light #theme-toggle{color:var(--g2)}
 </head>
 <body>
 <div id="scanlines"></div><div id="vignette"></div><div id="crt-beam"></div>
-<button class="print-btn" onclick="window.print()">&#9113; Print / Save PDF</button>
+<div style="position:fixed;bottom:20pt;left:20pt;z-index:200;display:flex;gap:10px"><button class="print-btn" style="position:static" onclick="try{if(location.search.indexOf('view=cv')>-1){location.href=location.pathname}else{history.back()}}catch(e){location.href=location.pathname}">&#8592; Back</button></div><button class="print-btn" onclick="window.print()">&#9113; Print / Save PDF</button>
 <div class="page">
   <aside>
     <div><div class="s-mono">AT<em>.</em></div><div class="s-role">Lead Video Editor &amp; Sr. Graphic Designer</div></div>
@@ -1931,11 +2209,113 @@ body.light #theme-toggle{color:var(--g2)}
   </main>
 </div>
 </body></html>`;
-  document.getElementById('btn-cv').addEventListener('click',function(){
+  var CV_ROUTE_RE = /[?&]view=cv(?:&|$)/;
+  var cvOverlay = null, cvFrame = null;
+
+  function buildCvDoc(){
+    var parsed = new DOMParser().parseFromString(cvHtml, 'text/html');
+    parsed.querySelectorAll('.print-btn').forEach(function(btn){
+      var wrap = btn.parentElement;
+      btn.remove();
+      if(wrap && wrap !== parsed.body && !wrap.querySelector('*') && !(wrap.textContent || '').trim()){
+        wrap.remove();
+      }
+    });
+    return '<!DOCTYPE html>\n' + parsed.documentElement.outerHTML;
+  }
+
+  function ensureCvOverlay(){
+    if(cvOverlay) return;
+    var style = document.createElement('style');
+    style.id = 'cv-overlay-styles';
+    style.textContent = [
+      '#cv-view-root{position:fixed;inset:0;z-index:12000;background:#f3efe8;display:none;flex-direction:column}',
+      '#cv-view-root.active{display:flex}',
+      '#cv-view-toolbar{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:rgba(10,10,10,.88);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px);box-shadow:0 14px 40px rgba(0,0,0,.24)}',
+      '#cv-view-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}',
+      '#cv-view-frame{flex:1 1 auto;width:100%;border:0;background:#f3efe8;min-height:calc(100vh - 61px)}',
+      '#cv-view-title{font:700 .76rem/1 "Space Mono",monospace;letter-spacing:.24em;text-transform:uppercase;color:#e7e0d3;text-shadow:0 0 18px rgba(227,193,134,.08)}',
+      '#cv-view-root .print-btn{position:static;bottom:auto;right:auto;background:rgba(255,255,255,.02);color:#e7e0d3;border:1px solid rgba(255,255,255,.12);padding:10px 14px;font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;border-radius:999px;min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:none}',
+      '#cv-view-root .print-btn:hover{background:rgba(227,193,134,.1);border-color:rgba(227,193,134,.34);color:#f5ead7}',
+      '#cv-view-root .print-btn:active{transform:translateY(1px)}',
+      'body.cv-open{overflow:hidden}',
+      'body.cv-open > :not(#cv-view-root):not(script):not(style):not(link){display:none !important}',
+      '@media(max-width:640px){#cv-view-toolbar{padding:10px 12px;align-items:flex-start}#cv-view-title{font-size:.68rem;padding-top:2px}#cv-view-actions{width:100%;justify-content:space-between}#cv-view-actions .print-btn{flex:1 1 calc(50% - 5px);padding:10px 12px;font-size:.64rem;letter-spacing:.12em}}',
+      '@media print{body.cv-open > :not(#cv-view-root):not(script):not(style):not(link){display:none !important}#cv-view-root{position:static !important;inset:auto !important;display:block !important;background:#fff}#cv-view-toolbar{display:none !important}#cv-view-frame{display:block !important;width:100% !important;height:auto !important;min-height:0 !important}}'
+    ].join('');
+    document.head.appendChild(style);
+
+    cvOverlay = document.createElement('div');
+    cvOverlay.id = 'cv-view-root';
+    cvOverlay.innerHTML = '' +
+      '<div id="cv-view-toolbar">' +
+        '<div id="cv-view-title">Curriculum Vitae</div>' +
+        '<div id="cv-view-actions">' +
+          '<button type="button" class="print-btn" id="cv-back-btn">&#8592; Back</button>' +
+          '<button type="button" class="print-btn" id="cv-print-btn">&#9113; Print / Save PDF</button>' +
+        '</div>' +
+      '</div>' +
+      '<iframe id="cv-view-frame" title="CV Preview"></iframe>';
+    document.body.appendChild(cvOverlay);
+    cvFrame = document.getElementById('cv-view-frame');
+    cvFrame.setAttribute('srcdoc', buildCvDoc());
+
+    document.getElementById('cv-back-btn').addEventListener('click', function(){
+      if(CV_ROUTE_RE.test(location.search)){
+        history.back();
+        setTimeout(function(){
+          if(CV_ROUTE_RE.test(location.search)){
+            history.replaceState(history.state, '', location.pathname + location.hash);
+            syncCvRoute();
+          }
+        }, 60);
+      } else {
+        syncCvRoute();
+      }
+    });
+
+    document.getElementById('cv-print-btn').addEventListener('click', function(){
+      try{
+        cvFrame.contentWindow.focus();
+        cvFrame.contentWindow.print();
+      }catch(err){
+        window.print();
+      }
+    });
+  }
+
+  function openCvView(pushState){
+    ensureCvOverlay();
+    var intro = document.getElementById('intro');
+    if(intro) intro.style.display = 'none';
+    document.body.classList.add('cv-open');
+    cvOverlay.classList.add('active');
+    if(pushState && !CV_ROUTE_RE.test(location.search)){
+      history.pushState({view:'cv'}, '', location.pathname + '?view=cv');
+    }
+  }
+
+  function closeCvView(){
+    if(cvOverlay) cvOverlay.classList.remove('active');
+    document.body.classList.remove('cv-open');
+  }
+
+  function syncCvRoute(){
+    if(CV_ROUTE_RE.test(location.search)){
+      openCvView(false);
+    } else {
+      closeCvView();
+    }
+  }
+
+  document.getElementById('btn-cv').addEventListener('click',function(e){
+    e.preventDefault();
     SFX.btnClick();
-    var blob=new Blob([cvHtml],{type:'text/html'});
-    window.open(URL.createObjectURL(blob),'_blank');
+    openCvView(true);
   });
+
+  window.addEventListener('popstate', syncCvRoute);
+  syncCvRoute();
 })();
 
 /* ═══════════════════════════════════════════════
@@ -2137,6 +2517,14 @@ body.light #theme-toggle{color:var(--g2)}
   }
 })();
 
+/* ── Site version — update this whenever you deploy changes ── */
+var SITE_VERSION = 'v1.3.2';
+var ADMIN_UUID = '42ffe4c2-2dc1-49f9-bcdb-731946042110';
+(function(){
+  var el = document.getElementById('site-version');
+  if(el) el.textContent = SITE_VERSION;
+})();
+
 /* ═══════════════════════════════════════════════
    ADMIN SYSTEM
 ═══════════════════════════════════════════════ */
@@ -2293,10 +2681,10 @@ var Admin = (function(){
     }
     try{
       var hn=document.getElementById('hero-name-el'),hb=document.getElementById('hero-bio-el'),at=document.getElementById('about-text-el');
-      if(hn)await saveContentToSupabase('hero_name',hn.innerHTML);
-      if(hb)await saveContentToSupabase('hero_bio',hb.textContent);
-      if(at)await saveContentToSupabase('about_text',at.textContent);
-    }catch(e){errs.push('Content: '+e.message);}
+      if(hn) await saveContentToSupabase('hero_name', hn.innerHTML);
+      if(hb) await saveContentToSupabase('hero_bio',  hb.textContent);
+      if(at) await saveContentToSupabase('about_text', at.textContent);
+    } catch(e){ errs.push('Content fields: '+e.message); }
     for(var j=0;j<(DATA.customSections||[]).length;j++){
       try{var ns=await saveSectionToSupabase(DATA.customSections[j]);DATA.customSections[j].id=ns;}catch(e){errs.push('Section: '+e.message);}
     }
