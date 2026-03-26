@@ -158,10 +158,7 @@ nav.hide{transform:translateY(-100%)}
 .hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;position:relative;z-index:1}
 .hero-bio{max-width:560px;font-family:'Jost',sans-serif;font-weight:400;font-size:1.05rem;color:var(--g2);line-height:1.9}
 .hero-stats{display:flex;gap:44px;flex-shrink:0}
-
-.hero-copy{display:flex;flex-direction:column;gap:18px;max-width:560px}
-.hero-copy .hero-bio{max-width:none}
-.hero-back-link{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;width:min(100%,440px);padding:16px 20px;border:1px solid rgba(58,212,200,.38);background:rgba(58,212,200,.08);text-decoration:none;color:var(--white);transition:transform .2s,border-color .2s,background .2s,color .2s;box-shadow:0 0 24px rgba(58,212,200,.08);cursor:none}
+.hero-back-link{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;width:min(100%,440px);padding:16px 20px;border:1px solid rgba(58,212,200,.38);background:rgba(58,212,200,.08);text-decoration:none;color:var(--white);transition:transform .2s,border-color .2s,background .2s,color .2s;box-shadow:0 0 24px rgba(58,212,200,.08);cursor:pointer}
 .hero-back-link:hover{transform:translateY(-1px);border-color:var(--cyan);background:rgba(58,212,200,.12);color:var(--cyan)}
 .hero-back-copy{display:flex;flex-direction:column;gap:6px}
 .hero-back-kicker{font-family:'Space Mono',monospace;font-size:.54rem;letter-spacing:3px;text-transform:uppercase;color:var(--g4)}
@@ -187,18 +184,35 @@ section{position:relative;z-index:3}
 
 /* ── PROJECTS SECTION ── */
 #projects{padding:84px 64px;border-bottom:1px solid var(--border)}
-.project-block{padding:0 0 80px;border-bottom:1px solid var(--border2);margin-bottom:80px;opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
-.project-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.project-block{border:1px solid var(--border2);background:rgba(255,255,255,.01);margin-bottom:18px;opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease,border-color .25s ease,background .25s ease;overflow:hidden}
+.project-block:last-child{margin-bottom:0}
 .project-block.visible{opacity:1;transform:translateY(0)}
-.proj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:44px}
+.project-block.open{border-color:var(--border);background:rgba(255,255,255,.015)}
+.project-summary{width:100%;display:flex;justify-content:space-between;align-items:stretch;gap:28px;padding:28px 30px;background:transparent;border:none;color:inherit;text-align:left;cursor:pointer;transition:background .2s}
+.project-summary:hover{background:var(--ink)}
+.project-block.open .project-summary{background:rgba(255,255,255,.02);border-bottom:1px solid var(--border2)}
+.proj-main{display:flex;align-items:center;gap:22px;flex:1;min-width:0}
+.proj-thumb{width:148px;height:88px;border:1px solid var(--border);background:var(--surface);overflow:hidden;position:relative;flex-shrink:0}
+.proj-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.84);transition:transform .5s,filter .3s}
+.project-summary:hover .proj-thumb img{transform:scale(1.04);filter:brightness(1)}
+.proj-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g5)}
+.proj-copy{min-width:0;display:flex;flex-direction:column;justify-content:center}
 .proj-index{font-family:'Space Mono',monospace;font-weight:700;font-size:.58rem;color:var(--g5);letter-spacing:.15em;margin-bottom:10px}
 .proj-title{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(2rem,4vw,3.4rem);color:var(--white);line-height:1.05;letter-spacing:-1px}
 .proj-title em{font-style:italic;color:var(--amber);text-shadow:0 0 20px rgba(224,169,58,.3)}
+.proj-click-hint{margin-top:10px;font-family:'Space Mono',monospace;font-weight:700;font-size:.5rem;color:var(--g4);letter-spacing:.18em;text-transform:uppercase}
 .proj-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .p-tag{font-family:'Jost',sans-serif;font-weight:600;font-size:.65rem;color:var(--g4);border:1px solid var(--border);padding:5px 12px;text-transform:uppercase;letter-spacing:1.5px;transition:all .2s}
 .p-tag.amber{border-color:rgba(224,169,58,.35);color:var(--amber)}
 .p-tag.cyan{border-color:rgba(58,212,200,.25);color:var(--cyan)}
-.proj-desc{font-size:.9rem;color:var(--g3);line-height:1.85;max-width:320px;text-align:right;padding-top:6px}
+.proj-summary-side{max-width:320px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:16px;flex-shrink:0}
+.proj-desc{font-size:.9rem;color:var(--g3);line-height:1.85;max-width:320px;text-align:right}
+.project-toggle-arrow{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--g4);letter-spacing:.12em;text-transform:uppercase;display:inline-flex;align-items:center;gap:10px;transition:transform .3s,color .2s}
+.project-toggle-arrow::before{content:'View Project';font-size:.5rem;letter-spacing:.18em}
+.project-block.open .project-toggle-arrow{transform:rotate(180deg);color:var(--amber)}
+.project-body{max-height:0;overflow:hidden;transition:max-height .6s cubic-bezier(.4,0,.2,1)}
+.project-block.open .project-body{max-height:6000px}
+.project-body-inner{padding:24px 30px 30px}
 
 /* ── PIPELINE STAGES ── */
 .pipeline{display:flex;flex-direction:column;gap:3px}
@@ -288,11 +302,10 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
   .nav-right{gap:6px}
   #hero{padding:0 20px 52px}
   .hero-stats{display:none}
-  .hero-back-link{padding:14px 16px}
-  .hero-back-kicker{font-size:.5rem}
-  .hero-back-title{font-size:.68rem;letter-spacing:1.6px}
   #projects{padding:52px 20px}
-  .proj-header{flex-direction:column;gap:16px}
+  .project-summary{flex-direction:column;gap:18px;padding:22px 20px}
+  .proj-main{align-items:flex-start}
+  .proj-summary-side{max-width:none;align-items:flex-start}
   .proj-desc{text-align:left;max-width:100%}
   .img-grid.c3,.img-grid.c4{grid-template-columns:repeat(2,1fr)}
   .pipeline-legend{flex-wrap:wrap}
@@ -304,7 +317,107 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
 }
 @media(max-width:480px){
   .nav-channels{display:none}
+  .proj-main{flex-direction:column;align-items:flex-start}
+  .proj-thumb{width:100%;height:auto;aspect-ratio:16/9}
 }
+
+/* ── MOBILE POLISH OVERRIDES ── */
+@media(max-width:900px){
+  .hero-meta{flex-wrap:wrap;gap:10px 14px}
+  .pipeline-legend{width:100%;max-width:100%}
+  .pl-step{flex:1 1 50%;min-width:160px}
+}
+@media(max-width:768px){
+  body{overflow-x:hidden}
+  #grain{display:none}
+  #crt-beam{opacity:.35}
+  nav{height:52px;padding:0 14px;gap:10px}
+  .nav-channels{display:none}
+  .nav-status{display:none}
+  .btn-cv{height:32px;padding:0 10px;font-size:.5rem;letter-spacing:1.2px}
+  #hero{min-height:auto;justify-content:flex-start;padding:86px 20px 36px}
+  .hero-ticker{top:52px;height:34px}
+  .hero-meta{margin-bottom:18px;font-size:.54rem;letter-spacing:1.4px;gap:8px 12px}
+  .hero-meta-sep{display:none}
+  .i-rec{font-size:.6rem;letter-spacing:2px}
+  .i-rec::before{width:7px;height:7px}
+  .hero-name{font-size:clamp(3.7rem,20vw,5.2rem);letter-spacing:-1.5px;margin-bottom:20px}
+  .hero-bottom{gap:20px}
+  .hero-bio{font-size:.95rem;line-height:1.72;max-width:100%}
+  .hero-back-link{width:100%;padding:14px 16px;margin-top:18px;cursor:pointer}
+  .hero-back-kicker{font-size:.5rem}
+  .hero-back-title{font-size:.68rem;letter-spacing:1.6px}
+  .pipeline-legend{margin-top:24px;width:100%}
+  .pl-step{flex:1 1 calc(50% - 1px);min-width:0;padding:10px 12px}
+  .pl-step:nth-child(2n){border-right:none}
+  #projects{padding:44px 16px}
+  .sec-eyebrow{gap:12px;margin-bottom:28px}
+  .sec-eyebrow-label{font-size:.62rem;letter-spacing:3px}
+  .sec-eyebrow-num{font-size:.52rem}
+  .project-block{margin-bottom:14px}
+  .project-summary{flex-direction:column;gap:16px;padding:18px 16px}
+  .proj-main{width:100%;gap:14px;align-items:flex-start}
+  .proj-thumb{width:118px;height:74px}
+  .proj-copy,.proj-summary-side{width:100%}
+  .proj-summary-side{max-width:none;align-items:flex-start;gap:10px}
+  .proj-index{margin-bottom:8px}
+  .proj-title{font-size:clamp(1.85rem,10vw,2.6rem);line-height:1}
+  .proj-click-hint{margin-top:8px;font-size:.48rem;letter-spacing:.15em}
+  .proj-tags{margin-top:12px}
+  .p-tag{font-size:.58rem;padding:5px 9px}
+  .proj-desc{font-size:.86rem;line-height:1.7;max-width:100%;text-align:left}
+  .project-toggle-arrow{align-self:flex-start;font-size:.65rem}
+  .project-toggle-arrow::before{font-size:.48rem}
+  .project-body-inner{padding:18px 16px 20px}
+  .stage-header{padding:12px 14px;gap:10px;align-items:flex-start}
+  .stage-num{width:22px;font-size:.5rem}
+  .stage-label{font-size:.55rem;letter-spacing:.14em}
+  .stage-title-txt{font-size:.5rem;line-height:1.5}
+  .stage-inner{padding:16px}
+  .stage-note{margin-top:14px;padding:10px 12px;font-size:.74rem;line-height:1.7}
+  .stage-connector{gap:8px;height:22px;font-size:.45rem}
+  .img-cell-label{bottom:8px;left:8px;font-size:.42rem}
+  .video-wrap{aspect-ratio:16/10}
+  .play-btn{width:48px;height:48px;font-size:1rem}
+  .play-label{font-size:.5rem;text-align:center;padding:0 12px;line-height:1.6}
+  #lightbox{padding:18px}
+  #lightbox img{max-width:100%;max-height:calc(100vh - 76px)}
+  .lb-close{top:14px;right:16px;padding:6px 8px;background:rgba(0,0,0,.45)}
+  footer{padding:14px 16px;gap:10px}
+  .footer-txt{font-size:.5rem;line-height:1.8}
+  .footer-links{flex-wrap:wrap;gap:12px}
+  .footer-links a{font-size:.48rem}
+  #back-top{bottom:18px;right:16px;width:34px;height:34px}
+  #admin-toolbar{height:44px;padding:0 12px;gap:8px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  #admin-toolbar::-webkit-scrollbar{display:none}
+  #admin-toolbar .admin-toolbar-label,#admin-toolbar .admin-tb-sep{display:none}
+  .admin-tb-btn{flex:0 0 auto}
+  #admin-panel{top:44px;width:100%;border-left:none;border-top:1px solid var(--border)}
+  .admin-modal-box{width:calc(100vw - 24px);max-height:calc(100vh - 24px);margin:12px}
+  .admin-modal-header,.admin-modal-body,.admin-modal-footer{padding-left:16px;padding-right:16px}
+  .admin-login-box{width:min(360px,calc(100vw - 24px));padding:24px}
+}
+@media(max-width:560px){
+  .img-grid.c2,.img-grid.c3,.img-grid.c4{grid-template-columns:1fr}
+  .proj-main{flex-direction:column}
+  .proj-thumb{width:100%;height:auto;aspect-ratio:16/9}
+  .project-summary{padding:16px 14px}
+  .project-body-inner{padding:16px 14px 18px}
+  .stage-inner{padding:14px}
+  .stage-header{padding:11px 12px}
+  .footer-admin-link,#site-version{display:none}
+}
+@media(max-width:400px){
+  html{font-size:14px}
+  nav{padding:0 12px}
+  .btn-cv{padding:0 8px;font-size:.46rem}
+  #hero{padding:82px 14px 34px}
+  #projects{padding:40px 12px}
+  footer{padding:12px}
+  .proj-title{font-size:clamp(1.7rem,11vw,2.2rem)}
+  .hero-name{font-size:clamp(3.2rem,19vw,4.6rem)}
+}
+
 </style>
 </head>
 <body>
@@ -375,7 +488,7 @@ footer{border-top:1px solid var(--border);padding:18px 64px;display:flex;justify
 </div>
 
 <!-- ── ADMIN PROJECT EDIT MODAL ── -->
-<div id="admin-modal" class="">
+<div id="admin-modal">
   <div class="admin-modal-box">
     <div class="admin-modal-header">
       <div class="admin-modal-title" id="modal-title">Edit AI Project</div>
@@ -454,7 +567,7 @@ https://example.com/img2.jpg"></textarea>
 </div>
 
 <!-- ── LIGHTBOX ── -->
-<div id="lightbox" onclick="closeLightbox()" class="">
+<div id="lightbox" onclick="closeLightbox()">
   <span class="lb-close" onclick="event.stopPropagation(); closeLightbox()">✕ &nbsp;CLOSE</span>
   <img id="lb-img" src="" alt="" onclick="event.stopPropagation()">
 </div>
@@ -463,27 +576,27 @@ https://example.com/img2.jpg"></textarea>
 <div id="app">
 
 <nav id="main-nav">
-  <a href="https://oran6ie.github.io" class="nav-logo">AT<span>·</span></a>
+  <a href="../" class="nav-logo" data-skip-intro="1">AT<span>·</span></a>
   <div class="nav-channels">
-    <a href="https://oran6ie.github.io#about" class="nav-ch">
+    <a href="../#about" class="nav-ch" data-skip-intro="1">
       <span class="nav-ch-num">01</span><span class="nav-ch-label">About</span>
     </a>
-    <a href="https://oran6ie.github.io#work" class="nav-ch">
+    <a href="../#work" class="nav-ch" data-skip-intro="1">
       <span class="nav-ch-num">02</span><span class="nav-ch-label">Work</span>
     </a>
-    <a href="https://oran6ie.github.io#experience" class="nav-ch">
+    <a href="../#experience" class="nav-ch" data-skip-intro="1">
       <span class="nav-ch-num">03</span><span class="nav-ch-label">Experience</span>
     </a>
-    <a href="https://oran6ie.github.io/ai" class="nav-ch active">
+    <a href="./" class="nav-ch active">
       <span class="nav-ch-num">04</span><span class="nav-ch-label">AI Works</span>
     </a>
-    <a href="https://oran6ie.github.io#contact" class="nav-ch">
+    <a href="../#contact" class="nav-ch" data-skip-intro="1">
       <span class="nav-ch-num">05</span><span class="nav-ch-label">Contact</span>
     </a>
   </div>
   <div class="nav-right">
     <div class="nav-status"><div class="nav-dot"></div><span>Available</span></div>
-    <a href="https://oran6ie.github.io" class="btn-cv">← Main Portfolio</a>
+    <a href="../" class="btn-cv" data-skip-intro="1">← Main Portfolio</a>
   </div>
 </nav>
 
@@ -507,16 +620,7 @@ https://example.com/img2.jpg"></textarea>
   <h1 class="hero-name">AI<br><em>Works</em></h1>
 
   <div class="hero-bottom">
-    <div class="hero-copy">
-      <p class="hero-bio" id="hero-bio-el">End-to-end AI-assisted production — from reference image to final video. Every project documents the full pipeline: source material, generative output, motion pass, and finished edit.</p>
-      <a class="hero-back-link" href="../" aria-label="Click here to go back to my main portfolio">
-        <span class="hero-back-copy">
-          <span class="hero-back-kicker">Return to Main Site</span>
-          <span class="hero-back-title">Click Here to Go Back to My Main Portfolio</span>
-        </span>
-        <span class="hero-back-arrow" aria-hidden="true">↖</span>
-      </a>
-    </div>
+    <p class="hero-bio" id="hero-bio-el">End-to-end AI-assisted production — from reference image to final video. Every project documents the full pipeline: source material, generative output, motion pass, and finished edit.</p>
     <div class="hero-stats">
       <div>
         <div class="hero-stat-v" id="hero-stat-count">02</div>
@@ -528,6 +632,14 @@ https://example.com/img2.jpg"></textarea>
       </div>
     </div>
   </div>
+
+  <a class="hero-back-link" href="../" data-skip-intro="1" aria-label="Click here to go back to my main portfolio">
+    <span class="hero-back-copy">
+      <span class="hero-back-kicker">Back to Main Portfolio</span>
+      <span class="hero-back-title">Click Here to Go Back to My Main Portfolio</span>
+    </span>
+    <span class="hero-back-arrow" aria-hidden="true">↖</span>
+  </a>
 
   <div class="pipeline-legend">
     <div class="pl-step s1"><span class="sn">STAGE 01</span>REF IMAGES</div>
@@ -544,21 +656,21 @@ https://example.com/img2.jpg"></textarea>
     <div class="sec-eyebrow-rule"></div>
   </div>
   <!-- Projects rendered dynamically by JS -->
-  <div id="projects-container"><div class="project-block visible" id="proj-ai1"><div class="proj-header"><div><div class="proj-index">PROJECT · 01</div><h2 class="proj-title">Product<br><em>Campaign</em></h2><div class="proj-tags"><span class="p-tag">E-Commerce</span><span class="p-tag">Product Shoot</span><span class="p-tag cyan">AI Generate</span><span class="p-tag amber">Higgsfield AI</span></div></div><p class="proj-desc">Raw product references fed through generative tools to create studio-grade visuals, animated with AI motion, cut into a conversion-optimised campaign video.</p></div><div class="pipeline"><div class="stage s1 open" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">01</span><span class="stage-label">REF IMAGES</span><span class="stage-title-txt">Source / Reference Material</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/ref_1_elemoj.jpg')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/ref_1_elemoj.jpg" alt="REF 1" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">REF · 01</span></div><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774550412/ref_2_jez92k.jpg')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774550412/ref_2_jez92k.jpg" alt="REF 2" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">REF · 02</span></div></div><div class="stage-note">Original product images used as input references — apparel, required elements for accuracy eg. Planes, Bikes</div></div></div></div><div class="stage-connector">→ GENERATE</div><div class="stage s2" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">02</span><span class="stage-label">AI GENERATE</span><span class="stage-title-txt">Studio-Grade Stills from Reference</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/GEN_1_wgczwb.jpg')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/GEN_1_wgczwb.jpg" alt="GEN 1" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">GEN · 01</span></div><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/GEN_2_akcg4d.jpg')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774550413/GEN_2_akcg4d.jpg" alt="GEN 2" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">GEN · 02</span></div></div><div class="stage-note">AI-generated product visuals from reference inputs. Realistic ligthing, styled backgrounds, and compositional variations.</div></div></div></div><div class="stage-connector">→ MOTION</div><div class="stage s3" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">03</span><span class="stage-label">MOTION</span><span class="stage-title-txt">AI-Animated Video Clips</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774553901/gif_1_gbs9hr.gif')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774553901/gif_1_gbs9hr.gif" alt="MOT 1" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">MOT · 01</span></div><div class="img-cell" onclick="openLightbox('https://res.cloudinary.com/doyswibq0/image/upload/v1774553901/gif_2_mpsutr.gif')"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1774553901/gif_2_mpsutr.gif" alt="MOT 2" loading="lazy"><div class="img-cell-overlay"></div><span class="img-cell-label">MOT · 02</span></div></div><div class="stage-note">Generated stills animated using Higgsfield AI / Kling / Runway. Camera motion, parallax, and product reveals.</div></div></div></div><div class="stage-connector">→ FINAL CUT</div><div class="stage s4 open" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">04</span><span class="stage-label">FINAL EDIT</span><span class="stage-title-txt">Complete Edited Video</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="video-wrap"><iframe src="https://www.youtube.com/embed/LBeOPLGYvLI" allowfullscreen=""></iframe></div><div class="stage-note">Final campaign video — AI-generated assets assembled, colour-graded, and cut in Premiere Pro.</div></div></div></div></div></div><div class="project-block visible" id="proj-ai1774525646029"><div class="proj-header"><div><div class="proj-index">PROJECT · 02</div><h2 class="proj-title">Adventure Themed<br><em>Apparel Campaign</em></h2><div class="proj-tags"><span class="p-tag">E-commerce</span><span class="p-tag">Apparel</span></div></div><p class="proj-desc"></p></div><div class="pipeline"><div class="stage s1 open" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">01</span><span class="stage-label">REF IMAGES</span><span class="stage-title-txt">Source / Reference Material</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">REF · 01</span></div><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">REF · 02</span></div></div></div></div></div><div class="stage-connector">→ GENERATE</div><div class="stage s2" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">02</span><span class="stage-label">AI GENERATE</span><span class="stage-title-txt">Studio-Grade Stills from Reference</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">GEN · 01</span></div><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">GEN · 02</span></div></div></div></div></div><div class="stage-connector">→ MOTION</div><div class="stage s3" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">03</span><span class="stage-label">MOTION</span><span class="stage-title-txt">AI-Animated Video Clips</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="img-grid c2"><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">MOT · 01</span></div><div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">MOT · 02</span></div></div></div></div></div><div class="stage-connector">→ FINAL CUT</div><div class="stage s4" data-stage=""><div class="stage-header" onclick="toggleStage(this)"><span class="stage-num">04</span><span class="stage-label">FINAL EDIT</span><span class="stage-title-txt">Complete Edited Video</span><span class="stage-arrow">▾</span></div><div class="stage-body"><div class="stage-inner"><div class="video-wrap"><div class="video-placeholder"><div class="play-btn">▶</div><span class="play-label">No video added yet — edit in admin panel</span></div></div></div></div></div></div></div></div>
+  <div id="projects-container"></div>
 </section>
 
 <footer>
   <span class="footer-txt">© 2026 Alankrit Thapa &nbsp;·&nbsp; AI Works &nbsp;·&nbsp; oran6ie.github.io/ai</span>
   <div class="footer-links">
-    <span id="site-version">v1.0.1</span>
-    <a href="https://oran6ie.github.io">← Main Portfolio</a>
+    <span id="site-version">v1.1.2</span>
+    <a href="../" data-skip-intro="1">← Main Portfolio</a>
     <a href="https://www.behance.net/oran6ie" target="_blank" rel="noopener noreferrer">Behance</a>
     <a href="https://www.linkedin.com/in/alankritthapa/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
     <a class="footer-admin-link" id="admin-trigger" href="#">○</a>
   </div>
 </footer>
 
-<button id="back-top" title="Back to top" class="">↑</button>
+<button id="back-top" title="Back to top">↑</button>
 
 </div><!-- /#app -->
 
@@ -569,10 +681,19 @@ https://example.com/img2.jpg"></textarea>
 var SUPA_URL  = 'https://gqkvywzqqdxydiifftpe.supabase.co';
 var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdxa3Z5d3pxcWR4eWRpaWZmdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDU0NDQsImV4cCI6MjA4OTUyMTQ0NH0.Q5A4w4wasdgZFuf4DWLcfqIKKN1uGzs0H7yjDNzJP38';
 var ADMIN_UUID = '42ffe4c2-2dc1-49f9-bcdb-731946042110';
-var SITE_VERSION = 'v1.0.1';
+var SITE_VERSION = 'v1.1.2';
 var supa = null;
 try{ supa = supabase.createClient(SUPA_URL, SUPA_KEY); }catch(e){ console.warn('Supabase init failed:', e); }
 (function(){ var el = document.getElementById('site-version'); if(el) el.textContent = SITE_VERSION; })();
+
+
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a[data-skip-intro="1"]');
+    if(!a) return;
+    try{ sessionStorage.setItem('skipIntroOnce', '1'); }catch(err){}
+  });
+})();
 
 /* ═══════════════════════════════════════════════
    DATA MODEL
@@ -662,25 +783,68 @@ async function saveToSupabase(){
 window.addEventListener('DOMContentLoaded', function(){ loadFromSupabase(); });
 
 /* ═══════════════════════════════════════════════
-   VIDEO EMBED PARSER — same as main portfolio
+   VIDEO EMBED PARSER — more robust for shared links
 ═══════════════════════════════════════════════ */
-function parseVideoEmbed(v){
+function extractIframeSrc(v){
+  var m = String(v || '').match(/src=["']([^"']+)["']/i);
+  return m ? m[1] : '';
+}
+
+function getYouTubeId(v){
   if(!v) return '';
-  var yt = v.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if(yt) return 'https://www.youtube.com/embed/' + yt[1];
-  var vi = v.match(/vimeo\.com\/(\d+)/);
-  if(vi) return 'https://player.vimeo.com/video/' + vi[1];
-  return v; // raw iframe or direct
+  var raw = String(v).trim();
+  if(raw.startsWith('<iframe')) raw = extractIframeSrc(raw) || raw;
+  try{
+    var u = new URL(raw);
+    var host = (u.hostname || '').replace(/^www\./,'').toLowerCase();
+    var parts = u.pathname.split('/').filter(Boolean);
+    if(host === 'youtu.be') return parts[0] || '';
+    if(host.indexOf('youtube.com') !== -1 || host.indexOf('youtube-nocookie.com') !== -1){
+      if(u.searchParams.get('v')) return u.searchParams.get('v');
+      if(parts[0] === 'embed' || parts[0] === 'shorts' || parts[0] === 'live') return parts[1] || '';
+    }
+  }catch(e){}
+  var m = raw.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{6,})/i);
+  return m ? m[1] : '';
+}
+
+function getVimeoId(v){
+  if(!v) return '';
+  var raw = String(v).trim();
+  if(raw.startsWith('<iframe')) raw = extractIframeSrc(raw) || raw;
+  try{
+    var u = new URL(raw);
+    var host = (u.hostname || '').replace(/^www\./,'').toLowerCase();
+    var parts = u.pathname.split('/').filter(Boolean);
+    if(host.indexOf('vimeo.com') !== -1) return parts.pop() || '';
+  }catch(e){}
+  var m = raw.match(/vimeo\.com\/(\d+)/i);
+  return m ? m[1] : '';
+}
+
+function isDirectMediaFile(v){
+  return /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(String(v || '').trim());
 }
 
 function buildVideoHtml(v){
   if(!v) return '';
-  var yt = v.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if(yt) return '<iframe src="https://www.youtube.com/embed/'+yt[1]+'" allowfullscreen></iframe>';
-  var vi = v.match(/vimeo\.com\/(\d+)/);
-  if(vi) return '<iframe src="https://player.vimeo.com/video/'+vi[1]+'" allowfullscreen></iframe>';
-  if(v.trim().startsWith('<iframe')) return v;
-  return '<video src="'+v+'" controls></video>';
+  var raw = String(v).trim();
+  var ytId = getYouTubeId(raw);
+  if(ytId){
+    return '<iframe src="https://www.youtube.com/embed/'+escAttr(ytId)+'?rel=0&modestbranding=1" title="YouTube video player" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  }
+  var vimeoId = getVimeoId(raw);
+  if(vimeoId){
+    return '<iframe src="https://player.vimeo.com/video/'+escAttr(vimeoId)+'" title="Vimeo video player" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+  }
+  if(raw.startsWith('<iframe')){
+    var iframeSrc = extractIframeSrc(raw);
+    if(iframeSrc){
+      return '<iframe src="'+escAttr(iframeSrc)+'" title="Embedded video player" loading="lazy" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    }
+  }
+  if(isDirectMediaFile(raw)) return '<video src="'+escAttr(raw)+'" controls playsinline preload="metadata"></video>';
+  return '<div class="video-wrap"><div class="video-placeholder"><div class="play-btn">⚠</div><span class="play-label">Unsupported video link — paste a YouTube, Vimeo, iframe, or direct video URL</span></div></div>';
 }
 
 /* ═══════════════════════════════════════════════
@@ -707,12 +871,11 @@ function renderProjects(){
   if(!container) return;
   container.innerHTML = '';
 
-  // Update stat count
   var countEl = document.getElementById('hero-stat-count');
   if(countEl) countEl.textContent = String(DATA.projects.length).padStart(2,'0');
 
   if(DATA.projects.length === 0){
-    container.innerHTML = '<p style="font-family:\'Space Mono\',monospace;font-size:.65rem;color:var(--g5);letter-spacing:2px;padding:40px 0;">No AI projects yet. Use the admin panel to add one.</p>';
+    container.innerHTML = '<p style="font-family:Space Mono,monospace;font-size:.65rem;color:var(--g5);letter-spacing:2px;padding:40px 0;">No AI projects yet. Use the admin panel to add one.</p>';
     return;
   }
 
@@ -721,13 +884,12 @@ function renderProjects(){
     var s1imgs = parseImgs(p.s1imgs || '');
     var s2imgs = parseImgs(p.s2imgs || '');
     var s3imgs = parseImgs(p.s3imgs || '');
+    var previewSrc = s3imgs[0] || s2imgs[0] || s1imgs[0] || '';
 
-    // Tags HTML
     var tagsHtml = tags.map(function(t){
       return '<span class="p-tag'+( t.type ? ' '+t.type : '')+'">' + escHtml(t.label) + '</span>';
     }).join('');
 
-    // Image grids
     var imgCols = {s1: s1imgs.length >= 4 ? 'c4' : s1imgs.length === 3 ? 'c3' : 'c2',
                    s2: s2imgs.length >= 3 ? 'c3' : 'c2',
                    s3: 'c2'};
@@ -736,7 +898,6 @@ function renderProjects(){
       var cells = '';
       var limited = imgs.slice(0, maxCount);
       if(limited.length === 0){
-        // placeholders
         for(var i=0;i<2;i++){
           cells += '<div class="img-cell"><div class="img-placeholder"><span class="ph-plus">+</span><span class="ph-txt">Add image in admin</span></div><div class="img-cell-overlay"></div><span class="img-cell-label">'+labelPrefix+' · 0'+(i+1)+'</span></div>';
         }
@@ -748,84 +909,93 @@ function renderProjects(){
       return '<div class="img-grid '+colClass+'">'+cells+'</div>';
     }
 
-    // Video HTML
     var videoHtml;
     if(p.s4video && p.s4video.trim()){
-      videoHtml = '<div class="video-wrap">'+buildVideoHtml(p.s4video)+'</div>';
+      var builtVideo = buildVideoHtml(p.s4video);
+      if(builtVideo.indexOf('class="video-wrap"') === 0) videoHtml = builtVideo;
+      else videoHtml = '<div class="video-wrap">'+builtVideo+'</div>';
     } else {
       videoHtml = '<div class="video-wrap"><div class="video-placeholder"><div class="play-btn">▶</div><span class="play-label">No video added yet — edit in admin panel</span></div></div>';
     }
+
+    var previewHtml = previewSrc
+      ? '<div class="proj-thumb"><img src="'+escAttr(previewSrc)+'" alt="'+escAttr((p.title || 'Project') + ' preview')+'" loading="lazy"></div>'
+      : '<div class="proj-thumb"><div class="proj-thumb-placeholder">Preview Soon</div></div>';
 
     var block = document.createElement('div');
     block.className = 'project-block';
     block.id = 'proj-'+p.id;
     block.innerHTML =
-      '<div class="proj-header">' +
-        '<div>' +
-          '<div class="proj-index">PROJECT · '+String(idx+1).padStart(2,'0')+'</div>' +
-          '<h2 class="proj-title">'+escHtml(p.title||'Untitled')+'<br><em>'+escHtml(p.title2||'')+'</em></h2>' +
-          '<div class="proj-tags">'+tagsHtml+'</div>' +
-        '</div>' +
-        '<p class="proj-desc">'+escHtml(p.desc||'')+'</p>' +
-      '</div>' +
-      '<div class="pipeline">' +
-        // S1
-        '<div class="stage s1 open" data-stage>' +
-          '<div class="stage-header" onclick="toggleStage(this)">' +
-            '<span class="stage-num">01</span><span class="stage-label">REF IMAGES</span>' +
-            '<span class="stage-title-txt">Source / Reference Material</span>' +
-            '<span class="stage-arrow">▾</span>' +
+      '<button class="project-summary" type="button" onclick="toggleProject(this)" aria-expanded="false">' +
+        '<div class="proj-main">' +
+          previewHtml +
+          '<div class="proj-copy">' +
+            '<div class="proj-index">PROJECT · '+String(idx+1).padStart(2,'0')+'</div>' +
+            '<h2 class="proj-title">'+escHtml(p.title||'Untitled')+'<br><em>'+escHtml(p.title2||'')+'</em></h2>' +
+            '<div class="proj-click-hint">Click to view project</div>' +
+            '<div class="proj-tags">'+tagsHtml+'</div>' +
           '</div>' +
-          '<div class="stage-body"><div class="stage-inner">' +
-            buildImgGrid(s1imgs, 4, 'REF', imgCols.s1) +
-            (p.s1note ? '<div class="stage-note">'+escHtml(p.s1note)+'</div>' : '') +
-          '</div></div>' +
         '</div>' +
-        '<div class="stage-connector">→ GENERATE</div>' +
-        // S2
-        '<div class="stage s2" data-stage>' +
-          '<div class="stage-header" onclick="toggleStage(this)">' +
-            '<span class="stage-num">02</span><span class="stage-label">AI GENERATE</span>' +
-            '<span class="stage-title-txt">Studio-Grade Stills from Reference</span>' +
-            '<span class="stage-arrow">▾</span>' +
+        '<div class="proj-summary-side">' +
+          '<p class="proj-desc">'+escHtml(p.desc||'')+'</p>' +
+          '<span class="project-toggle-arrow">▾</span>' +
+        '</div>' +
+      '</button>' +
+      '<div class="project-body"><div class="project-body-inner">' +
+        '<div class="pipeline">' +
+          '<div class="stage s1" data-stage>' +
+            '<div class="stage-header" onclick="toggleStage(this)">' +
+              '<span class="stage-num">01</span><span class="stage-label">REF IMAGES</span>' +
+              '<span class="stage-title-txt">Source / Reference Material</span>' +
+              '<span class="stage-arrow">▾</span>' +
+            '</div>' +
+            '<div class="stage-body"><div class="stage-inner">' +
+              buildImgGrid(s1imgs, 4, 'REF', imgCols.s1) +
+              (p.s1note ? '<div class="stage-note">'+escHtml(p.s1note)+'</div>' : '') +
+            '</div></div>' +
           '</div>' +
-          '<div class="stage-body"><div class="stage-inner">' +
-            buildImgGrid(s2imgs, 3, 'GEN', imgCols.s2) +
-            (p.s2note ? '<div class="stage-note">'+escHtml(p.s2note)+'</div>' : '') +
-          '</div></div>' +
-        '</div>' +
-        '<div class="stage-connector">→ MOTION</div>' +
-        // S3
-        '<div class="stage s3" data-stage>' +
-          '<div class="stage-header" onclick="toggleStage(this)">' +
-            '<span class="stage-num">03</span><span class="stage-label">MOTION</span>' +
-            '<span class="stage-title-txt">AI-Animated Video Clips</span>' +
-            '<span class="stage-arrow">▾</span>' +
+          '<div class="stage-connector">→ GENERATE</div>' +
+          '<div class="stage s2" data-stage>' +
+            '<div class="stage-header" onclick="toggleStage(this)">' +
+              '<span class="stage-num">02</span><span class="stage-label">AI GENERATE</span>' +
+              '<span class="stage-title-txt">Studio-Grade Stills from Reference</span>' +
+              '<span class="stage-arrow">▾</span>' +
+            '</div>' +
+            '<div class="stage-body"><div class="stage-inner">' +
+              buildImgGrid(s2imgs, 3, 'GEN', imgCols.s2) +
+              (p.s2note ? '<div class="stage-note">'+escHtml(p.s2note)+'</div>' : '') +
+            '</div></div>' +
           '</div>' +
-          '<div class="stage-body"><div class="stage-inner">' +
-            buildImgGrid(s3imgs, 2, 'MOT', imgCols.s3) +
-            (p.s3note ? '<div class="stage-note">'+escHtml(p.s3note)+'</div>' : '') +
-          '</div></div>' +
-        '</div>' +
-        '<div class="stage-connector">→ FINAL CUT</div>' +
-        // S4
-        '<div class="stage s4" data-stage>' +
-          '<div class="stage-header" onclick="toggleStage(this)">' +
-            '<span class="stage-num">04</span><span class="stage-label">FINAL EDIT</span>' +
-            '<span class="stage-title-txt">Complete Edited Video</span>' +
-            '<span class="stage-arrow">▾</span>' +
+          '<div class="stage-connector">→ MOTION</div>' +
+          '<div class="stage s3" data-stage>' +
+            '<div class="stage-header" onclick="toggleStage(this)">' +
+              '<span class="stage-num">03</span><span class="stage-label">MOTION</span>' +
+              '<span class="stage-title-txt">AI-Animated Video Clips</span>' +
+              '<span class="stage-arrow">▾</span>' +
+            '</div>' +
+            '<div class="stage-body"><div class="stage-inner">' +
+              buildImgGrid(s3imgs, 2, 'MOT', imgCols.s3) +
+              (p.s3note ? '<div class="stage-note">'+escHtml(p.s3note)+'</div>' : '') +
+            '</div></div>' +
           '</div>' +
-          '<div class="stage-body"><div class="stage-inner">' +
-            videoHtml +
-            (p.s4note ? '<div class="stage-note">'+escHtml(p.s4note)+'</div>' : '') +
-          '</div></div>' +
+          '<div class="stage-connector">→ FINAL CUT</div>' +
+          '<div class="stage s4" data-stage>' +
+            '<div class="stage-header" onclick="toggleStage(this)">' +
+              '<span class="stage-num">04</span><span class="stage-label">FINAL EDIT</span>' +
+              '<span class="stage-title-txt">Complete Edited Video</span>' +
+              '<span class="stage-arrow">▾</span>' +
+            '</div>' +
+            '<div class="stage-body"><div class="stage-inner">' +
+              videoHtml +
+              (p.s4note ? '<div class="stage-note">'+escHtml(p.s4note)+'</div>' : '') +
+            '</div></div>' +
+          '</div>' +
         '</div>' +
-      '</div>';
+      '</div></div>';
 
     container.appendChild(block);
   });
 
-  // Re-run scroll reveal on new elements
   observeBlocks();
 }
 
@@ -834,6 +1004,21 @@ function renderProjects(){
 ═══════════════════════════════════════════════ */
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escAttr(s){ return String(s).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+function toggleProject(trigger){
+  var block = trigger && trigger.closest ? trigger.closest('.project-block') : null;
+  if(!block) return;
+  var willOpen = !block.classList.contains('open');
+  document.querySelectorAll('.project-block.open').forEach(function(other){
+    if(other !== block){
+      other.classList.remove('open');
+      var summary = other.querySelector('.project-summary');
+      if(summary) summary.setAttribute('aria-expanded','false');
+    }
+  });
+  block.classList.toggle('open', willOpen);
+  trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+}
 
 function toggleStage(hdr){
   var stage = hdr.closest('[data-stage]');
@@ -1093,8 +1278,26 @@ var Admin = (function(){
     document.getElementById('tb-preview').innerHTML = '👁 Preview';
   });
 
+  function buildCleanExportHtml(){
+    var clone = document.documentElement.cloneNode(true);
+    function clean(selector, fn){
+      var el = clone.querySelector(selector);
+      if(el) fn(el);
+    }
+    clean('#cursor', function(el){ el.className = ''; el.removeAttribute('style'); });
+    clean('#cursor-ring', function(el){ el.className = ''; el.removeAttribute('style'); });
+    clean('#admin-toolbar', function(el){ el.className = ''; el.removeAttribute('style'); });
+    clean('#admin-panel', function(el){ el.className = ''; el.removeAttribute('style'); });
+    clean('#admin-modal', function(el){ el.className = ''; });
+    clean('#lightbox', function(el){ el.className = ''; });
+    clean('#main-nav', function(el){ el.classList.remove('hide'); el.removeAttribute('style'); });
+    clean('#hero', function(el){ el.removeAttribute('style'); });
+    clean('#back-top', function(el){ el.classList.remove('visible'); });
+    return '<!DOCTYPE html>\n' + clone.outerHTML;
+  }
+
   document.getElementById('tb-export').addEventListener('click', function(){
-    var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    var src = buildCleanExportHtml();
     var blob = new Blob([src], {type:'text/html'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
