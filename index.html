@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Alankrit Thapa — Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Jost:wght@300;400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -38,6 +37,9 @@ body.locked{overflow:hidden}
   .nav-status{gap:3px}
   .work-grid{grid-template-columns:1fr}
   .hero-stats{display:none}
+  .hero-ai-link{padding:14px 16px}
+  .hero-ai-link-kicker{font-size:.5rem}
+  .hero-ai-link-title{font-size:.68rem;letter-spacing:1.6px}
 }
 @media(hover:none){
   /* Larger tap targets on touch devices */
@@ -156,6 +158,19 @@ nav.hide{transform:translateY(-100%)}
 .hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;position:relative;z-index:1}
 .hero-bio{max-width:560px;font-family:'Jost',sans-serif;font-weight:400;font-size:1.05rem;color:var(--g2);line-height:1.9}
 .hero-stats{display:flex;gap:44px;flex-shrink:0}
+
+.hero-copy{display:flex;flex-direction:column;gap:18px;max-width:560px}
+.hero-copy .hero-bio{max-width:none}
+.hero-ai-link{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;width:min(100%,420px);padding:16px 20px;border:1px solid rgba(224,169,58,.42);background:rgba(224,169,58,.08);text-decoration:none;color:var(--white);transition:transform .2s,border-color .2s,background .2s,color .2s;box-shadow:0 0 24px rgba(224,169,58,.08);cursor:none}
+.hero-ai-link:hover{transform:translateY(-1px);border-color:var(--amber);background:rgba(224,169,58,.12);color:var(--amber)}
+.hero-ai-link-copy{display:flex;flex-direction:column;gap:6px}
+.hero-ai-link-kicker{font-family:'Space Mono',monospace;font-size:.54rem;letter-spacing:3px;text-transform:uppercase;color:var(--g4)}
+.hero-ai-link-title{font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;line-height:1.45}
+.hero-ai-link-arrow{font-family:'Space Mono',monospace;font-size:1rem;flex-shrink:0}
+body.light .hero-ai-link{background:rgba(184,134,11,.08);border-color:rgba(184,134,11,.35);box-shadow:none}
+body.light .hero-ai-link:hover{border-color:#b8860b;background:rgba(184,134,11,.12);color:#b8860b}
+body.light .hero-ai-link-kicker{color:var(--g4)}
+
 .hero-stat-v{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:3.5rem;color:var(--white);line-height:1;text-shadow:0 0 28px rgba(255,255,255,.13)}
 .hero-stat-k{font-family:'Space Mono',monospace;font-weight:700;font-size:.58rem;color:var(--g4);text-transform:uppercase;letter-spacing:2px;margin-top:5px}
 
@@ -418,6 +433,8 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
   .hero-name{font-size:clamp(3rem,16vw,5.5rem);margin-bottom:28px}
   .hero-meta{font-size:.56rem;gap:10px;flex-wrap:wrap}
   .hero-bio{font-size:.92rem}
+  .hero-ai-link{width:100%}
+  .hero-ai-link-title{font-size:.72rem}
   .hero-stats{gap:28px}
   .hero-stat-v{font-size:2.4rem}
 
@@ -474,6 +491,9 @@ body.admin-editing [contenteditable]:focus{outline:1px solid var(--cyan);outline
 
   /* HERO — hide stats on very small screens */
   .hero-stats{display:none}
+  .hero-ai-link{padding:14px 16px}
+  .hero-ai-link-kicker{font-size:.5rem}
+  .hero-ai-link-title{font-size:.68rem;letter-spacing:1.6px}
 
   /* ABOUT tags — smaller */
   .about-tag{font-size:.62rem;padding:5px 10px}
@@ -798,22 +818,18 @@ body.light #theme-toggle{color:var(--g2)}
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
-<body class="locked">
+<body class="" style="cursor: none;">
 
 <div id="scanlines"></div>
 <div id="crt-beam"></div>
 <div id="vignette"></div>
 <div id="grain"></div>
 <!-- LOADING SCREEN -->
-<div id="loading">
-  <div class="load-mono">AT<em>.</em></div>
-  <div class="load-bar-wrap"><div class="load-bar"></div></div>
-  <div class="load-label">Loading</div>
-</div>
+
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
 <div id="nav-flash"></div>
-<div id="email-toast">&#10003; Email copied to clipboard</div>
+<div id="email-toast">✓ Email copied to clipboard</div>
 
 <!-- ADMIN LOGIN -->
 <div id="admin-login-overlay" class="hidden">
@@ -829,17 +845,17 @@ body.light #theme-toggle{color:var(--g2)}
 
 <!-- ADMIN TOOLBAR -->
 <div id="admin-toolbar">
-  <span class="admin-toolbar-label">&#9881; Admin</span>
+  <span class="admin-toolbar-label">⚙ Admin</span>
   <div class="admin-tb-sep"></div>
-  <button class="admin-tb-btn" id="tb-toggle-panel">&#9776; Projects &amp; Content</button>
-  <button class="admin-tb-btn" id="tb-edit-mode">&#9998; Edit Mode</button>
-  <button class="admin-tb-btn" id="tb-cancel-edit" style="display:none;color:var(--g4)">&#10005; Cancel</button>
-  <button class="admin-tb-btn" id="tb-preview">&#128065; Preview</button>
-  <button class="admin-tb-btn" id="tb-undo" title="Undo last change" style="opacity:.5" disabled>&#8617; Undo</button>
-  <button class="admin-tb-btn" id="tb-redo" title="Nothing to redo" disabled style="opacity:.35">&#8618; Redo</button>
-  <button class="admin-tb-btn" id="tb-save">&#10003; Save Changes</button>
+  <button class="admin-tb-btn" id="tb-toggle-panel">☰ Projects &amp; Content</button>
+  <button class="admin-tb-btn" id="tb-edit-mode">✎ Edit Mode</button>
+  <button class="admin-tb-btn" id="tb-cancel-edit" style="display: none; color: var(--g4);">✕ Cancel</button>
+  <button class="admin-tb-btn" id="tb-preview">👁 Preview</button>
+  <button class="admin-tb-btn" id="tb-undo" title="Undo last change" style="opacity:.5" disabled="">↩ Undo</button>
+  <button class="admin-tb-btn" id="tb-redo" title="Nothing to redo" disabled="" style="opacity:.35">↪ Redo</button>
+  <button class="admin-tb-btn" id="tb-save">✓ Save Changes</button>
   <!-- FIX: removed duplicate export button -->
-  <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">&#11015; Export HTML</button>
+  <button class="admin-tb-btn" id="tb-export" style="color:var(--cyan);border-color:rgba(58,212,200,0.4)">⬇ Export HTML</button>
   <button class="admin-tb-btn admin-tb-logout" id="tb-logout">Logout</button>
 </div>
 
@@ -847,7 +863,7 @@ body.light #theme-toggle{color:var(--g2)}
 <div id="admin-panel">
   <div class="admin-panel-header">
     <div class="admin-panel-title">Portfolio Admin</div>
-    <button class="admin-icon-btn" id="close-panel">&#10005;</button>
+    <button class="admin-icon-btn" id="close-panel">✕</button>
   </div>
   <div class="admin-tabs">
     <div class="admin-tab active" data-tab="projects">Projects</div>
@@ -858,7 +874,7 @@ body.light #theme-toggle{color:var(--g2)}
   <div class="admin-tab-content active" id="tab-projects">
     <button class="admin-btn admin-add-project-btn" id="btn-add-project">+ Add New Project</button>
     <hr class="admin-section-divider">
-    <div id="admin-proj-list"></div>
+    <div id="admin-proj-list"><div class="admin-proj-item" data-id="8" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773983017/Sequence01-ezgif.com-optimize_dukfts.gif"><div class="admin-proj-info"><div class="admin-proj-title">Digital Overload</div><div class="admin-proj-type">Narrative Shortfilm</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="8">✎</button><button class="admin-icon-btn del" data-del="8">✕</button></div></div><div class="admin-proj-item" data-id="6" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985765/Sequence_01_2_nbieke.gif"><div class="admin-proj-info"><div class="admin-proj-title">Deployed Aero Cap Launch</div><div class="admin-proj-type">High-End Video &amp; Motion Design</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="6">✎</button><button class="admin-icon-btn del" data-del="6">✕</button></div></div><div class="admin-proj-item" data-id="3" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985765/Sequence_01_3_wqyjcb.gif"><div class="admin-proj-info"><div class="admin-proj-title">Deployed Para Trooper</div><div class="admin-proj-type">Cinematic Apparel Campaign</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="3">✎</button><button class="admin-icon-btn del" data-del="3">✕</button></div></div><div class="admin-proj-item" data-id="4" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985759/Sequence_01_4_zku35x.gif"><div class="admin-proj-info"><div class="admin-proj-title">UI Motion System</div><div class="admin-proj-type">Automated Marketing Platform MG</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="4">✎</button><button class="admin-icon-btn del" data-del="4">✕</button></div></div><div class="admin-proj-item" data-id="2" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985770/Sequence_01_dutsr4.gif"><div class="admin-proj-info"><div class="admin-proj-title">FOOH Advertising</div><div class="admin-proj-type">3D Apparel VFX Breakdown</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="2">✎</button><button class="admin-icon-btn del" data-del="2">✕</button></div></div><div class="admin-proj-item" data-id="5" draggable="true"><div class="drag-handle"><span></span><span></span><span></span></div><img class="admin-proj-thumb" src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985774/Sequence_01_1_xzdce8.gif"><div class="admin-proj-info"><div class="admin-proj-title">Radio — Bershy</div><div class="admin-proj-type">Lyric Video &amp; Motion Design | 1.3+ Mil Views - 40k Likes</div></div><div class="admin-proj-actions"><button class="admin-icon-btn" data-edit="5">✎</button><button class="admin-icon-btn del" data-del="5">✕</button></div></div></div>
   </div>
   <!-- CONTENT TAB -->
   <div class="admin-tab-content" id="tab-content">
@@ -888,14 +904,14 @@ body.light #theme-toggle{color:var(--g2)}
 </div>
 
 <!-- ADMIN PROJECT EDIT MODAL -->
-<div id="admin-modal">
+<div id="admin-modal" class="">
   <div class="admin-modal-box">
     <div class="admin-modal-header">
-      <div class="admin-modal-title" id="modal-title">Edit Project</div>
-      <button class="admin-modal-close" id="modal-close">&#10005;</button>
+      <div class="admin-modal-title" id="modal-title">Add Project</div>
+      <button class="admin-modal-close" id="modal-close">✕</button>
     </div>
     <div class="admin-modal-body">
-      <input type="hidden" id="modal-proj-id">
+      <input type="hidden" id="modal-proj-id" value="">
       <div class="admin-field">
         <label>Project Title</label>
         <input class="admin-input" id="modal-proj-title" type="text" placeholder="e.g. Digital Overload">
@@ -943,43 +959,12 @@ body.light #theme-toggle{color:var(--g2)}
 </div>
 
 <!-- INTRO -->
-<div id="intro">
-  <div id="intro-vignette"></div>
-  <div id="intro-shine"></div>
-  <div id="intro-bands"></div>
-  <div id="intro-sf"></div>
-  <div id="intro-flash"></div>
-  <div class="i-corner tl"></div><div class="i-corner tr"></div>
-  <div class="i-corner bl"></div><div class="i-corner br"></div>
-  <div class="i-rec">REC</div>
-  <div class="i-tc" id="i-tc">00:00:00:00</div>
-  <div class="i-ch">CH &middot; 01</div>
-  <div class="i-topbar"><span>INPUT &middot; COMPOSITE</span><span>FORMAT &middot; PAL</span><span>AT-2026-KOL</span></div>
-  <div class="tv-bars">
-    <span style="background:#c8c800"></span><span style="background:#00c8c8"></span>
-    <span style="background:#00c800"></span><span style="background:#c800c8"></span>
-    <span style="background:#c80000"></span><span style="background:#0000c8"></span>
-    <span style="background:#c8c800"></span><span style="background:#111"></span>
-    <span style="background:#fff"></span><span style="background:#111"></span>
-    <span style="background:#0000c8"></span><span style="background:#111"></span>
-    <span style="background:#c8c800"></span>
-  </div>
-  <div class="intro-body">
-    <div class="i-sup">Creative Operations &middot; Motion &amp; Visual</div>
-    <div class="i-name">Alankrit<br><em>Thapa</em></div>
-    <div class="i-role">Lead Video Editor &amp; Senior Graphic Designer</div>
-    <div class="i-line"></div>
-    <div class="i-enter">
-      <div class="i-enter-txt">Click anywhere to enter</div>
-      <div class="i-arrow">&#8595;</div>
-    </div>
-  </div>
-</div>
+
 
 <!-- MAIN -->
 <div id="app">
 <nav id="nav">
-  <a href="#hero" class="nav-logo">AT<span>&middot;</span></a>
+  <a href="#hero" class="nav-logo">AT<span>·</span></a>
   <div class="nav-channels">
     <a class="nav-ch" data-target="about"><div class="nav-ch-num">01</div><div class="nav-ch-label">About</div></a>
     <a class="nav-ch" data-target="work"><div class="nav-ch-num">02</div><div class="nav-ch-label">Work</div></a>
@@ -987,13 +972,13 @@ body.light #theme-toggle{color:var(--g2)}
     <a class="nav-ch" data-target="contact"><div class="nav-ch-num">04</div><div class="nav-ch-label">Contact</div></a>
   </div>
   <div class="nav-right">
-    <button id="theme-toggle" title="Toggle light/dark mode">☾</button>
-    <div id="vol-control">
-    <button id="vol-mute" title="Mute/Unmute">&#128266;</button>
+    <button id="theme-toggle" title="Switch to light mode">☾</button>
+    <div id="vol-control" class="visible">
+    <button id="vol-mute" title="Mute/Unmute">🔊</button>
     <input id="vol-slider" type="range" min="0" max="1" step="0.05" value="0.5" title="Volume">
   </div>
     <button class="btn-cv" id="btn-cv">
-      <svg viewBox="0 0 14 14"><path d="M2 1h7l3 3v9H2V1zm7 0v3h3M4 6h6M4 8h6M4 10h4"/></svg>
+      <svg viewBox="0 0 14 14"><path d="M2 1h7l3 3v9H2V1zm7 0v3h3M4 6h6M4 8h6M4 10h4"></path></svg>
       <span>View CV</span>
     </button>
     <div class="nav-status"><div class="nav-dot"></div>Available</div>
@@ -1012,8 +997,7 @@ body.light #theme-toggle{color:var(--g2)}
              Q460,502 400,496 Q340,488 290,472
              Q240,456 210,432 Q182,408 172,378
              Q162,348 170,315 Q178,280 198,255
-             Q216,232 230,210 Q248,182 270,158 Z"
-          stroke-width="0.7" stroke-dasharray="6,5" opacity="0.45"/>
+             Q216,232 230,210 Q248,182 270,158 Z" stroke-width="0.7" stroke-dasharray="6,5" opacity="0.45"></path>
 
     <!-- Main road 717A — S-curve through town centre -->
     <!-- Enters top, sweeps left then curves down-right -->
@@ -1021,155 +1005,147 @@ body.light #theme-toggle{color:var(--g2)}
              Q650,220 638,240 Q622,262 600,278
              Q575,295 548,308 Q518,322 492,334
              Q465,348 448,368 Q432,390 428,415
-             Q426,438 438,460 Q452,482 475,500"
-          stroke-width="2.8"/>
+             Q426,438 438,460 Q452,482 475,500" stroke-width="2.8"></path>
     <!-- Branch right — upper road -->
-    <path d="M645,200 Q672,196 702,200 Q730,205 755,215 Q778,225 800,238"
-          stroke-width="2"/>
+    <path d="M645,200 Q672,196 702,200 Q730,205 755,215 Q778,225 800,238" stroke-width="2"></path>
     <!-- Branch right — mid road -->
-    <path d="M600,278 Q628,275 658,278 Q692,282 720,294 Q748,308 770,328 Q790,348 800,372"
-          stroke-width="1.6"/>
+    <path d="M600,278 Q628,275 658,278 Q692,282 720,294 Q748,308 770,328 Q790,348 800,372" stroke-width="1.6"></path>
     <!-- Branch left — upper loop road -->
     <path d="M548,308 Q520,298 490,286 Q458,274 425,268
              Q392,264 362,270 Q330,278 304,296
              Q278,315 260,340 Q244,365 242,395
-             Q242,420 255,442 Q270,465 295,480"
-          stroke-width="1.6"/>
+             Q242,420 255,442 Q270,465 295,480" stroke-width="1.6"></path>
     <!-- Branch left — connecting lower left -->
     <path d="M492,334 Q468,328 440,322 Q410,316 380,312
-             Q348,308 318,318 Q292,330 274,352"
-          stroke-width="1.2"/>
+             Q348,308 318,318 Q292,330 274,352" stroke-width="1.2"></path>
     <!-- Small road top-left cluster -->
     <path d="M362,270 Q340,250 315,235 Q290,222 262,220
-             Q238,220 218,235 Q200,250 195,275"
-          stroke-width="1"/>
+             Q238,220 218,235 Q200,250 195,275" stroke-width="1"></path>
     <!-- Lower road south -->
-    <path d="M475,500 Q490,518 512,530 Q540,542 570,545 Q600,546 628,536"
-          stroke-width="1.4"/>
+    <path d="M475,500 Q490,518 512,530 Q540,542 570,545 Q600,546 628,536" stroke-width="1.4"></path>
     <!-- Road top right entering from edge -->
-    <path d="M800,110 Q770,128 745,148 Q720,168 700,190 Q680,210 665,228"
-          stroke-width="1.8"/>
+    <path d="M800,110 Q770,128 745,148 Q720,168 700,190 Q680,210 665,228" stroke-width="1.8"></path>
 
     <!-- Building clusters — simplified organic rectangles -->
     <!-- Upper centre dense cluster -->
     <g opacity="0.75">
-      <rect x="558" y="148" width="18" height="13" rx="1" stroke-width="0.8"/>
-      <rect x="580" y="142" width="22" height="15" rx="1" stroke-width="0.8"/>
-      <rect x="606" y="148" width="18" height="12" rx="1" stroke-width="0.8"/>
-      <rect x="572" y="160" width="14" height="11" rx="1" stroke-width="0.7"/>
-      <rect x="590" y="158" width="16" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="610" y="162" width="14" height="10" rx="1" stroke-width="0.7"/>
-      <rect x="556" y="165" width="12" height="10" rx="1" stroke-width="0.6"/>
-      <rect x="626" y="152" width="16" height="11" rx="1" stroke-width="0.7"/>
+      <rect x="558" y="148" width="18" height="13" rx="1" stroke-width="0.8"></rect>
+      <rect x="580" y="142" width="22" height="15" rx="1" stroke-width="0.8"></rect>
+      <rect x="606" y="148" width="18" height="12" rx="1" stroke-width="0.8"></rect>
+      <rect x="572" y="160" width="14" height="11" rx="1" stroke-width="0.7"></rect>
+      <rect x="590" y="158" width="16" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="610" y="162" width="14" height="10" rx="1" stroke-width="0.7"></rect>
+      <rect x="556" y="165" width="12" height="10" rx="1" stroke-width="0.6"></rect>
+      <rect x="626" y="152" width="16" height="11" rx="1" stroke-width="0.7"></rect>
     </g>
 
     <!-- Centre-left main cluster (around road bend) -->
     <g opacity="0.72">
-      <rect x="490" y="275" width="24" height="16" rx="1" stroke-width="0.9"/>
-      <rect x="518" y="270" width="20" height="14" rx="1" stroke-width="0.9"/>
-      <rect x="466" y="280" width="20" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="442" y="285" width="18" height="13" rx="1" stroke-width="0.8"/>
-      <rect x="418" y="290" width="20" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="490" y="295" width="22" height="14" rx="1" stroke-width="0.7"/>
-      <rect x="516" y="288" width="18" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="466" y="298" width="16" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="444" y="302" width="18" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="420" y="306" width="16" height="11" rx="1" stroke-width="0.7"/>
-      <rect x="398" y="295" width="16" height="12" rx="1" stroke-width="0.6"/>
-      <rect x="375" y="300" width="18" height="12" rx="1" stroke-width="0.6"/>
-      <rect x="352" y="308" width="16" height="11" rx="1" stroke-width="0.6"/>
+      <rect x="490" y="275" width="24" height="16" rx="1" stroke-width="0.9"></rect>
+      <rect x="518" y="270" width="20" height="14" rx="1" stroke-width="0.9"></rect>
+      <rect x="466" y="280" width="20" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="442" y="285" width="18" height="13" rx="1" stroke-width="0.8"></rect>
+      <rect x="418" y="290" width="20" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="490" y="295" width="22" height="14" rx="1" stroke-width="0.7"></rect>
+      <rect x="516" y="288" width="18" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="466" y="298" width="16" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="444" y="302" width="18" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="420" y="306" width="16" height="11" rx="1" stroke-width="0.7"></rect>
+      <rect x="398" y="295" width="16" height="12" rx="1" stroke-width="0.6"></rect>
+      <rect x="375" y="300" width="18" height="12" rx="1" stroke-width="0.6"></rect>
+      <rect x="352" y="308" width="16" height="11" rx="1" stroke-width="0.6"></rect>
     </g>
 
     <!-- Upper-left scattered cluster -->
     <g opacity="0.65">
-      <rect x="248" y="240" width="20" height="14" rx="1" stroke-width="0.75"/>
-      <rect x="272" y="234" width="22" height="15" rx="1" stroke-width="0.75"/>
-      <rect x="298" y="238" width="18" height="13" rx="1" stroke-width="0.75"/>
-      <rect x="322" y="232" width="20" height="14" rx="1" stroke-width="0.75"/>
-      <rect x="250" y="258" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="270" y="254" width="18" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="292" y="256" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="315" y="250" width="18" height="13" rx="1" stroke-width="0.65"/>
-      <rect x="340" y="244" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="228" y="270" width="16" height="11" rx="1" stroke-width="0.6"/>
-      <rect x="248" y="274" width="14" height="11" rx="1" stroke-width="0.6"/>
-      <rect x="265" y="270" width="16" height="11" rx="1" stroke-width="0.6"/>
+      <rect x="248" y="240" width="20" height="14" rx="1" stroke-width="0.75"></rect>
+      <rect x="272" y="234" width="22" height="15" rx="1" stroke-width="0.75"></rect>
+      <rect x="298" y="238" width="18" height="13" rx="1" stroke-width="0.75"></rect>
+      <rect x="322" y="232" width="20" height="14" rx="1" stroke-width="0.75"></rect>
+      <rect x="250" y="258" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="270" y="254" width="18" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="292" y="256" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="315" y="250" width="18" height="13" rx="1" stroke-width="0.65"></rect>
+      <rect x="340" y="244" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="228" y="270" width="16" height="11" rx="1" stroke-width="0.6"></rect>
+      <rect x="248" y="274" width="14" height="11" rx="1" stroke-width="0.6"></rect>
+      <rect x="265" y="270" width="16" height="11" rx="1" stroke-width="0.6"></rect>
     </g>
 
     <!-- Lower-left cluster -->
     <g opacity="0.68">
-      <rect x="220" y="330" width="22" height="15" rx="1" stroke-width="0.8"/>
-      <rect x="246" y="325" width="20" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="270" y="328" width="18" height="13" rx="1" stroke-width="0.8"/>
-      <rect x="295" y="322" width="20" height="15" rx="1" stroke-width="0.8"/>
-      <rect x="318" y="325" width="18" height="13" rx="1" stroke-width="0.75"/>
-      <rect x="222" y="350" width="18" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="244" y="346" width="20" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="268" y="348" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="288" y="342" width="18" height="13" rx="1" stroke-width="0.65"/>
-      <rect x="308" y="345" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="225" y="368" width="16" height="11" rx="1" stroke-width="0.6"/>
-      <rect x="245" y="365" width="18" height="11" rx="1" stroke-width="0.6"/>
-      <rect x="267" y="365" width="16" height="12" rx="1" stroke-width="0.6"/>
+      <rect x="220" y="330" width="22" height="15" rx="1" stroke-width="0.8"></rect>
+      <rect x="246" y="325" width="20" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="270" y="328" width="18" height="13" rx="1" stroke-width="0.8"></rect>
+      <rect x="295" y="322" width="20" height="15" rx="1" stroke-width="0.8"></rect>
+      <rect x="318" y="325" width="18" height="13" rx="1" stroke-width="0.75"></rect>
+      <rect x="222" y="350" width="18" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="244" y="346" width="20" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="268" y="348" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="288" y="342" width="18" height="13" rx="1" stroke-width="0.65"></rect>
+      <rect x="308" y="345" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="225" y="368" width="16" height="11" rx="1" stroke-width="0.6"></rect>
+      <rect x="245" y="365" width="18" height="11" rx="1" stroke-width="0.6"></rect>
+      <rect x="267" y="365" width="16" height="12" rx="1" stroke-width="0.6"></rect>
     </g>
 
     <!-- Centre-right cluster -->
     <g opacity="0.7">
-      <rect x="655" y="255" width="22" height="15" rx="1" stroke-width="0.85"/>
-      <rect x="682" y="250" width="20" height="14" rx="1" stroke-width="0.85"/>
-      <rect x="706" y="255" width="18" height="13" rx="1" stroke-width="0.8"/>
-      <rect x="730" y="258" width="18" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="658" y="274" width="18" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="680" y="270" width="16" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="700" y="272" width="18" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="724" y="276" width="16" height="11" rx="1" stroke-width="0.65"/>
-      <rect x="744" y="270" width="20" height="14" rx="1" stroke-width="0.7"/>
+      <rect x="655" y="255" width="22" height="15" rx="1" stroke-width="0.85"></rect>
+      <rect x="682" y="250" width="20" height="14" rx="1" stroke-width="0.85"></rect>
+      <rect x="706" y="255" width="18" height="13" rx="1" stroke-width="0.8"></rect>
+      <rect x="730" y="258" width="18" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="658" y="274" width="18" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="680" y="270" width="16" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="700" y="272" width="18" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="724" y="276" width="16" height="11" rx="1" stroke-width="0.65"></rect>
+      <rect x="744" y="270" width="20" height="14" rx="1" stroke-width="0.7"></rect>
     </g>
 
     <!-- Lower-centre cluster -->
     <g opacity="0.7">
-      <rect x="448" y="375" width="22" height="15" rx="1" stroke-width="0.85"/>
-      <rect x="474" y="370" width="20" height="14" rx="1" stroke-width="0.85"/>
-      <rect x="498" y="372" width="18" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="520" y="368" width="20" height="15" rx="1" stroke-width="0.8"/>
-      <rect x="545" y="372" width="18" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="450" y="394" width="18" height="13" rx="1" stroke-width="0.75"/>
-      <rect x="472" y="390" width="20" height="13" rx="1" stroke-width="0.75"/>
-      <rect x="496" y="390" width="18" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="518" y="388" width="20" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="542" y="388" width="16" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="565" y="378" width="18" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="452" y="412" width="16" height="11" rx="1" stroke-width="0.6"/>
-      <rect x="472" y="408" width="18" height="12" rx="1" stroke-width="0.6"/>
-      <rect x="495" y="408" width="16" height="12" rx="1" stroke-width="0.6"/>
-      <rect x="515" y="406" width="18" height="12" rx="1" stroke-width="0.6"/>
-      <rect x="538" y="408" width="16" height="11" rx="1" stroke-width="0.6"/>
+      <rect x="448" y="375" width="22" height="15" rx="1" stroke-width="0.85"></rect>
+      <rect x="474" y="370" width="20" height="14" rx="1" stroke-width="0.85"></rect>
+      <rect x="498" y="372" width="18" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="520" y="368" width="20" height="15" rx="1" stroke-width="0.8"></rect>
+      <rect x="545" y="372" width="18" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="450" y="394" width="18" height="13" rx="1" stroke-width="0.75"></rect>
+      <rect x="472" y="390" width="20" height="13" rx="1" stroke-width="0.75"></rect>
+      <rect x="496" y="390" width="18" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="518" y="388" width="20" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="542" y="388" width="16" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="565" y="378" width="18" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="452" y="412" width="16" height="11" rx="1" stroke-width="0.6"></rect>
+      <rect x="472" y="408" width="18" height="12" rx="1" stroke-width="0.6"></rect>
+      <rect x="495" y="408" width="16" height="12" rx="1" stroke-width="0.6"></rect>
+      <rect x="515" y="406" width="18" height="12" rx="1" stroke-width="0.6"></rect>
+      <rect x="538" y="408" width="16" height="11" rx="1" stroke-width="0.6"></rect>
     </g>
 
     <!-- Lower-right cluster -->
     <g opacity="0.65">
-      <rect x="606" y="378" width="22" height="15" rx="1" stroke-width="0.8"/>
-      <rect x="633" y="374" width="20" height="14" rx="1" stroke-width="0.8"/>
-      <rect x="658" y="378" width="18" height="13" rx="1" stroke-width="0.75"/>
-      <rect x="680" y="380" width="18" height="14" rx="1" stroke-width="0.75"/>
-      <rect x="608" y="398" width="18" height="12" rx="1" stroke-width="0.7"/>
-      <rect x="630" y="394" width="20" height="13" rx="1" stroke-width="0.7"/>
-      <rect x="654" y="396" width="16" height="12" rx="1" stroke-width="0.65"/>
-      <rect x="675" y="398" width="18" height="12" rx="1" stroke-width="0.65"/>
+      <rect x="606" y="378" width="22" height="15" rx="1" stroke-width="0.8"></rect>
+      <rect x="633" y="374" width="20" height="14" rx="1" stroke-width="0.8"></rect>
+      <rect x="658" y="378" width="18" height="13" rx="1" stroke-width="0.75"></rect>
+      <rect x="680" y="380" width="18" height="14" rx="1" stroke-width="0.75"></rect>
+      <rect x="608" y="398" width="18" height="12" rx="1" stroke-width="0.7"></rect>
+      <rect x="630" y="394" width="20" height="13" rx="1" stroke-width="0.7"></rect>
+      <rect x="654" y="396" width="16" height="12" rx="1" stroke-width="0.65"></rect>
+      <rect x="675" y="398" width="18" height="12" rx="1" stroke-width="0.65"></rect>
     </g>
 
     <!-- Open ground / clearing (upper-right of centre) -->
-    <rect x="648" y="210" width="72" height="48" rx="2" stroke-width="0.9" opacity="0.5"/>
+    <rect x="648" y="210" width="72" height="48" rx="2" stroke-width="0.9" opacity="0.5"></rect>
     <!-- Field hatch lines -->
     <g opacity="0.25" stroke-width="0.3">
-      <line x1="656" y1="210" x2="656" y2="258"/>
-      <line x1="664" y1="210" x2="664" y2="258"/>
-      <line x1="672" y1="210" x2="672" y2="258"/>
-      <line x1="680" y1="210" x2="680" y2="258"/>
-      <line x1="688" y1="210" x2="688" y2="258"/>
-      <line x1="696" y1="210" x2="696" y2="258"/>
-      <line x1="704" y1="210" x2="704" y2="258"/>
-      <line x1="712" y1="210" x2="712" y2="258"/>
+      <line x1="656" y1="210" x2="656" y2="258"></line>
+      <line x1="664" y1="210" x2="664" y2="258"></line>
+      <line x1="672" y1="210" x2="672" y2="258"></line>
+      <line x1="680" y1="210" x2="680" y2="258"></line>
+      <line x1="688" y1="210" x2="688" y2="258"></line>
+      <line x1="696" y1="210" x2="696" y2="258"></line>
+      <line x1="704" y1="210" x2="704" y2="258"></line>
+      <line x1="712" y1="210" x2="712" y2="258"></line>
     </g>
 
     <!-- Road labels -->
@@ -1183,8 +1159,8 @@ body.light #theme-toggle{color:var(--g2)}
 
     <!-- North arrow -->
     <g transform="translate(776,128)" opacity="0.75">
-      <line x1="0" y1="22" x2="0" y2="-22" stroke-width="1.2"/>
-      <polygon points="0,-22 -4,-9 4,-9" fill="white" stroke-width="0"/>
+      <line x1="0" y1="22" x2="0" y2="-22" stroke-width="1.2"></line>
+      <polygon points="0,-22 -4,-9 4,-9" fill="white" stroke-width="0"></polygon>
       <text x="-4" y="34" font-family="monospace" font-size="9" fill="white">N</text>
     </g>
 
@@ -1192,20 +1168,29 @@ body.light #theme-toggle{color:var(--g2)}
 </svg>
   <div class="hero-ticker">
     <div class="hero-ticker-track">
-      Lead Video Editor<span class="tdot">&bull;</span>Motion Designer<span class="tdot">&bull;</span>Graphic Designer<span class="tdot">&bull;</span>Kolkata, India<span class="tdot">&bull;</span>Available Full-Time<span class="tdot">&bull;</span>BFA Applied Arts<span class="tdot">&bull;</span>Premiere Pro<span class="tdot">&bull;</span>After Effects<span class="tdot">&bull;</span>4+ Years<span class="tdot">&bull;</span>Narrative Edit<span class="tdot">&bull;</span>VFX<span class="tdot">&bull;</span>UI Motion<span class="tdot">&bull;</span>
-      Lead Video Editor<span class="tdot">&bull;</span>Motion Designer<span class="tdot">&bull;</span>Graphic Designer<span class="tdot">&bull;</span>Kolkata, India<span class="tdot">&bull;</span>Available Full-Time<span class="tdot">&bull;</span>BFA Applied Arts<span class="tdot">&bull;</span>Premiere Pro<span class="tdot">&bull;</span>After Effects<span class="tdot">&bull;</span>4+ Years<span class="tdot">&bull;</span>Narrative Edit<span class="tdot">&bull;</span>VFX<span class="tdot">&bull;</span>UI Motion<span class="tdot">&bull;</span>
+      Lead Video Editor<span class="tdot">•</span>Motion Designer<span class="tdot">•</span>Graphic Designer<span class="tdot">•</span>Kolkata, India<span class="tdot">•</span>Available Full-Time<span class="tdot">•</span>BFA Applied Arts<span class="tdot">•</span>Premiere Pro<span class="tdot">•</span>After Effects<span class="tdot">•</span>4+ Years<span class="tdot">•</span>Narrative Edit<span class="tdot">•</span>VFX<span class="tdot">•</span>UI Motion<span class="tdot">•</span>
+      Lead Video Editor<span class="tdot">•</span>Motion Designer<span class="tdot">•</span>Graphic Designer<span class="tdot">•</span>Kolkata, India<span class="tdot">•</span>Available Full-Time<span class="tdot">•</span>BFA Applied Arts<span class="tdot">•</span>Premiere Pro<span class="tdot">•</span>After Effects<span class="tdot">•</span>4+ Years<span class="tdot">•</span>Narrative Edit<span class="tdot">•</span>VFX<span class="tdot">•</span>UI Motion<span class="tdot">•</span>
     </div>
   </div>
   <div class="hero-scroll">Scroll</div>
   <div class="hero-meta">
     <span>Kalimpong, W.B.</span><div class="hero-meta-sep"></div>
-    <span class="hl">REF &middot; AT-2026</span><div class="hero-meta-sep"></div>
-    <span>Status &middot; Deployed</span>
+    <span class="hl">REF · AT-2026</span><div class="hero-meta-sep"></div>
+    <span>Status · Deployed</span>
   </div>
-  <div class="hero-name glitch-target" id="hero-name-el">Alankrit<br><em>Thapa</em></div>
+  <div class="hero-name glitch-target" id="hero-name-el" contenteditable="false">Alankrit Thapa</div>
   <div class="hero-subtitle" id="hero-subtitle" aria-label="Lead Video Editor &amp; Senior Graphic Designer"></div>
   <div class="hero-bottom">
-    <p class="hero-bio" id="hero-bio-el">Lead Video Editor and Motion Designer with a BFA — specialising in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery.</p>
+    <div class="hero-copy">
+      <p class="hero-bio" id="hero-bio-el" contenteditable="false">Lead Video Editor and Motion Designer with a BFA — specializing in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery.</p>
+      <a class="hero-ai-link" href="./ai/" aria-label="Click here to view my AI projects">
+        <span class="hero-ai-link-copy">
+          <span class="hero-ai-link-kicker">Explore AI Work</span>
+          <span class="hero-ai-link-title">Click Here to View My AI Projects</span>
+        </span>
+        <span class="hero-ai-link-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
     <div class="hero-stats">
       <div><div class="hero-stat-v">4+</div><div class="hero-stat-k">Years Active</div></div>
       <div><div class="hero-stat-v">'21</div><div class="hero-stat-k">Active Since</div></div>
@@ -1215,24 +1200,24 @@ body.light #theme-toggle{color:var(--g2)}
 
 <section id="about">
   <div class="about-left">
-    <div class="sec-eyebrow reveal"><div class="sec-eyebrow-label">About</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">01</div></div>
-    <div class="about-heading reveal">Motion &amp;<br><em>Visual</em></div>
-    <p class="about-text reveal reveal-delay-1" id="about-text-el">Specialising in high-energy promotional content, cinematic apparel campaigns, and digital narratives. Every frame is intentional — clean cuts, dynamic motion, and conversion-optimised assets from raw footage to final delivery.</p>
-    <div class="about-tags reveal reveal-delay-2">
+    <div class="sec-eyebrow reveal in"><div class="sec-eyebrow-label">About</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">01</div></div>
+    <div class="about-heading reveal in">Motion &amp;<br><em>Visual</em></div>
+    <p class="about-text reveal reveal-delay-1 in" id="about-text-el" contenteditable="false">Specialising in high-energy promotional content, cinematic apparel campaigns, and digital narratives. Every frame is intentional — clean cuts, dynamic motion, and conversion-optimised assets from raw footage to final delivery.</p>
+    <div class="about-tags reveal reveal-delay-2 in">
       <span class="about-tag">Narrative Edit</span><span class="about-tag">Cinematic</span>
       <span class="about-tag">Brand Campaign</span><span class="about-tag">Music Video</span>
       <span class="about-tag">UI Motion</span><span class="about-tag">E-Commerce</span><span class="about-tag">VFX</span>
     </div>
   </div>
   <div class="about-right">
-    <div class="sec-eyebrow reveal"><div class="sec-eyebrow-label">Arsenal</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">02</div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><text x="4" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Pr</text></svg></div><span class="arsenal-name">Adobe Premiere Pro</span><span class="arsenal-pct">96</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:96%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><text x="3.5" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Ae</text></svg></div><span class="arsenal-name">Adobe After Effects</span><span class="arsenal-pct">98</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:98%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><text x="3.5" y="18" font-family="Arial" font-size="11" font-weight="700" fill="#bbb">Ps</text></svg></div><span class="arsenal-name">Adobe Photoshop</span><span class="arsenal-pct">90</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:90%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><text x="4" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Ai</text></svg></div><span class="arsenal-name">Adobe Illustrator</span><span class="arsenal-pct">88</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:88%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><polygon points="7,5 7,21 21,13" fill="#bbb"/></svg></div><span class="arsenal-name">Motion Graphics</span><span class="arsenal-pct">93</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:93%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><circle cx="13" cy="13" r="3.5" fill="#bbb"/><line x1="13" y1="4" x2="13" y2="8.5" stroke="#bbb" stroke-width="1.8"/><line x1="13" y1="17.5" x2="13" y2="22" stroke="#bbb" stroke-width="1.8"/><line x1="4" y1="13" x2="8.5" y2="13" stroke="#bbb" stroke-width="1.8"/><line x1="17.5" y1="13" x2="22" y2="13" stroke="#bbb" stroke-width="1.8"/></svg></div><span class="arsenal-name">Higgsfield AI</span><span class="arsenal-pct">80</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:80%"></div></div></div>
-    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"/><path d="M13 6 L16.5 16 L13 14 L9.5 16 Z" fill="#cc9966" stroke="none"/><circle cx="13" cy="13" r="5" fill="none" stroke="#cc9966" stroke-width="1.2"/></svg></div><span class="arsenal-name">Claude AI</span><span class="arsenal-pct">75</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:75%"></div></div></div>
+    <div class="sec-eyebrow reveal in"><div class="sec-eyebrow-label">Arsenal</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">02</div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><text x="4" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Pr</text></svg></div><span class="arsenal-name">Adobe Premiere Pro</span><span class="arsenal-pct">96</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:96%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><text x="3.5" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Ae</text></svg></div><span class="arsenal-name">Adobe After Effects</span><span class="arsenal-pct">98</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:98%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><text x="3.5" y="18" font-family="Arial" font-size="11" font-weight="700" fill="#bbb">Ps</text></svg></div><span class="arsenal-name">Adobe Photoshop</span><span class="arsenal-pct">90</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:90%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><text x="4" y="18" font-family="Arial" font-size="12" font-weight="700" fill="#bbb">Ai</text></svg></div><span class="arsenal-name">Adobe Illustrator</span><span class="arsenal-pct">88</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:88%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><polygon points="7,5 7,21 21,13" fill="#bbb"></polygon></svg></div><span class="arsenal-name">Motion Graphics</span><span class="arsenal-pct">93</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:93%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><circle cx="13" cy="13" r="3.5" fill="#bbb"></circle><line x1="13" y1="4" x2="13" y2="8.5" stroke="#bbb" stroke-width="1.8"></line><line x1="13" y1="17.5" x2="13" y2="22" stroke="#bbb" stroke-width="1.8"></line><line x1="4" y1="13" x2="8.5" y2="13" stroke="#bbb" stroke-width="1.8"></line><line x1="17.5" y1="13" x2="22" y2="13" stroke="#bbb" stroke-width="1.8"></line></svg></div><span class="arsenal-name">Higgsfield AI</span><span class="arsenal-pct">80</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:80%"></div></div></div>
+    <div class="arsenal-item"><div class="arsenal-head"><div class="arsenal-icon"><svg viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="3" fill="#222"></rect><path d="M13 6 L16.5 16 L13 14 L9.5 16 Z" fill="#cc9966" stroke="none"></path><circle cx="13" cy="13" r="5" fill="none" stroke="#cc9966" stroke-width="1.2"></circle></svg></div><span class="arsenal-name">Claude AI</span><span class="arsenal-pct">75</span></div><div class="arsenal-track"><div class="arsenal-fill" style="width:75%"></div></div></div>
     <div class="lang-grid">
       <div class="lang-cell"><span class="lang-name">English</span><span class="lang-tag">Fluent</span></div>
       <div class="lang-cell"><span class="lang-name">Hindi</span><span class="lang-tag">Native</span></div>
@@ -1243,26 +1228,26 @@ body.light #theme-toggle{color:var(--g2)}
 </section>
 
 <section id="work">
-  <div class="sec-eyebrow reveal"><div class="sec-eyebrow-label">Selected Work &mdash; Click to View</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">03</div></div>
-  <div class="work-grid" id="work-grid"></div>
+  <div class="sec-eyebrow reveal in"><div class="sec-eyebrow-label">Selected Work — Click to View</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">03</div></div>
+  <div class="work-grid" id="work-grid"><a class="work-card" href="https://www.behance.net/gallery/246016001/Digital-Overload-Narrative-Short-Film" target="_blank" style="--ca: #e05c3a;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773983017/Sequence01-ezgif.com-optimize_dukfts.gif" alt="Digital Overload" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">Digital Overload</div><div class="work-type">Narrative Shortfilm</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="8">✎ Edit</button><button class="card-edit-btn del" data-del="8">✕ Remove</button></div></a><a class="work-card" href="https://www.behance.net/gallery/245976175/Aero-Cap-High-End-Video-Motion-Design-Launch" target="_blank" style="--ca: #a0d060;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985765/Sequence_01_2_nbieke.gif" alt="Deployed Aero Cap Launch" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">Deployed Aero Cap Launch</div><div class="work-type">High-End Video &amp; Motion Design</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="6">✎ Edit</button><button class="card-edit-btn del" data-del="6">✕ Remove</button></div></a><a class="work-card" href="https://www.behance.net/gallery/246012311/Deployed-Airtrooper-Cinematic-Apparel-Campaign" target="_blank" style="--ca: #e0a93a;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985765/Sequence_01_3_wqyjcb.gif" alt="Deployed Para Trooper" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">Deployed Para Trooper</div><div class="work-type">Cinematic Apparel Campaign</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="3">✎ Edit</button><button class="card-edit-btn del" data-del="3">✕ Remove</button></div></a><a class="work-card" href="https://www.behance.net/gallery/245991737/UI-Motion-System-Automated-Marketing-Platform" target="_blank" style="--ca: #6a8fff;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985759/Sequence_01_4_zku35x.gif" alt="UI Motion System" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">UI Motion System</div><div class="work-type">Automated Marketing Platform MG</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="4">✎ Edit</button><button class="card-edit-btn del" data-del="4">✕ Remove</button></div></a><a class="work-card" href="https://www.behance.net/gallery/246014623/FOOH-Advertising-3D-Apparel-VFX-Breakdown" target="_blank" style="--ca: #4ec9a0;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985770/Sequence_01_dutsr4.gif" alt="FOOH Advertising" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">FOOH Advertising</div><div class="work-type">3D Apparel VFX Breakdown</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="2">✎ Edit</button><button class="card-edit-btn del" data-del="2">✕ Remove</button></div></a><a class="work-card" href="https://www.behance.net/gallery/245979613/Radio-Bershy-Lyric-Video-Motion-Design" target="_blank" style="--ca: #e05c8a;"><div class="work-img"><img src="https://res.cloudinary.com/doyswibq0/image/upload/v1773985774/Sequence_01_1_xzdce8.gif" alt="Radio — Bershy" loading="lazy"><div class="work-overlay"><div class="work-cta">View Project ↗</div></div><div class="work-bar"></div></div><div class="work-info"><div class="work-title">Radio — Bershy</div><div class="work-type">Lyric Video &amp; Motion Design | 1.3+ Mil Views - 40k Likes</div></div><div class="card-edit-overlay"><button class="card-edit-btn" data-id="5">✎ Edit</button><button class="card-edit-btn del" data-del="5">✕ Remove</button></div></a></div>
 </section>
 
 <section id="experience">
-  <div class="sec-eyebrow reveal"><div class="sec-eyebrow-label">Experience</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">04</div></div>
-  <div class="xp-item reveal"><div class="xp-left"><div class="xp-dates">Apr 2025<br>&mdash; Present</div><div class="xp-node active"></div></div><div class="xp-right"><div class="xp-company">Deployed &middot; India</div><div class="xp-role">Lead Video Editor &amp; Senior Graphic Designer</div><div class="xp-loc">India &middot; Remote / On-site</div><p class="xp-desc">Spearheading post-production for promotional campaigns and e-commerce assets. Blending high-fidelity video editing with motion graphics to produce conversion-optimised content across Amazon, YouTube, and digital storefronts. Managing the full visual pipeline from raw footage to final delivery.</p></div></div>
-  <div class="xp-item reveal reveal-delay-1"><div class="xp-left"><div class="xp-dates">Aug 2024<br>&mdash; Apr 2025</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Deployed &middot; Kolkata</div><div class="xp-role">Senior Video Editor &amp; Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Elevated brand visual identity through high-retention content, cinematic apparel campaigns, and platform-optimised assets across digital channels.</p></div></div>
-  <div class="xp-item reveal reveal-delay-2"><div class="xp-left"><div class="xp-dates">Aug 2022<br>&mdash; Aug 2024</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Deployed &middot; Kolkata</div><div class="xp-role">Video Editor &amp; Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Produced video and graphic assets for e-commerce and social platforms. Developed motion design systems that streamlined production workflows.</p></div></div>
-  <div class="xp-item reveal reveal-delay-3"><div class="xp-left"><div class="xp-dates">Aug 2021<br>&mdash; Jun 2022</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Mayand InfoTech &middot; Kolkata</div><div class="xp-role">Junior Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Designed digital assets and visual communications. Built foundational expertise in brand-aligned graphic production.</p></div></div>
+  <div class="sec-eyebrow reveal in"><div class="sec-eyebrow-label">Experience</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">04</div></div>
+  <div class="xp-item reveal in"><div class="xp-left"><div class="xp-dates">Apr 2025<br>— Present</div><div class="xp-node active"></div></div><div class="xp-right"><div class="xp-company">Deployed · India</div><div class="xp-role">Lead Video Editor &amp; Senior Graphic Designer</div><div class="xp-loc">India · Remote / On-site</div><p class="xp-desc">Spearheading post-production for promotional campaigns and e-commerce assets. Blending high-fidelity video editing with motion graphics to produce conversion-optimised content across Amazon, YouTube, and digital storefronts. Managing the full visual pipeline from raw footage to final delivery.</p></div></div>
+  <div class="xp-item reveal reveal-delay-1 in"><div class="xp-left"><div class="xp-dates">Aug 2024<br>— Apr 2025</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Deployed · Kolkata</div><div class="xp-role">Senior Video Editor &amp; Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Elevated brand visual identity through high-retention content, cinematic apparel campaigns, and platform-optimised assets across digital channels.</p></div></div>
+  <div class="xp-item reveal reveal-delay-2 in"><div class="xp-left"><div class="xp-dates">Aug 2022<br>— Aug 2024</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Deployed · Kolkata</div><div class="xp-role">Video Editor &amp; Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Produced video and graphic assets for e-commerce and social platforms. Developed motion design systems that streamlined production workflows.</p></div></div>
+  <div class="xp-item reveal reveal-delay-3 in"><div class="xp-left"><div class="xp-dates">Aug 2021<br>— Jun 2022</div><div class="xp-node"></div></div><div class="xp-right"><div class="xp-company">Mayand InfoTech · Kolkata</div><div class="xp-role">Junior Graphic Designer</div><div class="xp-loc">Kolkata, India</div><p class="xp-desc">Designed digital assets and visual communications. Built foundational expertise in brand-aligned graphic production.</p></div></div>
 </section>
 
 <section id="education">
   <div>
-    <div class="sec-eyebrow reveal"><div class="sec-eyebrow-label">Education</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">05</div></div>
-    <div class="edu-degree reveal">Bachelor of Fine Arts<br>(Applied Arts)</div>
+    <div class="sec-eyebrow reveal in"><div class="sec-eyebrow-label">Education</div><div class="sec-eyebrow-rule"></div><div class="sec-eyebrow-num">05</div></div>
+    <div class="edu-degree reveal in">Bachelor of Fine Arts<br>(Applied Arts)</div>
     <div class="edu-school">Amity University</div>
-    <div class="edu-meta">Kolkata, India &nbsp;&middot;&nbsp; Jun 2019 &mdash; Aug 2023</div>
+    <div class="edu-meta">Kolkata, India &nbsp;·&nbsp; Jun 2019 — Aug 2023</div>
   </div>
-  <div class="edu-year">2019<br>&mdash;<br>2023</div>
+  <div class="edu-year">2019<br>—<br>2023</div>
 </section>
 
 <!-- custom sections injected here -->
@@ -1270,10 +1255,10 @@ body.light #theme-toggle{color:var(--g2)}
 
 <section id="contact">
   <p class="contact-pre">Get in touch</p>
-  <div class="contact-heading reveal">Let&apos;s <em>Work</em><br>Together</div>
-  <p class="contact-sub">Open to full-time roles &amp; collaborations &middot; Kolkata &middot; Remote</p>
+  <div class="contact-heading reveal in">Let's <em>Work</em><br>Together</div>
+  <p class="contact-sub">Open to full-time roles &amp; collaborations · Kolkata · Remote</p>
   <div class="contact-links">
-    <button class="email-copy" id="email-copy-btn" title="Copy email: alan55krit@gmail.com"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 4l7 5 7-5"/></svg></button>
+    <button class="email-copy" id="email-copy-btn" title="Copy email: alan55krit@gmail.com"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="3" width="14" height="10" rx="1.5"></rect><path d="M1 4l7 5 7-5"></path></svg></button>
     <a class="contact-link" href="https://www.behance.net/oran6ie" target="_blank">Behance</a>
     <a class="contact-link" href="https://www.linkedin.com/in/alankritthapa/" target="_blank">LinkedIn</a>
     <a class="contact-link" href="https://youtube.com/@oran6ie" target="_blank">YouTube</a>
@@ -1281,32 +1266,32 @@ body.light #theme-toggle{color:var(--g2)}
 </section>
 
 <footer>
-  <div class="footer-txt">behance.net/oran6ie &nbsp;&middot;&nbsp; linkedin.com/in/alankritthapa &nbsp;&middot;&nbsp; @oran6ie</div>
+  <div class="footer-txt">behance.net/oran6ie &nbsp;·&nbsp; linkedin.com/in/alankritthapa &nbsp;·&nbsp; @oran6ie</div>
   <div style="display:flex;align-items:center;gap:16px">
-    <span id="site-version"></span>
-    <div class="footer-txt">&copy; 2026 Alankrit Thapa</div>
-    <a class="footer-admin-link" id="admin-trigger" href="#">&#9675;</a>
+    <span id="site-version">v1.3.2</span>
+    <div class="footer-txt">© 2026 Alankrit Thapa</div>
+    <a class="footer-admin-link" id="admin-trigger" href="#">○</a>
   </div>
 </footer>
 
 <!-- PROJECT DETAIL MODAL -->
-<div id="proj-modal">
+<div id="proj-modal" class="">
   <div class="pm-box">
-    <button class="pm-close" id="pm-close">&#10005;</button>
+    <button class="pm-close" id="pm-close">✕</button>
     <div class="pm-media" id="pm-media"></div>
     <div class="pm-body">
       <div class="pm-eyebrow" id="pm-eyebrow">Selected Work</div>
-      <div class="pm-title" id="pm-title"></div>
-      <div class="pm-type" id="pm-type"></div>
-      <div class="pm-accent" id="pm-accent"></div>
+      <div class="pm-title" id="pm-title">Radio — Bershy</div>
+      <div class="pm-type" id="pm-type">Lyric Video &amp; Motion Design | 1.3+ Mil Views - 40k Likes</div>
+      <div class="pm-accent" id="pm-accent" style="background: rgb(224, 92, 138);"></div>
     </div>
     <div class="pm-footer">
-      <a class="pm-link" id="pm-link" href="#" target="_blank">View on Behance &#8599;</a>
+      <a class="pm-link" id="pm-link" href="https://www.behance.net/gallery/245979613/Radio-Bershy-Lyric-Video-Motion-Design" target="_blank">View on Behance ↗</a>
       <button class="pm-close" style="position:static;width:auto;padding:0 14px;font-family:Space Mono,monospace;font-size:.55rem;letter-spacing:2px" id="pm-close2">Close</button>
     </div>
   </div>
 </div>
-<button id="back-top" title="Back to top">&#8593;</button>
+<button id="back-top" title="Back to top" class="">↑</button>
 </div><!-- #app -->
 
 <script>
@@ -2990,5 +2975,6 @@ var Admin = (function(){
 
 
 })();
-</script>
+</script><div class="cur-trail" style="display: block; opacity: 0.5; left: 934px; top: 16px;"></div><div class="cur-trail" style="display: block; opacity: 0.42; left: 934px; top: 16px;"></div><div class="cur-trail" style="display: block; opacity: 0.33; left: 934px; top: 16px;"></div><div class="cur-trail" style="display: block; opacity: 0.25; left: 934px; top: 16px;"></div><div class="cur-trail" style="display: block; opacity: 0.17; left: 934px; top: 16px;"></div><div class="cur-trail" style="display: block; opacity: 0.08; left: 934px; top: 16px;"></div>
+
 </body></html>
