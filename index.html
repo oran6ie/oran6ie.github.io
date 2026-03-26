@@ -818,7 +818,7 @@ body.light #theme-toggle{color:var(--g2)}
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
-<body class="" style="cursor: none;">
+<body class="locked" style="cursor: none;">
 
 <div id="scanlines"></div>
 <div id="crt-beam"></div>
@@ -835,7 +835,7 @@ body.light #theme-toggle{color:var(--g2)}
 <div id="admin-login-overlay" class="hidden">
   <div class="admin-login-box">
     <div class="admin-login-title">Admin Access</div>
-    <input class="admin-input" id="admin-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="admin-input" id="admin-user" type="text" placeholder="Email" autocomplete="off">
     <input class="admin-input" id="admin-pass" type="password" placeholder="Password" autocomplete="off">
     <div class="admin-error" id="admin-error">Incorrect credentials</div>
     <button class="admin-btn" id="admin-login-btn">Login</button>
@@ -959,7 +959,38 @@ body.light #theme-toggle{color:var(--g2)}
 </div>
 
 <!-- INTRO -->
-
+<div id="intro">
+  <div id="intro-vignette"></div>
+  <div id="intro-shine"></div>
+  <div id="intro-bands"></div>
+  <div id="intro-sf"></div>
+  <div id="intro-flash"></div>
+  <div class="i-corner tl"></div><div class="i-corner tr"></div>
+  <div class="i-corner bl"></div><div class="i-corner br"></div>
+  <div class="i-rec">REC</div>
+  <div class="i-tc" id="i-tc">00:00:00:00</div>
+  <div class="i-ch">CH &middot; 01</div>
+  <div class="i-topbar"><span>INPUT &middot; COMPOSITE</span><span>FORMAT &middot; PAL</span><span>AT-2026-KOL</span></div>
+  <div class="tv-bars">
+    <span style="background:#c8c800"></span><span style="background:#00c8c8"></span>
+    <span style="background:#00c800"></span><span style="background:#c800c8"></span>
+    <span style="background:#c80000"></span><span style="background:#0000c8"></span>
+    <span style="background:#c8c800"></span><span style="background:#111"></span>
+    <span style="background:#fff"></span><span style="background:#111"></span>
+    <span style="background:#0000c8"></span><span style="background:#111"></span>
+    <span style="background:#c8c800"></span>
+  </div>
+  <div class="intro-body">
+    <div class="i-sup">Creative Operations &middot; Motion &amp; Visual</div>
+    <div class="i-name">Alankrit<br><em>Thapa</em></div>
+    <div class="i-role">Lead Video Editor &amp; Senior Graphic Designer</div>
+    <div class="i-line"></div>
+    <div class="i-enter">
+      <div class="i-enter-txt">Click anywhere to enter</div>
+      <div class="i-arrow">&#8595;</div>
+    </div>
+  </div>
+</div>
 
 <!-- MAIN -->
 <div id="app">
@@ -973,7 +1004,7 @@ body.light #theme-toggle{color:var(--g2)}
   </div>
   <div class="nav-right">
     <button id="theme-toggle" title="Switch to light mode">☾</button>
-    <div id="vol-control" class="visible">
+    <div id="vol-control">
     <button id="vol-mute" title="Mute/Unmute">🔊</button>
     <input id="vol-slider" type="range" min="0" max="1" step="0.05" value="0.5" title="Volume">
   </div>
@@ -1268,7 +1299,7 @@ body.light #theme-toggle{color:var(--g2)}
 <footer>
   <div class="footer-txt">behance.net/oran6ie &nbsp;·&nbsp; linkedin.com/in/alankritthapa &nbsp;·&nbsp; @oran6ie</div>
   <div style="display:flex;align-items:center;gap:16px">
-    <span id="site-version">v1.3.2</span>
+    <span id="site-version">v1.3.4</span>
     <div class="footer-txt">© 2026 Alankrit Thapa</div>
     <a class="footer-admin-link" id="admin-trigger" href="#">○</a>
   </div>
@@ -1651,6 +1682,21 @@ var SFX = (function(){
   document.addEventListener('mouseup',function(){dot.classList.remove('tap')});
 })();
 
+
+
+/* ══ INTRO SKIP (returning from /ai) ══ */
+(function(){
+  try{
+    if(sessionStorage.getItem('skipIntroOnce') === '1'){
+      sessionStorage.removeItem('skipIntroOnce');
+      var intro = document.getElementById('intro');
+      if(intro) intro.remove();
+      document.body.classList.remove('locked');
+      var vc = document.getElementById('vol-control');
+      if(vc) vc.classList.add('visible');
+    }
+  }catch(e){}
+})();
 
 /* ══ TYPEWRITER ══ */
 (function(){
@@ -2503,7 +2549,7 @@ body.light #theme-toggle{color:var(--g2)}
 })();
 
 /* ── Site version — update this whenever you deploy changes ── */
-var SITE_VERSION = 'v1.3.2';
+var SITE_VERSION = 'v1.3.4';
 var ADMIN_UUID = '42ffe4c2-2dc1-49f9-bcdb-731946042110';
 (function(){
   var el = document.getElementById('site-version');
