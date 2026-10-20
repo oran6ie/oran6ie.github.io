@@ -135,9 +135,11 @@ function choose(c: CatState, all: CatState[]): Step[] {
       { kind: 'rest', pose: poses.sit, dur: 5, say: 'PET ME', face: 1 },
     ]],
     [cat.sleepy * nightK, () => {
-      const spots = cat.id === 'miko' ? ['bed', 'sill', 'catbed'] : cat.id === 'bibi' ? ['catbed', 'floor'] : ['bed', 'floor', 'catbed'];
+      // under the bed is a favourite hideout for a quiet nap, storm or not
+      const spots = cat.id === 'miko' ? ['bed', 'sill', 'catbed', 'under-bed'] : cat.id === 'bibi' ? ['catbed', 'floor', 'under-bed'] : ['bed', 'floor', 'catbed', 'under-bed'];
       const s = pick(spots.filter((x) => !taken.has(x)));
       const rest: Step = { kind: 'rest', pose: pick(poses.sleep), dur: rand(25, 70), zz: true, spot: s };
+      if (s === 'under-bed') return [...route(c, 'floor', rand(UNDER_BED.x0, UNDER_BED.x1), UNDER_BED.y), { ...rest, dark: true }];
       if (s === 'bed') return [...route(c, 'bed', rand(BED.x0, BED.x1), BED.y), rest];
       if (s === 'sill') return [...route(c, 'sill', SILL.x, SILL.y), { ...rest, pose: 'curl' }];
       if (s === 'catbed') return [...route(c, 'floor', SPOTS.catbed.x, SPOTS.catbed.y), { ...rest, pose: 'curl' }];
@@ -360,7 +362,7 @@ export function createCats(hooks: CatHooks = {}) {
   return { state, update, draw, hit, say, feed, setLaser };
 }
 
-export type Decor = { sunglasses?: boolean; tika?: boolean; garland?: boolean; santa?: boolean; party?: boolean };
+export type Decor = { tika?: boolean; garland?: boolean; santa?: boolean; party?: boolean };
 
 /*
   Where the head is in each sprite, in pixels of the sprite facing right:
@@ -407,7 +409,6 @@ function acc(name: string, w: number, h: number, ax: number, ay: number, paint: 
 const cone = (g: CanvasRenderingContext2D, col: string) => { rect(g, 0, 7, 7, 2, col); rect(g, 1, 5, 5, 2, col); rect(g, 2, 3, 3, 2, col); rect(g, 3, 2, 1, 1, col); };
 const PARTY = () => acc('party', 7, 9, 3, 9, (g) => { cone(g, '#3be8ff'); rect(g, 3, 1, 1, 1, '#ffe066'); rect(g, 2, 7, 1, 1, '#ff4fd8'); rect(g, 4, 5, 1, 1, '#ffe066'); });
 const SANTA = () => acc('santa', 8, 10, 3, 10, (g) => { cone(g, '#d62828'); rect(g, 0, 9, 7, 1, '#ffffff'); rect(g, 4, 1, 2, 2, '#ffffff'); rect(g, 4, 3, 1, 1, '#d62828'); });
-const SHADES = () => acc('shades', 7, 2, 3, 1, (g) => { rect(g, 0, 0, 7, 1, '#07060f'); rect(g, 0, 1, 3, 1, '#07060f'); rect(g, 4, 1, 3, 1, '#07060f'); rect(g, 1, 0, 1, 1, '#ff4fd8'); rect(g, 5, 0, 1, 1, '#ff4fd8'); });
 const TIKA = () => acc('tika', 1, 2, 0, 1, (g) => rect(g, 0, 0, 1, 2, '#e01e37'));
 
 /* Draw an accessory at (px, py), turned with the head and mirrored for cats facing left */
@@ -422,7 +423,7 @@ function wear(ctx: CanvasRenderingContext2D, a: Acc, px: number, py: number, deg
 }
 
 export function drawDecor(ctx: CanvasRenderingContext2D, key: string, im: HTMLImageElement, x: number, y: number, face: 1 | -1, d: Decor) {
-  if (!d.sunglasses && !d.tika && !d.garland && !d.santa && !d.party) return;
+  if (!d.tika && !d.garland && !d.santa && !d.party) return;
   const [ex, ey, tx, top, nx, ny, deg = 0] = HEADS[key] ?? [im.width * 0.8, im.height * 0.3, im.width * 0.78, im.height * 0.15, im.width * 0.75, im.height * 0.5].map(Math.round);
   const X = (px: number) => (face === 1 ? x + px : x + im.width - 1 - px);
   const hx = X(ex), hy = y + ey;
@@ -437,7 +438,6 @@ export function drawDecor(ctx: CanvasRenderingContext2D, key: string, im: HTMLIm
     const r = (deg * face * Math.PI) / 180;
     wear(ctx, TIKA(), Math.round(hx + Math.sin(r) * 3), Math.round(hy - Math.cos(r) * 3), deg, face);
   }
-  if (d.sunglasses) wear(ctx, SHADES(), hx, hy, deg, face);
   if (d.santa) wear(ctx, SANTA(), cx, ht + 1, deg, face);
   if (d.party) wear(ctx, PARTY(), cx, ht + 1, deg, face);
 }

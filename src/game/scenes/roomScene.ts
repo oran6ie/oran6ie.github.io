@@ -348,13 +348,13 @@ export function createRoomScene() {
     const top = Math.round(HANDS_AT.y - hands.y - hands.h / 2);
     const floor = top + backH;
     const decor: Decor = {
-      sunglasses: f.nightShift, tika: fest.has('kukur'), garland: fest.has('kukur'),
-      santa: fest.has('christmas') && !f.nightShift, party: fest.has('birthday') && !f.nightShift,
+      tika: fest.has('kukur'), garland: fest.has('kukur'), santa: fest.has('christmas'), party: fest.has('birthday'),
     };
     const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({
       // a cat in mid-leap is in front of the bed, never tucked under it
       y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor) }));
-    if (hiding) actors.push({ y: BED_FRONT.y + BED_FRONT.h + 9, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
+    // drawn after every cat further back than the bed's front edge, so they all end up underneath
+    if (hiding) actors.push({ y: FLOOR_FRONT - 0.5, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
     if (pim) actors.push({
       y: floor,
       draw: () => {
