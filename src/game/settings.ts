@@ -11,9 +11,13 @@ const listeners = new Set<() => void>();
 
 function load(): Settings {
   const reduced = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const defaults: Settings = { sound: true, radio: true, crt: true, motion: !reduced, curtains: false, bulb: 'off', radioVolume: 0.5 };
+  // the lofi radio starts on, very quietly, as room ambience; the slider turns it up
+  const defaults: Settings = { sound: true, radio: true, crt: true, motion: !reduced, curtains: false, bulb: 'off', radioVolume: 0.15 };
   try {
-    return { ...defaults, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') };
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
+    // settings saved before the radio became ambience get it switched back on, quietly, once
+    if (saved.v !== 2) { saved.v = 2; saved.radio = true; saved.radioVolume = Math.min(saved.radioVolume ?? 0.15, 0.15); localStorage.setItem(KEY, JSON.stringify(saved)); }
+    return { ...defaults, ...saved };
   } catch {
     return defaults;
   }

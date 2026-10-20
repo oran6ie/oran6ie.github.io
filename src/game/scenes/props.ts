@@ -8,7 +8,7 @@ import { pixelText, rect, seeded } from '../../lib/pixel';
 import type { Region } from '../images';
 
 export const LASER_PEN = { x: 321, y: 231 };
-export const BOWL = { x: 112, y: 318 };
+export const BOWL = { x: 86, y: 311 }; // the food bowl, left of the water bowl
 
 export function drawKibble(ctx: CanvasRenderingContext2D, fill: number) {
   if (fill <= 0) return;
@@ -91,18 +91,6 @@ export function drawNightShift(ctx: CanvasRenderingContext2D, W: number, H: numb
 
 /* ── Festivals ── */
 
-/* Kites over Algarah during Dashain (drawn inside the window, behind the frame) */
-export function drawKites(ctx: CanvasRenderingContext2D, win: Region, t: number) {
-  const kites = [
-    { fx: 0.25, fy: 0.25, c: '#ff4fd8', ph: 0 }, { fx: 0.62, fy: 0.18, c: '#ffe066', ph: 2 }, { fx: 0.8, fy: 0.4, c: '#3be8ff', ph: 4 },
-  ];
-  for (const k of kites) {
-    const x = Math.round(win.x + k.fx * win.w + Math.sin(t * 0.8 + k.ph) * 3), y = Math.round(win.y + k.fy * win.h + Math.cos(t * 0.6 + k.ph) * 2);
-    rect(ctx, x, y - 2, 1, 1, k.c); rect(ctx, x - 1, y - 1, 3, 1, k.c); rect(ctx, x - 2, y, 5, 1, k.c); rect(ctx, x - 1, y + 1, 3, 1, k.c); rect(ctx, x, y + 2, 1, 1, k.c);
-    for (let i = 1; i < 14; i++) rect(ctx, x + Math.round(Math.sin(i * 0.5 + t) * 1.2) - Math.floor(i / 3), y + 2 + i, 1, 1, 'rgba(240,240,255,0.45)');
-  }
-}
-
 /* Tihar: diyas on the windowsill and a marigold garland along the curtain rod */
 export function drawTihar(ctx: CanvasRenderingContext2D, t: number, animate: boolean) {
   for (let i = 0; i < 5; i++) {
@@ -137,13 +125,29 @@ export function drawTree(ctx: CanvasRenderingContext2D, t: number) {
 }
 
 /* Birthday: a cake with a flickering candle on the desk */
+export const CAKE = { x: 321, y: 215 }; // on the desk, between the mic and the mouse mat
 export function drawCake(ctx: CanvasRenderingContext2D, t: number, animate: boolean) {
-  const x = 228, y = 194; // on the windowsill
-  rect(ctx, x, y, 12, 6, '#f4f1ff'); rect(ctx, x, y, 12, 2, '#ff4fd8'); rect(ctx, x, y + 4, 12, 1, '#ffe066');
-  rect(ctx, x - 1, y + 6, 14, 1, '#8b88c9');
-  rect(ctx, x + 5, y - 4, 1, 4, '#3be8ff');
-  const f = animate ? Math.round(Math.sin(t * 11)) : 0;
-  rect(ctx, x + 5, y - 6 + f, 1, 2, '#ffd23f');
+  const { x, y } = CAKE;
+  // plate
+  rect(ctx, x - 2, y + 10, 17, 2, '#07060f'); rect(ctx, x - 1, y + 10, 15, 1, '#c9c6e8');
+  // outline, sponge, cream filling and pink icing with drips
+  rect(ctx, x - 1, y + 2, 15, 9, '#07060f');
+  rect(ctx, x, y + 3, 13, 7, '#f2c27a');
+  rect(ctx, x, y + 6, 13, 1, '#fff6e8');
+  rect(ctx, x, y + 3, 13, 2, '#ff7ac8');
+  for (const dx of [1, 4, 8, 11]) rect(ctx, x + dx, y + 5, 1, 1, '#ff7ac8');
+  rect(ctx, x + 6, y + 5, 1, 2, '#ff7ac8');
+  for (const [dx, c] of [[2, '#3be8ff'], [5, '#ffe066'], [10, '#4ee38a']] as const) rect(ctx, x + dx, y + 3, 1, 1, c); // sprinkles
+  // three candles with flickering flames and a soft glow
+  [[3, '#3be8ff'], [6, '#ffe066'], [9, '#ff4fd8']].forEach(([dx, c], i) => {
+    const cx = x + (dx as number);
+    rect(ctx, cx, y - 1, 1, 3, c as string);
+    const f = animate && Math.sin(t * 11 + i * 2.1) > 0.3 ? 1 : 0;
+    rect(ctx, cx, y - 3 - f, 1, 2, '#ffd23f'); rect(ctx, cx, y - 2, 1, 1, '#ff7a1a');
+  });
+  const g = ctx.createRadialGradient(x + 6, y - 2, 0, x + 6, y - 2, 14);
+  g.addColorStop(0, 'rgba(255,200,90,0.28)'); g.addColorStop(1, 'rgba(255,200,90,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - 8, y - 16, 28, 28);
 }
 
 /* ── Weather & time ── */
@@ -173,8 +177,10 @@ export function drawHeater(ctx: CanvasRenderingContext2D, t: number) {
 }
 
 /* Late night: a cup of chai with steam on the desk */
-export function drawChai(ctx: CanvasRenderingContext2D, t: number, animate: boolean) {
-  const x = 295, y = 221; // left end of the desk
+export function drawChai(ctx: CanvasRenderingContext2D, t: number, animate: boolean, besideCake = false) {
+  // on the desk in front of the laptop; it moves over to the mouse mat when the birthday cake is there
+  const x = besideCake ? 337 : 323, y = besideCake ? 222 : 220;
+  rect(ctx, x - 1, y - 1, 9, 8, '#07060f');
   rect(ctx, x, y, 7, 6, '#f4f1ff'); rect(ctx, x + 1, y, 5, 1, '#c98a4b'); rect(ctx, x + 7, y + 1, 2, 3, '#f4f1ff'); rect(ctx, x + 8, y + 2, 1, 1, '#3b3a52');
   if (!animate) return;
   for (let i = 0; i < 3; i++) {

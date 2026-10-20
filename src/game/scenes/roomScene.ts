@@ -37,7 +37,7 @@ export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
   inventory: { x: 420, y: 178, w: 28, h: 34 },  // the manga stack
   katana: { x: 368, y: 34, w: 142, h: 22 },
   wardrobe: { x: 480, y: 190, w: 72, h: 102 },
-  bowl: { x: 104, y: 306, w: 40, h: 22 },
+  bowl: { x: 78, y: 302, w: 34, h: 22 }, // the food bowl (the water bowl is just right of it)
   laserPen: { x: 316, y: 224, w: 20, h: 13 },
   webcam: { x: 374, y: 144, w: 20, h: 14 },
   pikachu: { x: 396, y: 128, w: 26, h: 32 },
@@ -186,7 +186,12 @@ function drawBulb(ctx: CanvasRenderingContext2D, c: [number, number, number] | n
   rect(ctx, BULB.x - 2, BULB.y + 1, 1, 2, c ? 'rgba(255,255,255,0.85)' : '#9a96b8'); // highlight
 }
 
+// the bed's side, drawn again in front of cats underneath it (room pixels)
+const BED_FRONT = { x: 66, y: 262, w: 206, h: 29 };
+const FLOOR_FRONT = 318; // cats further back than this are under the bed
+
 export function createRoomScene() {
+  const bedFront = document.createElement('canvas');
   const sky = createSky(R.window);
   const events = { laserCaught: (_id: CatId) => {} };
   const cats = createCats({
@@ -225,7 +230,6 @@ export function createRoomScene() {
     // ── behind the room: things seen through its green-screen holes ──
     const lightning = sky(ctx, world, t, dt, animate);
     const fest = new Set(f.festivals);
-    if (fest.has('dashain') && world.weather !== 'storm') P.drawKites(ctx, R.window, animate ? t : 0);
 
     const mon = R.monitor;
     if (f.caught && caughtFor > 0.12) {
@@ -295,7 +299,7 @@ export function createRoomScene() {
     if (fest.has('tihar')) P.drawTihar(ctx, t, animate);
     if (fest.has('christmas')) P.drawTree(ctx, t);
     if (fest.has('birthday')) P.drawCake(ctx, t, animate);
-    if (f.tired) P.drawChai(ctx, t, animate);
+    if (f.tired) P.drawChai(ctx, t, animate, fest.has('birthday'));
     if (f.leak) P.drawLeak(ctx, t, animate);
     if (f.cold) P.drawHeater(ctx, t);
     P.drawKibble(ctx, f.food);
@@ -325,6 +329,13 @@ export function createRoomScene() {
     }
     if (lightning) { ctx.fillStyle = 'rgba(220,230,255,0.18)'; ctx.fillRect(0, 0, W, H); }
 
+    // keep a copy of the bed's side (mattress edge + rail) to draw back over cats hiding underneath
+    const hiding = cats.state.some((c) => c.level === 'floor' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w);
+    if (hiding) {
+      bedFront.width = BED_FRONT.w; bedFront.height = BED_FRONT.h;
+      bedFront.getContext('2d')!.drawImage(ctx.canvas, BED_FRONT.x, BED_FRONT.y, BED_FRONT.w, BED_FRONT.h, 0, 0, BED_FRONT.w, BED_FRONT.h);
+    }
+
     // ── player + cats, back to front ──
     const pose = f.caught ? 'front' : 'back';
     const pkey = `${f.look.outfit}-${f.look.hair}-${pose}`;
@@ -340,7 +351,10 @@ export function createRoomScene() {
       sunglasses: f.nightShift, tika: fest.has('kukur'), garland: fest.has('kukur'),
       santa: fest.has('christmas') && !f.nightShift, party: fest.has('birthday') && !f.nightShift,
     };
-    const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({ y: c.y, draw: () => cats.draw(ctx, c, t, animate, decor) }));
+    const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({
+      // a cat in mid-leap is in front of the bed, never tucked under it
+      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor) }));
+    if (hiding) actors.push({ y: BED_FRONT.y + BED_FRONT.h + 9, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
     if (pim) actors.push({
       y: floor,
       draw: () => {
