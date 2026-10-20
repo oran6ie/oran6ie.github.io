@@ -11,6 +11,7 @@
     "art": "node scripts/art/process.mjs && node scripts/art/memorial.mjs"
   },
   "dependencies": {
+    "gifenc": "^1.0.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "suncalc": "^2.1.1"

@@ -41,7 +41,7 @@ export function GamePage() {
       <CrtOverlay />
       <Toaster />
       <main key={screenKey} className={`screen screen-${screenKey}`}>
-        {route.screen === 'title' && <StartScreen onStart={() => go('hub')} onQuick={() => go('quick')} />}
+        {route.screen === 'title' && <StartScreen onStart={() => { try { sessionStorage.setItem('at_intro', '1'); } catch { /* ignore */ } go('hub'); }} onQuick={() => go('quick')} />}
         {route.screen === 'hub' && <Hub panel={route.panel} />}
         {route.screen === 'quick' && <QuickView />}
       </main>

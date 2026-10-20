@@ -12,7 +12,8 @@ type Level = 'floor' | 'bed' | 'desk' | 'sill';
 type Step =
   | { kind: 'walk'; x: number; y: number }
   | { kind: 'jump'; x: number; y: number; level: Level; near?: boolean } // near: land beside the take-off point
-  | { kind: 'rest'; pose: string; dur: number; zz?: boolean; say?: string; face?: 1 | -1; spot?: string };
+  | { kind: 'rest'; pose: string; dur: number; zz?: boolean; say?: string; face?: 1 | -1; spot?: string; dark?: boolean; eat?: boolean }
+  | { kind: 'chase' }; // following the laser dot
 
 const FLOOR = { x0: 62, x1: 584, y0: 322, y1: 352 };
 const BED = { x0: 150, x1: 262, y: 256 };
@@ -30,7 +31,30 @@ const POSES: Record<CatId, { sit: string; sleep: string[]; extra?: string }> = {
   bibi: { sit: 'sit', sleep: ['curl', 'loaf'] },
   topi: { sit: 'meow', sleep: ['curl'], extra: 'rub' },
 };
+const POSE_SET: Record<CatId, Record<string, true>> = {
+  miko: { walk: true, sit: true, curl: true, sprawl: true },
+  lebu: { walk: true, sit: true, pounce: true, curl: true },
+  bibi: { walk: true, sit: true, loaf: true, curl: true },
+  topi: { walk: true, meow: true, rub: true, curl: true },
+};
 const SPEED: Record<CatId, number> = { miko: 16, lebu: 30, bibi: 15, topi: 24 };
+const WEIGHT: Record<CatId, number> = { miko: 0.8, lebu: 0.7, bibi: 1.3, topi: 0.75 };
+const UNDER_BED = { x0: 168, x1: 250, y: 304 };
+
+/* What's going on in the world, set by the room each frame */
+export const env = { night: false, storm: false };
+
+/* Mood 0..100 per cat: petting and feeding raise it, it slowly drifts down; remembered between visits */
+const MOOD_KEY = 'at_cat_mood';
+export const mood: Record<CatId, number> = (() => {
+  const base = { miko: 60, lebu: 60, bibi: 60, topi: 60 };
+  try { return { ...base, ...JSON.parse(localStorage.getItem(MOOD_KEY) ?? '{}') }; } catch { return base; }
+})();
+export function cheer(id: CatId, amount: number) {
+  mood[id] = Math.max(0, Math.min(100, mood[id] + amount));
+  saveMood();
+}
+function saveMood() { try { localStorage.setItem(MOOD_KEY, JSON.stringify(mood)); } catch { /* ignore */ } }
 
 export type CatState = {
   cat: Cat;
@@ -43,6 +67,7 @@ export type CatState = {
   t: number;            // time spent in current step
   from: { x: number; y: number };
   zz: boolean;
+  dark?: boolean;        // hiding under the bed
   say: string;
   spot: string;
   w: number; h: number; // last drawn size, for hit testing
@@ -77,8 +102,22 @@ function route(c: CatState, level: Level, x: number, y: number): Step[] {
 function choose(c: CatState, all: CatState[]): Step[] {
   const cat = c.cat, poses = POSES[cat.id];
   const taken = new Set(all.filter((o) => o !== c).map((o) => o.spot));
+  // thunderstorm: everyone but fearless Lebu hides under the bed (Bibi first, always)
+  if (env.storm && cat.id !== 'lebu' && (cat.id === 'bibi' || Math.random() < 0.7)) {
+    return [
+      ...route(c, 'floor', rand(UNDER_BED.x0, UNDER_BED.x1), UNDER_BED.y),
+      { kind: 'rest', pose: 'loaf' in POSE_SET[cat.id] ? 'loaf' : 'curl', dur: rand(15, 30), dark: true, spot: 'under-bed' },
+    ];
+  }
+  const nightK = env.night ? 1.7 : 1, dayK = env.night ? 0.5 : 1;
   const options: [number, () => Step[] | null][] = [
-    [cat.sleepy, () => {
+    // feeling ignored: sit in the middle of the room and demand attention
+    [mood[cat.id] < 25 ? 2 : 0, () => [
+      ...route(c, 'floor', rand(300, 400), rand(336, 348)),
+      { kind: 'rest', pose: poses.sit, dur: 5, say: 'MEOW!!', face: -1 },
+      { kind: 'rest', pose: poses.sit, dur: 5, say: 'PET ME', face: 1 },
+    ]],
+    [cat.sleepy * nightK, () => {
       const spots = cat.id === 'miko' ? ['bed', 'sill', 'catbed'] : cat.id === 'bibi' ? ['catbed', 'floor'] : ['bed', 'floor', 'catbed'];
       const s = pick(spots.filter((x) => !taken.has(x)));
       const rest: Step = { kind: 'rest', pose: pick(poses.sleep), dur: rand(25, 70), zz: true, spot: s };
@@ -87,7 +126,7 @@ function choose(c: CatState, all: CatState[]): Step[] {
       if (s === 'catbed') return [...route(c, 'floor', SPOTS.catbed.x, SPOTS.catbed.y), { ...rest, pose: 'curl' }];
       return [...route(c, 'floor', rand(FLOOR.x0, 300), rand(FLOOR.y0, FLOOR.y1)), rest];
     }],
-    [cat.active, () => [
+    [cat.active * dayK, () => [
       ...route(c, 'floor', rand(FLOOR.x0, FLOOR.x1), rand(FLOOR.y0, FLOOR.y1)),
       { kind: 'rest', pose: poses.sit, dur: rand(3, 9), say: cat.id === 'topi' && Math.random() < 0.45 ? 'MRRP!' : cat.id === 'lebu' && Math.random() < 0.2 ? 'MEOW' : '' },
     ]],
@@ -113,7 +152,15 @@ function choose(c: CatState, all: CatState[]): Step[] {
   return [{ kind: 'rest', pose: poses.sit, dur: 4 }];
 }
 
-export function createCats(onMeow: (id: CatId) => void = () => {}) {
+export type CatHooks = {
+  meow?: (id: CatId) => void;
+  land?: (id: CatId, weight: number) => void;
+  nom?: (id: CatId) => void;
+  laserCaught?: (id: CatId) => void;
+};
+
+export function createCats(hooks: CatHooks = {}) {
+  const onMeow = hooks.meow ?? (() => {});
   // start positions spread around the room
   const starts: Record<CatId, [number, number, Level, string]> = {
     // ?sill previews Miko napping on the windowsill
@@ -131,15 +178,48 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
   });
 
   const clicked = new Map<CatState, { text: string; until: number }>();
+  let laser: { x: number; y: number } | null = null;
+  const chasers = new Set<CatId>();      // who decided to join this laser session
+  const feedQueue: { c: CatState; at: number; slot: number }[] = [];
+  let clock = 0, moodTick = 0;
+  const floorPt = (x: number, y: number) => ({ x: Math.max(FLOOR.x0, Math.min(FLOOR.x1, x)), y: Math.max(FLOOR.y0, Math.min(FLOOR.y1, y)) });
+  const BOWL_SLOTS = [{ x: 102, y: 324, face: 1 }, { x: 144, y: 324, face: -1 }, { x: 110, y: 338, face: 1 }, { x: 136, y: 340, face: -1 }] as const;
 
   function update(dt: number) {
+    clock += dt;
+    // moods drift down slowly while the room is open
+    if ((moodTick += dt) > 40) { moodTick = 0; for (const c of state) mood[c.cat.id] = Math.max(0, mood[c.cat.id] - 1); saveMood(); }
+    // feeding: cats arrive in order of hunger
+    for (let i = feedQueue.length - 1; i >= 0; i--) {
+      const q = feedQueue[i];
+      if (clock < q.at) continue;
+      feedQueue.splice(i, 1);
+      const slot = BOWL_SLOTS[q.slot];
+      q.c.plan = [...route(q.c, 'floor', slot.x, slot.y), { kind: 'rest', pose: POSES[q.c.cat.id].sit, dur: rand(5, 7), face: slot.face, say: 'NOM', eat: true, spot: `bowl` + q.slot }];
+      q.c.step = null;
+    }
     for (const c of state) {
+      // laser pointer: Lebu always chases, Topi sometimes, Bibi runs from it, Miko can't be bothered
+      if (laser) {
+        const id = c.cat.id, d = Math.hypot(laser.x - c.x, laser.y - c.y);
+        if (chasers.has(id) && c.step?.kind !== 'chase' && !c.plan.some((p) => p.kind === 'chase')) {
+          const p = floorPt(laser.x, laser.y);
+          c.plan = c.level === 'floor' ? [] : route(c, 'floor', p.x, p.y);
+          c.plan.push({ kind: 'chase' });
+          c.step = null;
+        } else if (id === 'bibi' && d < 50 && c.level === 'floor' && c.step?.kind !== 'walk') {
+          const away = floorPt(c.x + (c.x > laser.x ? 90 : -90), c.y);
+          c.plan = [{ kind: 'rest', pose: 'sit', dur: 2, say: '!!' }];
+          c.step = { kind: 'walk', x: away.x, y: away.y }; c.t = 0; c.from = { x: c.x, y: c.y };
+        }
+      }
       if (!c.step) {
         if (!c.plan.length) c.plan = choose(c, state);
         c.step = c.plan.shift()!;
         c.t = 0;
         c.from = { x: c.x, y: c.y };
         c.say = '';
+        if (c.step.kind === 'rest' && c.step.eat) { hooks.nom?.(c.cat.id); cheer(c.cat.id, 20); }
         if (c.step.kind === 'rest' && c.step.say) onMeow(c.cat.id);
         // now and then a sleepy cat mumbles in its sleep
         else if (c.step.kind === 'rest' && c.step.zz && Math.random() < 0.08) onMeow(c.cat.id);
@@ -153,6 +233,15 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
         if (Math.abs(dx) > 0.5) c.dir = dx > 0 ? 1 : -1;
         if (d <= v) { c.x = s.x; c.y = s.y; c.step = null; }
         else { c.x += (dx / d) * v; c.y += (dy / d) * v; }
+      } else if (s.kind === 'chase') {
+        if (!laser) { c.step = null; continue; }
+        const p = floorPt(laser.x, laser.y);
+        const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
+        const v = SPEED[c.cat.id] * 2.4 * dt;
+        c.zz = false; c.spot = '';
+        if (Math.abs(dx) > 0.5) c.dir = dx > 0 ? 1 : -1;
+        if (d < 5) { c.pose = POSE_SET[c.cat.id].pounce ? 'pounce' : POSES[c.cat.id].sit; hooks.laserCaught?.(c.cat.id); }
+        else { c.pose = 'walk'; const k = Math.min(1, v / d); c.x += dx * k; c.y += dy * k; }
       } else if (s.kind === 'jump') {
         c.zz = false; c.spot = '';
         if (s.near && c.t === dt) {
@@ -171,9 +260,9 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
         const kv = up ? 1 - (1 - k) * (1 - k) : 0.45 * k + 0.55 * k * k;
         c.x = c.from.x + (s.x - c.from.x) * k;
         c.y = c.from.y + dy * kv - 4 * h * k * (1 - k);
-        if (k >= 1) { c.x = s.x; c.y = s.y; c.level = s.level; c.step = null; }
+        if (k >= 1) { c.x = s.x; c.y = s.y; c.level = s.level; c.step = null; if (!up) hooks.land?.(c.cat.id, WEIGHT[c.cat.id]); }
       } else {
-        c.pose = s.pose; c.zz = !!s.zz; c.say = s.say ?? ''; c.spot = s.spot ?? '';
+        c.pose = s.pose; c.zz = !!s.zz; c.say = s.say ?? ''; c.spot = s.spot ?? ''; c.dark = !!s.dark;
         if (s.face) c.dir = s.face;
         if (c.t >= s.dur) c.step = null;
       }
@@ -182,7 +271,7 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
     }
   }
 
-  function draw(ctx: CanvasRenderingContext2D, c: CatState, t: number, animate: boolean) {
+  function draw(ctx: CanvasRenderingContext2D, c: CatState, t: number, animate: boolean, decor: Decor = {}) {
     const im = img(`cats/${c.cat.id}-${c.pose}`);
     if (!im) return;
     c.w = im.width; c.h = im.height;
@@ -197,6 +286,7 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
     const glance = animate && resting && !c.zz && Math.sin(t * 0.7 + c.cat.id.charCodeAt(0)) > 0.93;
     const face = glance ? -c.dir : c.dir;
     ctx.save();
+    if (c.dark) ctx.filter = 'brightness(0.45) saturate(0.6)'; // in the shadow under the bed
     if (face === -1) { ctx.translate(x + im.width, 0); ctx.scale(-1, 1); ctx.translate(-x, 0); }
     ctx.drawImage(im, x, y);
     if (lift) {
@@ -204,6 +294,7 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
       ctx.drawImage(im, 0, 0, im.width, k, x, y - lift, im.width, k);
     }
     ctx.restore();
+    if (!c.dark) drawDecor(ctx, c, im, x, y - lift, face as 1 | -1, decor);
 
     if (c.zz && animate) {
       for (let i = 0; i < 3; i++) {
@@ -226,7 +317,51 @@ export function createCats(onMeow: (id: CatId) => void = () => {}) {
     clicked.set(c, { text, until: performance.now() + 1400 });
   }
 
-  return { state, update, draw, hit, say };
+  /* Fill the bowl: the hungriest cat arrives first, Miko takes her time */
+  function feed() {
+    const order = [...state].sort((a, b) => b.cat.hungry - a.cat.hungry);
+    order.forEach((c, i) => feedQueue.push({ c, at: clock + i * 0.7 + (c.cat.id === 'miko' ? 2 : 0), slot: i }));
+  }
+
+  /* Laser pointer position in room pixels, or null when it's off */
+  function setLaser(p: { x: number; y: number } | null) {
+    if (p && !laser) {
+      chasers.clear();
+      chasers.add('lebu');
+      if (Math.random() < 0.6) chasers.add('topi');
+    }
+    if (!p) chasers.clear();
+    laser = p;
+  }
+
+  return { state, update, draw, hit, say, feed, setLaser };
+}
+
+export type Decor = { sunglasses?: boolean; tika?: boolean; garland?: boolean; santa?: boolean; party?: boolean };
+
+/* Rough head position per pose (fraction of sprite size, facing right) */
+const HEAD: Record<string, [number, number]> = {
+  walk: [0.84, 0.2], sit: [0.62, 0.12], meow: [0.62, 0.12], rub: [0.8, 0.3], pounce: [0.84, 0.32],
+  curl: [0.78, 0.38], sprawl: [0.86, 0.35], loaf: [0.72, 0.22],
+};
+
+function drawDecor(ctx: CanvasRenderingContext2D, c: CatState, im: HTMLImageElement, x: number, y: number, face: 1 | -1, d: Decor) {
+  if (!d.sunglasses && !d.tika && !d.garland && !d.santa && !d.party) return;
+  const [fx, fy] = HEAD[c.pose] ?? [0.75, 0.2];
+  const hx = Math.round(x + (face === 1 ? fx : 1 - fx) * im.width), hy = Math.round(y + fy * im.height);
+  if (d.garland) { // marigold garland around the neck
+    for (let i = -3; i <= 3; i++) rect(ctx, hx + i - face * 2, hy + 6 + (Math.abs(i) < 2 ? 1 : 0), 1, 1, i % 2 ? '#ff9f1c' : '#ffd23f');
+  }
+  if (d.tika) rect(ctx, hx, hy, 1, 2, '#e01e37');
+  if (d.sunglasses) {
+    rect(ctx, hx - 3, hy + 1, 7, 2, '#07060f');
+    rect(ctx, hx - 2 + (face === 1 ? 3 : 0), hy + 1, 1, 1, '#ff4fd8');
+  }
+  const hat = (col: string, tip: string) => {
+    rect(ctx, hx - 2, hy - 3, 5, 2, col); rect(ctx, hx - 1, hy - 5, 3, 2, col); rect(ctx, hx, hy - 6, 1, 1, tip);
+  };
+  if (d.santa) { hat('#d62828', '#ffffff'); rect(ctx, hx - 2, hy - 2, 5, 1, '#ffffff'); }
+  if (d.party) { hat('#3be8ff', '#ffe066'); rect(ctx, hx - 1, hy - 4, 1, 1, '#ff4fd8'); }
 }
 
 export function bubble(ctx: CanvasRenderingContext2D, text: string, cx: number, bottom: number) {

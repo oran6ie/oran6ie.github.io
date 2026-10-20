@@ -139,6 +139,12 @@ export function useWorld() {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, () => state);
 }
 
+/* Hour of the day in Algarah (0–23.99), honouring ?hour= */
+export function homeHour() {
+  const [h, m] = overrides().now().toLocaleTimeString('en-GB', { timeZone: HOME.tz, hour: '2-digit', minute: '2-digit', hour12: false }).split(':').map(Number);
+  return (h % 24) + m / 60;
+}
+
 /* Local time in Algarah, e.g. "9:41 PM" */
 export function homeTime(d = new Date()) {
   return d.toLocaleTimeString('en-IN', { timeZone: HOME.tz, hour: 'numeric', minute: '2-digit', hour12: true });

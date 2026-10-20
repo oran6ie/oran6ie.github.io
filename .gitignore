@@ -3,3 +3,5 @@ node_modules/
 dist/
 art-inbox/
 REFRENCES/
+worker/.wrangler/
+worker/.dev.vars

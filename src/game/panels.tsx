@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { aiProjects, type AiProject, type Media } from '../content/aiProjects';
 import { cats, memorial, type CatId } from '../content/cats';
 import { achievements, CAREER_START, inventory, player, rarity, shop } from '../content/game';
@@ -15,7 +15,10 @@ import youtube from '../content/youtube.json';
 import { BULB_PRESETS } from './bulb';
 import { go } from './route';
 import { setSetting, useSettings } from './settings';
+import { ACHIEVEMENTS, unlock, useAchievements } from './achievements';
 import { CopyEmailButton, Dialogue, PixelSprite } from './ui';
+import { getNotes, online, postNote, useOnlineStats, type Note } from '../lib/online';
+import { mood } from './scenes/cats';
 import { HOME, homeTime, moonPhaseName, getMoonPhase, timeOfDay, useWorld } from './world';
 
 const BASE = import.meta.env.BASE_URL;
@@ -97,7 +100,7 @@ export function QuestPanel({ initialTab = 'all' }: { initialTab?: Tab }) {
               key={questTitle(q)}
               className="quest-card"
               style={q.kind === 'work' ? ({ '--accent': q.p.accent } as CSSProperties) : undefined}
-              onClick={() => { sfx.open(); setOpen(q); }}
+              onClick={() => { sfx.open(); setOpen(q); unlock('curator'); }}
             >
               <div className="quest-media">
                 {prev && <LoopClip src={prev.src} poster={prev.poster} alt={questTitle(q)} />}
@@ -213,22 +216,51 @@ export function JourneyPanel() {
   );
 }
 
-/* ── Trophies ── */
-export function AchievementsPanel() {
+/* ── Trophies: my highlights, plus the badges visitors earn exploring the room ── */
+export function AchievementsPanel({ initialTab = 'mine' }: { initialTab?: 'mine' | 'yours' }) {
   const yrs = yearsActive();
+  const [tab, setTab] = useState(initialTab);
+  const got = useAchievements();
   return (
-    <div className="badge-grid">
-      {achievements.map((a) => (
-        <button
-          key={a.name}
-          className={a.locked ? 'badge locked' : 'badge'}
-          onClick={() => { if (a.locked) { sfx.locked(); go('contact'); } else sfx.coin(); }}
-        >
-          <PixelSprite sprite={badges[a.badge]} scale={4} />
-          <span className="badge-name">{a.name === 'Veteran' ? `Veteran · ${yrs}+ yrs` : a.name}</span>
-          <span className="badge-desc">{a.desc}</span>
+    <div className="trophies">
+      <div className="px-tabs" role="tablist">
+        <button role="tab" aria-selected={tab === 'mine'} className={tab === 'mine' ? 'px-tab active' : 'px-tab'} onClick={() => { sfx.move(); setTab('mine'); }}>My highlights</button>
+        <button role="tab" aria-selected={tab === 'yours'} className={tab === 'yours' ? 'px-tab active' : 'px-tab'} onClick={() => { sfx.move(); setTab('yours'); }}>
+          Your badges {got.size}/{ACHIEVEMENTS.length}
         </button>
-      ))}
+      </div>
+      {tab === 'mine' ? (
+        <div className="badge-grid">
+          {achievements.map((a) => (
+            <button
+              key={a.name}
+              className={a.locked ? 'badge locked' : 'badge'}
+              onClick={() => { if (a.locked) { sfx.locked(); go('contact'); } else sfx.coin(); }}
+            >
+              <PixelSprite sprite={badges[a.badge]} scale={4} />
+              <span className="badge-name">{a.name === 'Veteran' ? `Veteran · ${yrs}+ yrs` : a.name}</span>
+              <span className="badge-desc">{a.desc}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <>
+          <p className="body-text small">Badges you earn by poking around the room. They are saved in this browser.</p>
+          <div className="badge-grid visitor">
+            {ACHIEVEMENTS.map((a) => {
+              const on = got.has(a.id);
+              const hidden = !on && 'secret' in a;
+              return (
+                <div key={a.id} className={on ? 'badge' : 'badge locked'}>
+                  <PixelSprite sprite={on ? badges.spark : badges.lock} scale={3} />
+                  <span className="badge-name">{hidden ? '???' : a.name}</span>
+                  <span className="badge-desc">{hidden ? 'A secret. Something in the room reacts to persistence.' : a.desc}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -329,7 +361,8 @@ const SIT_POSE: Record<CatId, string> = { miko: 'sit', lebu: 'sit', bibi: 'sit',
 export function PartyPanel({ focus }: { focus: CatId | null }) {
   return (
     <>
-      <p className="body-text">My four party members. They live in this room, wander around, and climb onto my desk whenever I'm busy.</p>
+      <p className="body-text">My four party members. They live in this room, wander around, and climb onto my desk whenever I'm busy. Pet them (click) and feed them (the bowl) to keep their hearts full.</p>
+      {online && <PetsCounter />}
       <div className="party">
         {cats.map((c) => (
           <article key={c.id} className={c.id === focus ? 'cat-card focus' : 'cat-card'}>
@@ -337,6 +370,7 @@ export function PartyPanel({ focus }: { focus: CatId | null }) {
             <div>
               <h3 className="cat-name">{c.name} <span className="cat-sex">{c.gender === 'Female' ? '♀' : '♂'}</span></h3>
               <div className="cat-meta">{c.title} · {c.gender} · {c.age}</div>
+              <div className="cat-mood" title={`Mood ${Math.round(mood[c.id])}%`}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={mood[c.id] > i * 20 + 10 ? 'heart on' : 'heart'}>♥</span>)}</div>
               <div className="tag-row">{c.traits.map((t) => <span key={t} className="px-tag">{t}</span>)}</div>
               <p className="body-text small">{c.bio}</p>
               {c.echo && <p className="cat-echo">{c.echo}</p>}
@@ -345,6 +379,60 @@ export function PartyPanel({ focus }: { focus: CatId | null }) {
         ))}
       </div>
     </>
+  );
+}
+
+function PetsCounter() {
+  const { pets } = useOnlineStats();
+  return pets > 0 ? <p className="pets-counter">♥ Visitors have petted these cats <b>{pets.toLocaleString()}</b> times.</p> : null;
+}
+
+/* ── Guestbook: notes pinned on the corkboard (approved before they show) ── */
+const NOTE_COLORS = ['#ffe066', '#ff9fd8', '#8ff0ff', '#a8f0b8', '#ffc08a'];
+export function GuestbookPanel() {
+  const [notes, setNotes] = useState<Note[] | null>(null);
+  const [form, setForm] = useState({ name: '', msg: '', color: 0, website: '' });
+  const [state, setState] = useState<'' | 'sending' | 'sent'>('');
+  const [error, setError] = useState('');
+  useEffect(() => { getNotes().then(setNotes).catch(() => setNotes([])); }, []);
+  const send = async (e: FormEvent) => {
+    e.preventDefault();
+    setState('sending'); setError('');
+    try { await postNote(form); setState('sent'); sfx.coin(); unlock('guest'); }
+    catch (err) { setState(''); setError((err as Error).message); sfx.locked(); }
+  };
+  return (
+    <div className="guestbook">
+      {state === 'sent' ? (
+        <p className="guestbook-thanks">📌 Thanks, {form.name}! Your note is pinned and will show up once I've read it.</p>
+      ) : (
+        <form className="guestbook-form" onSubmit={send}>
+          <input className="px-input" placeholder="Your name" maxLength={24} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-label="Your name" />
+          <textarea className="px-input" placeholder="Say hi, leave a tip for the cats..." maxLength={140} required rows={3} value={form.msg} onChange={(e) => setForm({ ...form, msg: e.target.value })} aria-label="Message" />
+          <input className="hp" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} aria-hidden="true" />
+          <div className="guestbook-row">
+            <div className="note-colors" role="radiogroup" aria-label="Note colour">
+              {NOTE_COLORS.map((c, i) => (
+                <button key={c} type="button" role="radio" aria-checked={form.color === i} className={form.color === i ? 'note-color on' : 'note-color'} style={{ background: c }} onClick={() => setForm({ ...form, color: i })} aria-label={`Colour ${i + 1}`} />
+              ))}
+            </div>
+            <span className="guestbook-count">{form.msg.length}/140</span>
+            <button className="px-btn" disabled={state === 'sending'}>{state === 'sending' ? 'Pinning...' : 'Pin it'}</button>
+          </div>
+          {error && <p className="guestbook-error">{error}</p>}
+        </form>
+      )}
+      <div className="notes">
+        {notes === null && <p className="body-text small">Loading notes...</p>}
+        {notes?.length === 0 && <p className="body-text small">No notes yet. Be the first!</p>}
+        {notes?.map((n, i) => (
+          <figure key={n.id} className="note" style={{ background: NOTE_COLORS[n.color] ?? NOTE_COLORS[0], rotate: `${((i * 37) % 7) - 3}deg` } as CSSProperties}>
+            <blockquote>{n.msg}</blockquote>
+            <figcaption>— {n.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -417,6 +505,7 @@ const freqOf = (note: string) => {
 const TUNE: [string, number][] = [['E4', 1], ['G4', 1], ['A4', 2], ['G4', 1], ['E4', 1], ['D4', 2], ['E4', 1], ['G4', 1], ['C5', 2], ['B4', 1], ['A4', 1], ['G4', 3],
   ['A4', 1], ['C5', 1], ['D5', 2], ['C5', 1], ['A4', 1], ['G4', 2], ['E4', 1], ['D4', 1], ['C4', 4]];
 
+let notesPlayed = 0;
 export function PianoPanel() {
   // the radio steps back while you play
   useEffect(() => { radio.duck(true); return () => radio.duck(false); }, []);
@@ -424,6 +513,7 @@ export function PianoPanel() {
   const press = (note: string) => {
     sfx.warm();
     sfx.piano(freqOf(note));
+    if (++notesPlayed === 12) unlock('pianist');
     setDown((d) => new Set(d).add(note));
     setTimeout(() => setDown((d) => { const n = new Set(d); n.delete(note); return n; }), 180);
   };
@@ -473,6 +563,7 @@ const compact = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3
 const cleanTitle = (t: string) => t.replace(/\s*#\S+/g, '').trim();
 
 export function ChannelPanel() {
+  useEffect(() => unlock('subscriber'), []);
   const [playing, setPlaying] = useState<string | null>(null);
   const top = [...youtube.videos].sort((a, b) => b.views - a.views).slice(0, 6);
   const totalTop = top.reduce((s, v) => s + v.views, 0);

@@ -4,11 +4,18 @@
 */
 import { useEffect, useState } from 'react';
 
-const STATIONS = [
+type Station = { name: string; url: string; nowPlaying?: string };
+const LOFI: Station[] = [
   { name: 'laut.fm/lofi', url: 'https://stream.laut.fm/lofi', nowPlaying: 'https://api.laut.fm/station/lofi/current_song' },
   { name: 'Zeno lofi', url: 'https://stream.zeno.fm/0r0xa792kwzuv' },
   { name: 'Lofi Radio', url: 'https://play.streamafrica.net/lofiradio' },
 ];
+// Night Shift mode
+const SYNTH: Station[] = [
+  { name: 'laut.fm/synthwave', url: 'https://stream.laut.fm/synthwave', nowPlaying: 'https://api.laut.fm/station/synthwave/current_song' },
+  ...LOFI,
+];
+let STATIONS = LOFI;
 let volume = 0.28;  // set by the slider (0..1 of a gentle max)
 let duck = 1;       // drops while the piano is being played
 const level = () => volume * duck;
@@ -18,7 +25,8 @@ let station = 0;
 let wanted = false;
 let fadeTimer = 0;
 const listeners = new Set<() => void>();
-let status: { playing: boolean; title: string; station: string } = { playing: false, title: '', station: STATIONS[0].name };
+export type RadioStatus = { playing: boolean; title: string; station: string };
+let status: RadioStatus = { playing: false, title: '', station: STATIONS[0].name };
 const set = (s: Partial<typeof status>) => { status = { ...status, ...s }; listeners.forEach((l) => l()); };
 
 function element() {
@@ -63,6 +71,15 @@ function start() {
 }
 
 export const radio = {
+  /* switch genre (Night Shift plays synthwave); reconnects if it's on */
+  setMode(mode: 'lofi' | 'synthwave') {
+    const next = mode === 'synthwave' ? SYNTH : LOFI;
+    if (next === STATIONS) return;
+    STATIONS = next;
+    station = 0;
+    set({ title: '', station: STATIONS[0].name });
+    if (wanted) { audio?.pause(); start(); }
+  },
   setVolume(v: number) {
     volume = Math.max(0, Math.min(1, v)) * 0.6;
     if (audio && wanted) { clearInterval(fadeTimer); audio.volume = level(); }

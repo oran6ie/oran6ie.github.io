@@ -26,6 +26,22 @@ function init() {
 
 const ready = () => ctx !== null && master !== null && ctx.state === 'running' && !muted;
 
+/* A short burst of band-passed noise (static, crunches, swishes) */
+function noise(vol: number, dur: number, freq: number) {
+  if (!ready() || !noiseBuf) return;
+  const c = ctx!, now = c.currentTime;
+  const src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 0.7;
+  const g = c.createGain();
+  g.gain.setValueAtTime(vol, now);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  src.connect(bp).connect(g).connect(master!);
+  src.start(now); src.stop(now + dur + 0.02);
+}
+
+/* Short phone buzz on taps, where supported */
+export const haptic = (ms = 12) => { try { navigator.vibrate?.(ms); } catch { /* unsupported */ } };
+
 /* Play a run of notes: [frequency Hz, length s] pairs, back to back. */
 function notes(seq: [number, number][], type: OscillatorType = 'square', vol = 0.07) {
   if (!ready()) return;
@@ -183,6 +199,52 @@ export const sfx = {
   },
 
   piano(freq: number) { pianoNote(freq); },
+
+  /* Purr gets louder the closer the pointer is to a sleeping cat (0..1) */
+  purrLevel(level: number) {
+    if (level <= 0.02) { sfx.purr(false); return; }
+    sfx.purr(true);
+    if (purrNode && ctx) purrNode.g.gain.setTargetAtTime(0.06 + 0.5 * level, ctx.currentTime, 0.15);
+  },
+
+  /* Achievement unlocked */
+  fanfare() { notes([[523, 0.09], [659, 0.09], [784, 0.09], [1047, 0.12], [784, 0.08], [1047, 0.3]], 'square', 0.06); },
+
+  /* A cat landing: a soft thud, heavier for bigger cats */
+  land(weight = 1) {
+    if (!ready() || !noiseBuf) return;
+    const c = ctx!, now = c.currentTime;
+    const src = c.createBufferSource(); src.buffer = noiseBuf;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 140 + 60 / weight;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.35 * weight, now + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    src.connect(lp).connect(g).connect(master!);
+    src.start(now); src.stop(now + 0.15);
+  },
+
+  /* Katana: a bright metallic "shing" */
+  shing() {
+    if (!ready()) return;
+    const c = ctx!, now = c.currentTime;
+    for (const [f, v] of [[2400, 0.03], [3600, 0.02], [5100, 0.012]] as const) {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(f, now); o.frequency.exponentialRampToValueAtTime(f * 1.04, now + 0.4);
+      g.gain.setValueAtTime(v, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+      o.connect(g).connect(master!); o.start(now); o.stop(now + 0.55);
+    }
+    noise(0.04, 0.06, 6000);
+  },
+
+  /* TV static burst for channel flips */
+  static(dur = 0.25) { noise(0.05, dur, 3000); },
+
+  /* Kibble crunch */
+  nom() { noise(0.08, 0.05, 2200); setTimeout(() => noise(0.06, 0.05, 1900), 90); },
+
+  /* Laser pointer click */
+  click() { notes([[1800, 0.02]], 'square', 0.03); },
 
   /* Animal Crossing-style talking: a tiny pitched blip per letter (voice: base pitch) */
   blip(ch: string, voice = 1) {

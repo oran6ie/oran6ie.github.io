@@ -90,5 +90,7 @@ export const locations = {
   piano: { label: 'Piano', hint: 'Play it!' },
   channel: { label: 'YouTube', hint: 'My channel' },
   bulb: { label: 'Smart Bulb', hint: 'Change the lights' },
+  arcade: { label: 'Arcade', hint: 'Mini-games' },
+  guestbook: { label: 'Guestbook', hint: 'Pin a note' },
 } as const;
 export type LocationKey = keyof typeof locations;

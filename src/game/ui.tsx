@@ -3,6 +3,7 @@ import { EMAIL } from '../content/site';
 import { useEscape, useScrollLock } from '../lib/hooks';
 import { spriteSize, spriteURL, type Sprite } from '../lib/pixel';
 import { sfx } from '../lib/sfx';
+import { unlock } from './achievements';
 
 /* A sprite as a crisp, scaled-up <img>. */
 export function PixelSprite({ sprite, scale = 3, className, alt = '' }: { sprite: Sprite; scale?: number; className?: string; alt?: string }) {
@@ -126,6 +127,7 @@ export function CopyEmailButton({ children, className = 'px-btn', note }: { chil
       onClick={async () => {
         await copyText(EMAIL);
         sfx.coin();
+        unlock('mailman');
         toast(`✓ Email copied: ${EMAIL}${note ? ` · ${note}` : ''}`);
       }}
     >

@@ -136,6 +136,22 @@
    "w": 85,
    "h": 176
   },
+  "player/hoodie-long-back": {
+   "w": 107,
+   "h": 185
+  },
+  "player/hoodie-long-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/hoodie-short-back": {
+   "w": 106,
+   "h": 185
+  },
+  "player/hoodie-short-front": {
+   "w": 92,
+   "h": 190
+  },
   "cats/miko-walk": {
    "w": 50,
    "h": 30
@@ -289,6 +305,18 @@
    "y": 71,
    "w": 28,
    "h": 23
+  },
+  "hoodie-long-back": {
+   "x": 2,
+   "y": 59,
+   "w": 31,
+   "h": 17
+  },
+  "hoodie-short-back": {
+   "x": 2,
+   "y": 60,
+   "w": 30,
+   "h": 15
   }
  }
 }
