@@ -1,0 +1,50 @@
+/* Shared by every page: tokens, reset, cursor, CRT overlays, grain, back-to-top. */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050505;--ink:#0d0d0d;--surface:#141414;
+  --border:#2c2c2c;--border2:#1e1e1e;
+  --white:#f4f4f4;--g1:#e0e0e0;--g2:#c4c4c4;--g3:#969696;--g4:#686868;--g5:#3c3c3c;
+  --red:#ff3a2a;--amber:#e0a93a;--cyan:#3ad4c8;--lime:#a0d060;
+}
+html{font-size:17px;scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);color:var(--white);font-family:'Jost',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── CURSOR ── (hidden until the first mouse move) */
+#cursor{position:fixed;z-index:99999;pointer-events:none;width:10px;height:10px;background:var(--white);border:1.5px solid rgba(0,0,0,0.35);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;will-change:transform;display:none}
+#cursor.big{width:28px;height:28px}
+#cursor.tap{width:6px;height:6px;background:var(--amber)}
+#cursor-ring{position:fixed;z-index:99998;pointer-events:none;width:32px;height:32px;border:1px solid rgba(255,255,255,0.32);border-radius:50%;transform:translate(-50%,-50%);transition:width .25s,height .25s;will-change:transform;display:none}
+#cursor-ring.big{width:48px;height:48px}
+.cur-trail{position:fixed;pointer-events:none;z-index:99990;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.35);transform:translate(-50%,-50%);transition:opacity .4s ease;will-change:transform}
+@media(hover:none){#cursor,#cursor-ring,.cur-trail{display:none!important}body{cursor:auto!important}}
+@media(pointer:coarse){.cur-trail{display:none!important}}
+@media(max-width:768px){.cur-trail{display:none!important}}
+
+/* ── SCANLINES ── */
+#scanlines{position:fixed;inset:-80px 0 0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.1) 0,rgba(0,0,0,0.1) 1px,transparent 1px,transparent 4px);animation:scan-roll 16s linear infinite;will-change:transform;transform:translateZ(0)}
+@keyframes scan-roll{from{transform:translateY(0)}to{transform:translateY(80px)}}
+#crt-beam{position:fixed;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.005) 48%,rgba(255,255,255,0.018) 50%,rgba(255,255,255,0.005) 52%,transparent 100%);animation:beam 14s linear infinite;will-change:transform;transform:translateZ(0)}
+@keyframes beam{from{transform:translateY(-100vh)}to{transform:translateY(200vh)}}
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 100% 90% at 50% 50%,transparent 50%,rgba(0,0,0,0.55) 100%);transform:translateZ(0)}
+@keyframes crt{0%,92%,100%{opacity:1}93%{opacity:.97}95%{opacity:1}97%{opacity:.98}}
+#app{animation:crt 11s ease-in-out infinite;will-change:opacity}
+
+/* ── FILM GRAIN ── */
+#grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0.022;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");background-size:180px 180px;animation:grain-shift 1.8s steps(1) infinite;will-change:background-position}
+@keyframes grain-shift{0%{background-position:0 0}20%{background-position:42px -31px}40%{background-position:-24px 53px}60%{background-position:58px 21px}80%{background-position:-41px -62px}100%{background-position:22px 41px}}
+
+/* ── NAV FLASH ── */
+#nav-flash{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:0}
+@keyframes nf{0%{opacity:0}10%{opacity:1;background:repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0,rgba(255,255,255,.1) 1px,transparent 1px,transparent 2px)}40%{opacity:.4}100%{opacity:0}}
+#nav-flash.go{animation:nf .3s steps(1) forwards}
+
+/* ── BACK TO TOP ── */
+#back-top{position:fixed;bottom:32px;right:32px;z-index:500;width:36px;height:36px;background:var(--ink);border:1px solid var(--border);color:var(--g3);font-size:.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s,border-color .2s,color .2s;will-change:opacity}
+#back-top.visible{opacity:1;pointer-events:auto}
+#back-top:hover{border-color:var(--g3);color:var(--white)}
+@media(max-width:768px){#back-top{bottom:20px;right:16px}}
+
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* Looping preview clips (replacing GIFs) fill their frame */
+video.loop-clip{display:block;width:100%;height:100%;object-fit:cover}

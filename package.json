@@ -1,0 +1,27 @@
+{
+  "name": "oran6ie-portfolio",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/youtube.mjs && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "youtube": "node scripts/youtube.mjs",
+    "art": "node scripts/art/process.mjs && node scripts/art/memorial.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "suncalc": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "sharp": "^0.35.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

@@ -1,0 +1,294 @@
+{
+ "room": {
+  "w": 640,
+  "h": 360
+ },
+ "regions": {
+  "window": {
+   "x": 208,
+   "y": 85,
+   "w": 50,
+   "h": 108
+  },
+  "monitor": {
+   "x": 349,
+   "y": 159,
+   "w": 65,
+   "h": 34
+  },
+  "laptop": {
+   "x": 307,
+   "y": 172,
+   "w": 32,
+   "h": 25
+  },
+  "frame1": {
+   "x": 570,
+   "y": 105,
+   "w": 10,
+   "h": 31
+  },
+  "frame2": {
+   "x": 591,
+   "y": 104,
+   "w": 15,
+   "h": 36
+  },
+  "frame3": {
+   "x": 620,
+   "y": 101,
+   "w": 17,
+   "h": 41
+  },
+  "editorProgram": {
+   "x": 0.5003633720930233,
+   "y": 0.048828125,
+   "w": 0.37681686046511625,
+   "h": 0.3802083333333333
+  }
+ },
+ "sprites": {
+  "room": {
+   "w": 640,
+   "h": 360
+  },
+  "room-curtains": {
+   "w": 640,
+   "h": 360
+  },
+  "player/jersey-long-back": {
+   "w": 103,
+   "h": 185
+  },
+  "player/jersey-long-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/jersey-short-back": {
+   "w": 103,
+   "h": 184
+  },
+  "player/jersey-short-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/tee-long-back": {
+   "w": 103,
+   "h": 188
+  },
+  "player/tee-long-front": {
+   "w": 91,
+   "h": 190
+  },
+  "player/tee-short-back": {
+   "w": 102,
+   "h": 188
+  },
+  "player/tee-short-front": {
+   "w": 90,
+   "h": 187
+  },
+  "player/tank-long-back": {
+   "w": 107,
+   "h": 185
+  },
+  "player/tank-long-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/tank-short-back": {
+   "w": 107,
+   "h": 185
+  },
+  "player/tank-short-front": {
+   "w": 93,
+   "h": 190
+  },
+  "player/knit-long-back": {
+   "w": 107,
+   "h": 185
+  },
+  "player/knit-long-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/knit-short-back": {
+   "w": 106,
+   "h": 185
+  },
+  "player/knit-short-front": {
+   "w": 92,
+   "h": 190
+  },
+  "player/polo-long-back": {
+   "w": 99,
+   "h": 190
+  },
+  "player/polo-long-front": {
+   "w": 89,
+   "h": 185
+  },
+  "player/polo-short-back": {
+   "w": 99,
+   "h": 187
+  },
+  "player/polo-short-front": {
+   "w": 85,
+   "h": 176
+  },
+  "cats/miko-walk": {
+   "w": 50,
+   "h": 30
+  },
+  "cats/miko-sit": {
+   "w": 32,
+   "h": 36
+  },
+  "cats/miko-curl": {
+   "w": 34,
+   "h": 19
+  },
+  "cats/miko-sprawl": {
+   "w": 60,
+   "h": 18
+  },
+  "cats/lebu-walk": {
+   "w": 46,
+   "h": 43
+  },
+  "cats/lebu-sit": {
+   "w": 27,
+   "h": 41
+  },
+  "cats/lebu-pounce": {
+   "w": 41,
+   "h": 41
+  },
+  "cats/lebu-curl": {
+   "w": 38,
+   "h": 24
+  },
+  "cats/bibi-walk": {
+   "w": 50,
+   "h": 31
+  },
+  "cats/bibi-sit": {
+   "w": 30,
+   "h": 35
+  },
+  "cats/bibi-loaf": {
+   "w": 40,
+   "h": 26
+  },
+  "cats/bibi-curl": {
+   "w": 39,
+   "h": 27
+  },
+  "cats/topi-walk": {
+   "w": 44,
+   "h": 38
+  },
+  "cats/topi-meow": {
+   "w": 25,
+   "h": 41
+  },
+  "cats/topi-rub": {
+   "w": 29,
+   "h": 40
+  },
+  "cats/topi-curl": {
+   "w": 35,
+   "h": 23
+  },
+  "portrait-long": {
+   "w": 102,
+   "h": 112
+  },
+  "portrait-short": {
+   "w": 102,
+   "h": 112
+  },
+  "memorial-kittens": {
+   "w": 240,
+   "h": 320
+  },
+  "painting": {
+   "w": 320,
+   "h": 320
+  },
+  "screen-game": {
+   "w": 256,
+   "h": 144
+  },
+  "screen-editor": {
+   "w": 256,
+   "h": 144
+  },
+  "screen-music": {
+   "w": 256,
+   "h": 144
+  }
+ },
+ "hands": {
+  "jersey-long-back": {
+   "x": 2,
+   "y": 55,
+   "w": 29,
+   "h": 33
+  },
+  "jersey-short-back": {
+   "x": 4,
+   "y": 54,
+   "w": 27,
+   "h": 33
+  },
+  "tee-long-back": {
+   "x": 2,
+   "y": 61,
+   "w": 29,
+   "h": 27
+  },
+  "tee-short-back": {
+   "x": 2,
+   "y": 61,
+   "w": 29,
+   "h": 27
+  },
+  "tank-long-back": {
+   "x": 1,
+   "y": 60,
+   "w": 32,
+   "h": 26
+  },
+  "tank-short-back": {
+   "x": 1,
+   "y": 59,
+   "w": 32,
+   "h": 27
+  },
+  "knit-long-back": {
+   "x": 1,
+   "y": 59,
+   "w": 32,
+   "h": 17
+  },
+  "knit-short-back": {
+   "x": 1,
+   "y": 59,
+   "w": 31,
+   "h": 17
+  },
+  "polo-long-back": {
+   "x": 2,
+   "y": 73,
+   "w": 28,
+   "h": 24
+  },
+  "polo-short-back": {
+   "x": 2,
+   "y": 71,
+   "w": 28,
+   "h": 23
+  }
+ }
+}

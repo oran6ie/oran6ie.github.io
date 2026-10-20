@@ -1,0 +1,84 @@
+/* CV toolbar (both editions) + the Player Edition character sheet. */
+.cv-toolbar{position:fixed;left:0;right:0;bottom:16pt;z-index:300;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;pointer-events:none}
+.cv-toolbar>*{pointer-events:auto}
+.cv-toolbar .print-btn{position:static}
+.cv-toggle{display:flex;background:#0b0a1a;border:1px solid #2c2a63;padding:3px;gap:3px}
+.cv-toggle button{font:400 9px/1 'Press Start 2P',monospace;letter-spacing:1px;text-transform:uppercase;color:#9a96d6;background:transparent;border:0;padding:10px 12px;cursor:pointer}
+.cv-toggle button.on{background:#ff4fd8;color:#07060f}
+.cv-toggle button:not(.on):hover{color:#ffe066}
+@media print{.cv-toolbar{display:none!important}}
+
+/* ── Player Edition ── */
+.pcv-wrap{--bg:#0b0a1a;--panel:#141331;--panel2:#1d1b45;--edge:#07060f;--hi:#2c2a63;--ink:#ece9ff;--muted:#9a96d6;
+  --pink:#ff4fd8;--cyan:#3be8ff;--yellow:#ffe066;--green:#4ee38a;
+  font-family:'Pixelify Sans',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;width:100%}
+.pcv{width:210mm;min-height:297mm;background:var(--bg);padding:12mm 11mm 10mm;display:flex;flex-direction:column;gap:5mm;
+  box-shadow:0 8px 60px rgba(0,0,0,.7);background-image:radial-gradient(ellipse at 50% 0%,#1d1848 0%,var(--bg) 60%)}
+.pcv h2{font:400 7.5pt/1.4 'Press Start 2P',monospace;color:var(--pink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3mm}
+.pcv a{color:var(--cyan);text-decoration:none}
+.pcv-box{background:var(--panel);padding:4.5mm 5mm;box-shadow:0 0 0 2px var(--edge),inset 0 0 0 1.5px var(--hi)}
+
+.pcv-head{display:grid;grid-template-columns:28mm minmax(0,1fr) auto;gap:5mm;align-items:center;padding-bottom:4mm;border-bottom:2px dashed var(--hi)}
+.pcv-portrait{width:28mm;height:auto;image-rendering:pixelated;background:var(--panel2);box-shadow:0 0 0 2px var(--edge),0 0 0 4px var(--pink)}
+.pcv-kicker{font:400 6pt/1 'Press Start 2P',monospace;color:var(--cyan);letter-spacing:2px;margin-bottom:3mm}
+.pcv-name{font:400 17pt/1.15 'Press Start 2P',monospace;color:var(--yellow);text-shadow:2px 2px 0 var(--pink),4px 4px 0 #6b2ad6}
+.pcv-name span{display:block;font-size:12pt;color:var(--ink);text-shadow:2px 2px 0 #c4521f;margin-top:2mm}
+.pcv-class{font-size:11pt;margin-top:3mm}
+.pcv-meta{display:flex;flex-wrap:wrap;gap:2mm 4mm;margin-top:2mm;font-size:9pt;color:var(--muted)}
+.pcv-lv{color:var(--pink);font-family:'Press Start 2P',monospace;font-size:7pt;align-self:center}
+.pcv-ok{color:var(--green)}
+.pcv-contact{display:grid;gap:2mm;font-size:9pt;text-align:right}
+.pcv-contact dt{font:400 5.5pt/1 'Press Start 2P',monospace;color:var(--muted);text-transform:uppercase;margin-bottom:1mm}
+
+.pcv-bio p{font-size:10pt;line-height:1.55}
+.pcv-tags{display:flex;flex-wrap:wrap;gap:1.5mm;margin-top:3mm}
+.pcv-tags span{font-size:8pt;color:var(--muted);background:var(--bg);padding:1mm 2.2mm;box-shadow:inset 0 0 0 1px var(--hi)}
+
+.pcv-cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:5mm;flex:1}
+.pcv-side{display:flex;flex-direction:column;gap:5mm}
+.pcv-quests{list-style:none;display:grid;gap:4mm;position:relative}
+.pcv-quests::before{content:'';position:absolute;left:5.5mm;top:3mm;bottom:3mm;width:2px;background:repeating-linear-gradient(180deg,var(--hi) 0 3px,transparent 3px 6px)}
+.pcv-quests li{display:grid;grid-template-columns:11mm minmax(0,1fr);gap:3mm;position:relative}
+.pcv-stage{z-index:1;align-self:start;text-align:center;font:400 6pt/1 'Press Start 2P',monospace;color:var(--edge);background:#9b6bff;padding:1.6mm 0;box-shadow:0 0 0 1.5px var(--edge)}
+.pcv-quests li.current .pcv-stage{background:var(--pink)}
+.pcv-quests li.tutorial .pcv-stage{background:var(--cyan)}
+.pcv-when{font:400 5.5pt/1.6 'Press Start 2P',monospace;color:var(--cyan);text-transform:uppercase}
+.pcv-quests li.current .pcv-when{color:var(--pink)}
+.pcv-role{font-size:10.5pt;font-weight:600;margin:.8mm 0 .3mm}
+.pcv-where{font-size:8.5pt;color:var(--muted)}
+.pcv-quests p{font-size:8.5pt;line-height:1.45;color:#c9c4ff;margin-top:1mm}
+
+.pcv-inv{list-style:none;display:grid;gap:2.4mm}
+.pcv-inv li{display:grid;grid-template-columns:8mm minmax(0,1fr);gap:2.5mm;align-items:center}
+.pcv-inv img{width:8mm;height:8mm;image-rendering:pixelated}
+.pcv-tool{font-size:9pt;display:flex;justify-content:space-between;gap:2mm}
+.pcv-tool span{font:400 5pt/1.8 'Press Start 2P',monospace;text-transform:uppercase;color:var(--rar)}
+.pcv-bar{height:2.2mm;background:var(--edge);box-shadow:0 0 0 1px var(--hi);margin-top:1mm}
+.pcv-bar i{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--rar) 0 5px,transparent 5px 6px)}
+.pcv .legendary{--rar:#ff9f43}.pcv .epic{--rar:#b47bff}.pcv .rare{--rar:#3be8ff}.pcv .uncommon{--rar:#4ee38a}
+.pcv-ach{list-style:none;display:grid;gap:1.8mm;font-size:8.5pt;line-height:1.4;color:#c9c4ff}
+.pcv-ach b{color:var(--yellow);font-weight:600;margin-right:1mm}
+.pcv-langs{list-style:none;display:grid;gap:1mm;font-size:9pt}
+.pcv-langs li{display:flex;justify-content:space-between}
+.pcv-langs li span:last-child{color:var(--muted)}
+.pcv-foot{display:flex;justify-content:space-between;font:400 5.5pt/1.6 'Press Start 2P',monospace;color:var(--muted);text-transform:uppercase;border-top:2px dashed var(--hi);padding-top:3mm}
+
+@media print{
+  .pcv-wrap{display:block}
+  .pcv{width:210mm;min-height:297mm;box-shadow:none;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media screen and (max-width:900px){
+  .pcv{width:100%;min-height:auto;padding:22px 14px 90px;gap:16px}
+  .pcv-head{grid-template-columns:90px minmax(0,1fr)}
+  .pcv-portrait{width:90px}
+  .pcv-contact{grid-column:1/-1;text-align:left;grid-template-columns:1fr 1fr}
+  .pcv-name{font-size:20px}.pcv-name span{font-size:15px}
+  .pcv-cols{grid-template-columns:1fr}
+  .pcv h2{font-size:10px}
+  .pcv-bio p,.pcv-quests p,.pcv-ach,.pcv-where{font-size:15px}
+  .pcv-role{font-size:17px}
+  .pcv-when,.pcv-stage,.pcv-foot,.pcv-tool span{font-size:8px}
+  .pcv-tool,.pcv-langs{font-size:15px}
+  .pcv-inv img{width:30px;height:30px}.pcv-inv li{grid-template-columns:30px 1fr}
+  .pcv-foot{flex-direction:column;gap:6px}
+}

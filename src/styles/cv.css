@@ -1,0 +1,100 @@
+/* Printable CV page (/cv/). Ported from the CV that used to be embedded in index.html. */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060606;--ink:#111;--g1:#e0e0e0;--g2:#b8b8b8;--g3:#888;--g4:#555;--g5:#2a2a2a;--border:#242424;--amber:#e0a93a;--cyan:#3ad4c8;}
+html{font-size:10.5pt;background:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Jost',sans-serif;color:var(--g1);background:#111;display:flex;justify-content:center;padding:24pt 0 48pt;position:relative;overflow-x:hidden}
+@media print{
+  html,body{width:210mm!important;min-width:210mm!important;max-width:none!important;overflow:visible!important}
+  body{background:#fff!important;padding:0!important;color:#111!important;display:block!important}
+  #scanlines,#vignette,#crt-beam,.print-btn{display:none!important}
+  .page{width:210mm!important;max-width:none!important;min-height:297mm!important;grid-template-columns:68mm 1fr!important;box-shadow:none!important;background:#fff!important;margin:0!important}
+  aside{padding:14mm 9mm 12mm!important;border-right:1px solid var(--border)!important;border-bottom:none!important;gap:8mm!important}
+  main{padding:13mm 10mm 12mm!important;gap:7mm!important}
+  .cv-sidebar{background:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+/* CRT effects */
+#scanlines{position:fixed;inset:0;z-index:100;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.11) 0,rgba(0,0,0,0.11) 1px,transparent 1px,transparent 3px);animation:sr 12s linear infinite}
+@keyframes sr{from{background-position-y:0}to{background-position-y:60px}}
+#vignette{position:fixed;inset:0;z-index:100;pointer-events:none;background:radial-gradient(ellipse 100% 90% at 50% 50%,transparent 55%,rgba(0,0,0,0.5) 100%)}
+#crt-beam{position:fixed;inset:0;z-index:100;pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.006) 48%,rgba(255,255,255,0.018) 50%,rgba(255,255,255,0.006) 52%,transparent 100%);animation:beam 14s linear infinite}
+@keyframes beam{from{transform:translateY(-100vh)}to{transform:translateY(200vh)}}
+@keyframes cv-flicker{0%,94%,100%{opacity:1}95%{opacity:.97}97%{opacity:1}98.5%{opacity:.98}}
+.page{animation:cv-flicker 9s ease-in-out infinite}
+
+.page{width:210mm;min-height:297mm;background:var(--bg);box-shadow:0 8px 60px rgba(0,0,0,0.7);display:grid;grid-template-columns:68mm 1fr;position:relative}
+
+/* glitch on name */
+@keyframes cv-name-g{
+  0%,5%,100%{clip-path:none;transform:none;text-shadow:0 0 20px rgba(255,255,255,0.12)}
+  2%{clip-path:polygon(0 30%,100% 30%,100% 36%,0 36%);transform:translateX(-4px);text-shadow:-3px 0 rgba(255,0,80,.5),3px 0 rgba(0,255,200,.5)}
+  3%{clip-path:none;transform:translateX(3px)}
+  4%{clip-path:none;transform:none;text-shadow:0 0 20px rgba(255,255,255,0.12)}
+}
+
+aside{background:#0a0a0a;border-right:1px solid var(--border);padding:14mm 9mm 12mm;display:flex;flex-direction:column;gap:8mm}
+.s-mono{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:26pt;color:var(--g1);letter-spacing:-1px;line-height:1;border-bottom:1px solid var(--border);padding-bottom:5mm;animation:cv-name-g 6s steps(1) infinite}
+.s-mono em{font-style:italic;color:var(--g3)}
+.s-role{font-family:'Jost',sans-serif;font-weight:300;font-size:6.5pt;color:var(--g4);text-transform:uppercase;letter-spacing:3px;margin-top:2mm}
+.s-section{display:flex;flex-direction:column;gap:2mm}
+.s-lbl{font-family:'Space Mono',monospace;font-weight:700;font-size:5pt;color:var(--g4);text-transform:uppercase;letter-spacing:3px;border-bottom:1px solid var(--border);padding-bottom:1.5mm;margin-bottom:0.5mm}
+.s-item{display:flex;flex-direction:column;gap:0.5mm}
+.s-key{font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g5);text-transform:uppercase;letter-spacing:1.5px}
+.s-val{font-size:7pt;color:var(--g3);font-weight:300}
+.s-val a{color:var(--g3);text-decoration:none}
+.sk-item{margin-bottom:2.5mm}
+.sk-name{font-size:7pt;color:var(--g2);font-weight:400;margin-bottom:1.5mm}
+.sk-bar{height:1px;background:var(--border);position:relative}
+.sk-fill{position:absolute;left:0;top:0;height:1px;background:var(--g4)}
+.sk-fill::after{content:'';position:absolute;right:0;top:-2px;width:1px;height:5px;background:var(--amber)}
+.lang-r{display:flex;justify-content:space-between;padding:1.5mm 0;border-bottom:1px solid var(--border)}
+.lang-r:last-child{border-bottom:none}
+.lang-n{font-size:7pt;color:var(--g3);font-weight:300}
+.lang-l{font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g4);text-transform:uppercase}
+.tag-w{display:flex;flex-wrap:wrap;gap:1.5mm}
+.tag{font-family:'Jost',sans-serif;font-size:5pt;color:var(--g4);border:1px solid var(--border);padding:1.5mm 3mm;text-transform:uppercase;letter-spacing:1px}
+
+main{padding:13mm 10mm 12mm;display:flex;flex-direction:column;gap:7mm}
+.m-hdr{border-bottom:1px solid var(--border);padding-bottom:6mm}
+.m-eye{font-family:'Space Mono',monospace;font-weight:700;font-size:5pt;color:var(--g4);text-transform:uppercase;letter-spacing:3px;margin-bottom:3mm}
+.m-name{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:30pt;color:var(--g1);line-height:.9;letter-spacing:-1px;margin-bottom:3mm}
+.m-name em{font-style:italic;color:var(--g3)}
+.m-sub{font-family:'Jost',sans-serif;font-weight:300;font-size:6.5pt;color:var(--g4);text-transform:uppercase;letter-spacing:3px;margin-bottom:3.5mm}
+.m-bio{font-size:7.5pt;color:var(--g3);line-height:1.8;font-weight:400}
+.m-sec{display:flex;flex-direction:column;gap:3.5mm}
+.m-shead{display:flex;align-items:center;gap:4mm;margin-bottom:0.5mm}
+.m-slbl{font-family:'Space Mono',monospace;font-weight:700;font-size:5pt;color:var(--g2);text-transform:uppercase;letter-spacing:3px;flex-shrink:0}
+.m-srule{flex:1;height:1px;background:var(--border)}
+.xp{display:grid;grid-template-columns:19mm 1fr;gap:0 4mm;margin-bottom:3mm}
+.xp:last-child{margin-bottom:0}
+.xp-d{font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g4);line-height:1.8;text-align:right;padding-top:1mm}
+.xp-r{font-family:'Jost',sans-serif;font-weight:600;font-size:8pt;color:var(--g1);margin-bottom:0.5mm}
+.xp-c{font-family:'Space Mono',monospace;font-size:5pt;color:var(--g4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1mm}
+.xp-p{font-size:6.5pt;color:var(--g3);line-height:1.75}
+.edu-r{display:grid;grid-template-columns:19mm 1fr;gap:0 4mm}
+.edu-d{font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g4);line-height:1.8;text-align:right;padding-top:1mm}
+.edu-deg{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:11pt;color:var(--g1);margin-bottom:1mm}
+.edu-s{font-size:7pt;color:var(--g3)}
+.edu-l{font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g4);text-transform:uppercase;letter-spacing:1.5px;margin-top:0.5mm}
+.fbar{margin-top:auto;padding-top:5mm;border-top:1px solid var(--border);font-family:'Space Mono',monospace;font-size:4.5pt;color:var(--g4);display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:1.5px}
+.print-btn{position:fixed;bottom:20pt;right:20pt;background:var(--g5);color:var(--g2);border:1px solid var(--border);padding:8pt 16pt;font-family:'Space Mono',monospace;font-size:6.5pt;letter-spacing:2px;text-transform:uppercase;cursor:pointer;z-index:200;transition:all .2s}
+.print-btn:hover{background:var(--g4);color:var(--g1)}
+
+/* Mobile CV layout: prevent zoomed-in A4 rendering on phones */
+@media screen and (max-width:900px){
+  html{font-size:16px}
+  body{padding:0;background:var(--bg)}
+  .page{width:100%;max-width:100vw;min-height:auto;grid-template-columns:1fr;box-shadow:none}
+  aside{padding:24px 18px;border-right:none;border-bottom:1px solid var(--border);gap:18px}
+  main{padding:24px 18px 32px;gap:18px}
+  .s-mono{font-size:2.35rem;padding-bottom:14px}
+  .s-role,.m-sub{font-size:.72rem;letter-spacing:2px}
+  .m-name{font-size:2.7rem;line-height:.95}
+  .m-bio,.s-val,.sk-name,.lang-n,.edu-s,.xp-p{font-size:.95rem;line-height:1.7}
+  .s-lbl,.m-eye,.m-slbl,.xp-c,.edu-l,.lang-l,.s-key,.fbar{font-size:.68rem;letter-spacing:1.5px}
+  .xp,.edu-r{grid-template-columns:1fr;gap:6px}
+  .xp-d,.edu-d{text-align:left;padding-top:0;font-size:.72rem}
+  .xp-r{font-size:1.02rem}
+  .edu-deg{font-size:1.45rem}
+  .tag{font-size:.62rem;padding:6px 10px}
+  .print-btn{bottom:14px;right:14px;padding:10px 14px;font-size:.7rem}
+}
