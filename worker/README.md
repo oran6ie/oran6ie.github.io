@@ -15,6 +15,7 @@ npx wrangler deploy                      # prints https://oran6ie-room.<you>.wor
 ```
 
 Then put that URL in `src/content/backend.ts` (`API_URL`) and push.
+Live: https://oran6ie-room.oran6ie.workers.dev (admin token in `worker/.admin-token.txt`, not in git).
 Without it the site still works; the online bits simply stay hidden.
 
 ## Moderating notes

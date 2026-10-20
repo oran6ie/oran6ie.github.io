@@ -7,7 +7,7 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "oran6ie-room"
-database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+database_id = "459d863e-607c-4374-b761-1ada73c4cad0"
 
 [vars]
 ALLOWED_ORIGINS = "https://oran6ie.github.io,http://localhost:5173,http://localhost:4173"
