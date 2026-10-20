@@ -77,6 +77,8 @@ function panelFor(key: LocationKey, look: Look) {
   }
 }
 
+const isTouch = () => typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches;
+
 const OUTFITS = ['jersey', 'tee', 'tank', 'knit', 'polo'];
 function randomLook(): Look {
   return { outfit: OUTFITS[Math.floor(Math.random() * OUTFITS.length)], hair: Math.random() < 0.5 ? 'long' : 'short' };
@@ -162,6 +164,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   const [kbd, setKbd] = useState(false); // outline objects only when navigating by keyboard
   const [caught, setCaught] = useState(false);
   const caughtTimer = useRef(0);
+  const touchTurnBack = useRef(0);
   const toy = useRef<{ name: Toy; at: number } | null>(null);
   const clock = useRef(0);
   const [catHover, setCatHover] = useState<{ id: CatId; x: number; y: number } | null>(null);
@@ -337,12 +340,19 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
                   e.stopPropagation();
                   if (catClick(e)) return;
                   if (k === 'window' && settings.curtains) { toggleCurtains(); return; }
+                  // touch screens can't hover: the first tap catches me, a second tap opens the card
+                  if (k === 'player' && isTouch() && !caught) {
+                    setFocus('player');
+                    clearTimeout(touchTurnBack.current);
+                    touchTurnBack.current = window.setTimeout(() => setFocus((f) => (f === 'player' ? null : f)), 4500);
+                    return;
+                  }
                   open(k);
                 }}
               >
                 {/* the player's label sits to the side so it never covers his speech bubble */}
                 <span className={k === 'player' ? 'hotspot-label side' : r.y < 70 ? 'hotspot-label below' : 'hotspot-label'}>
-                  <b>{locations[k].label}</b> {locations[k].hint}
+                  <b>{locations[k].label}</b> {k === 'player' && isTouch() ? 'Tap again to open' : locations[k].hint}
                 </span>
               </button>
             );
