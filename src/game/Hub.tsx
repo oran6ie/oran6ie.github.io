@@ -83,7 +83,7 @@ function randomLook(): Look {
 }
 
 /* A muted work clip that swaps every few seconds; it plays inside the editor on the monitor. */
-function useCyclingVideo(srcs: string[], seconds: number) {
+function useCyclingVideo(srcs: string[], seconds: number, active: boolean) {
   const [video] = useState(() => {
     const v = document.createElement('video');
     v.muted = true;
@@ -93,12 +93,13 @@ function useCyclingVideo(srcs: string[], seconds: number) {
     return v;
   });
   useEffect(() => {
+    if (!active) return;
     let i = 0;
     const next = () => { video.src = asset(srcs[i++ % srcs.length]); void video.play().catch(() => {}); };
     next();
     const id = setInterval(next, seconds * 1000);
     return () => { clearInterval(id); video.pause(); video.removeAttribute('src'); video.load(); };
-  }, [video, srcs, seconds]);
+  }, [video, srcs, seconds, active]);
   return video;
 }
 const WORK_CLIPS = projects.map((p) => p.preview);
@@ -154,7 +155,9 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   // ?debug exposes the live cats for testing
   useEffect(() => { if (new URLSearchParams(location.search).has('debug')) (window as unknown as { __cats: unknown }).__cats = scene.cats; }, [scene]);
   const [look] = useState(randomLook);
-  const clip = useCyclingVideo(WORK_CLIPS, 6);
+  // the work clip on the monitor only loads once someone first catches me
+  const [wantClip, setWantClip] = useState(false);
+  const clip = useCyclingVideo(WORK_CLIPS, 6, wantClip);
   const [focus, setFocus] = useState<LocationKey | null>(null);
   const [kbd, setKbd] = useState(false); // outline objects only when navigating by keyboard
   const [caught, setCaught] = useState(false);
@@ -188,7 +191,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   // Being "caught": hovering the player alt-tabs him to Premiere; he turns back a moment after you leave
   const setCaughtSoon = (on: boolean) => {
     clearTimeout(caughtTimer.current);
-    if (on) { if (!caught) { sfx.warm(); sfx.locked(); } setCaught(true); }
+    if (on) { if (!caught) { sfx.warm(); sfx.locked(); } setCaught(true); setWantClip(true); }
     else caughtTimer.current = window.setTimeout(() => setCaught(false), 1400);
   };
 

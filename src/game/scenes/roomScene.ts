@@ -184,6 +184,13 @@ export function createRoomScene() {
     curtainK += ((f.curtains ? 1 : 0) - curtainK) * Math.min(1, (animate ? dt : 1) * 4);
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, W, H);
+    // don't show a half-built room: wait for the room and the player
+    if (!img('room') || !img(`player/${f.look.outfit}-${f.look.hair}-back`)) {
+      rect(ctx, 0, 0, W, H, '#0b0a1a');
+      const dots = '.'.repeat(1 + (Math.floor(t * 3) % 3));
+      pixelText(ctx, 'LOADING' + dots, W / 2 - 34, H / 2 - 5, '#ffe066', 2);
+      return;
+    }
 
     // ── behind the room: things seen through its green-screen holes ──
     const lightning = sky(ctx, world, t, dt, animate);
