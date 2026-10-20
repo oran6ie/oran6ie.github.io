@@ -422,3 +422,49 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 /* no blue tap flash on Android, and no text-selection/callout when long-pressing the room */
 html{-webkit-tap-highlight-color:transparent}
 .room,.room *,.hotbar,.hud{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* ── Next round: toys, laser, director, arcade, night shift ── */
+.room.intro{overflow:hidden}
+.room.intro .room-canvas{animation:room-intro 2.4s cubic-bezier(.2,.7,.2,1) both;transform-origin:68% 52%}
+.room.intro .hotspot,.room.intro .cat-tag{opacity:0;pointer-events:none}
+@keyframes room-intro{from{transform:scale(2.2)}35%{transform:scale(2.2)}to{transform:scale(1)}}
+.room.laser-mode{cursor:none;touch-action:none}
+.room.laser-mode .hotspot:not(.toy-laserPen){pointer-events:none}
+.room.laser-mode .hotspot-label,.room.laser-mode .cat-tag{display:none}
+.room.night-shift{box-shadow:0 0 0 6px var(--px-edge),0 0 0 10px #4a1450,0 0 0 14px var(--px-edge),0 0 70px 24px rgba(255,79,216,.32)}
+.rec-badge{position:absolute;top:8px;left:8px;padding:4px 8px;background:rgba(7,6,15,.8);color:var(--px-red);font:10px var(--font-display);border:2px solid var(--px-red);animation:rec-blink 1s steps(2) infinite;pointer-events:none}
+@keyframes rec-blink{50%{color:#7a1f2b;border-color:#7a1f2b}}
+.director{display:grid;gap:12px;justify-items:center;text-align:center}
+.director-gif{width:100%;max-width:480px;image-rendering:pixelated;border:4px solid var(--px-edge);box-shadow:0 0 0 2px var(--px-hi)}
+.trophies{display:grid;gap:14px}
+.badge-grid.visitor .badge{cursor:default}
+.badge-grid.visitor .badge.locked .badge-name{color:var(--px-dim)}
+.arcade{display:grid;gap:12px}
+.arcade-game{display:grid;gap:8px;justify-items:center}
+.arcade-canvas{width:100%;max-width:640px;aspect-ratio:320/120;border:4px solid var(--px-edge);box-shadow:0 0 0 2px var(--px-hi);touch-action:manipulation;cursor:var(--cursor-hand)}
+@media (prefers-reduced-motion:reduce){.room.intro .room-canvas{animation:none}.rec-badge{animation:none}}
+/* guestbook, moods, online */
+.guestbook{display:grid;gap:16px}
+.guestbook-form{display:grid;gap:8px}
+.px-input{font:inherit;font-size:1rem;color:var(--px-ink);background:var(--px-bg2);border:3px solid var(--px-edge);box-shadow:inset 0 0 0 2px var(--px-hi);padding:8px 10px;resize:vertical}
+.px-input:focus{outline:2px solid var(--px-cyan);outline-offset:1px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.guestbook-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.guestbook-count{margin-left:auto;color:var(--px-muted);font-size:.85rem}
+.guestbook-error{color:var(--px-red)}
+.guestbook-thanks{color:var(--px-green)}
+.note-colors{display:flex;gap:6px}
+.note-color{width:22px;height:22px;border:3px solid var(--px-edge);cursor:var(--cursor-hand)}
+.note-color.on{outline:2px solid var(--px-ink);outline-offset:1px}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;padding:12px;background:#3a2a22;border:4px solid var(--px-edge);box-shadow:inset 0 0 0 3px #5a4030}
+.note{margin:0;padding:12px 10px 8px;color:#241f2e;box-shadow:3px 3px 0 rgba(0,0,0,.35);position:relative;overflow-wrap:anywhere}
+.note::before{content:'';position:absolute;top:-5px;left:calc(50% - 5px);width:10px;height:10px;background:var(--px-red);border:2px solid var(--px-edge)}
+.note blockquote{margin:0 0 6px;font-size:.95rem;line-height:1.35}
+.note figcaption{font-size:.8rem;opacity:.75}
+.cat-mood{display:flex;gap:2px;margin:2px 0 6px;font-size:.9rem}
+.cat-mood .heart{color:var(--px-dim)}
+.cat-mood .heart.on{color:var(--px-pink)}
+.pets-counter{color:var(--px-pink);margin:4px 0 12px}
+.hud-online{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:var(--px-green)}
+.hud-online i{width:8px;height:8px;background:var(--px-green);box-shadow:0 0 6px var(--px-green);animation:rec-blink 2s steps(2) infinite}
+@media (max-width:640px){.hud-stars{display:none}}

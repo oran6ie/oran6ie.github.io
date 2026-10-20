@@ -11,14 +11,17 @@ import { bulbColor, type BulbMode } from '../bulb';
 import { sfx } from '../../lib/sfx';
 import { drawCover, img, MANIFEST, type Region } from '../images';
 import { getWorld } from '../world';
-import { createCats, bubble } from './cats';
+import type { CatId } from '../../content/cats';
+import type { Festival } from '../festivals';
+import { bubble, createCats, env, type Decor } from './cats';
+import * as P from './props';
 import { ambient, createSky } from './sky';
 
 export const W = MANIFEST.room.w;
 export const H = MANIFEST.room.h;
 const R = MANIFEST.regions as Record<string, Region>;
 
-export type Toy = 'pikachu' | 'curtainL' | 'curtainR';
+export type Toy = 'pikachu' | 'curtainL' | 'curtainR' | 'katana' | 'wardrobe' | 'bowl' | 'laserPen' | 'webcam';
 
 /* Clickable areas, traced from the room art */
 export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
@@ -29,8 +32,14 @@ export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
   curtainR: { x: 258, y: 70, w: 36, h: 142 },
   channel: { x: 74, y: 44, w: 52, h: 24 },
   bulb: { x: 298, y: 0, w: 18, h: 50 },
-  journey: { x: 322, y: 64, w: 148, h: 84 },
-  inventory: { x: 368, y: 34, w: 142, h: 22 },
+  journey: { x: 322, y: 64, w: 70, h: 84 },
+  guestbook: { x: 392, y: 64, w: 78, h: 60 }, // the notes pinned on the right of the corkboard
+  inventory: { x: 420, y: 178, w: 28, h: 34 },  // the manga stack
+  katana: { x: 368, y: 34, w: 142, h: 22 },
+  wardrobe: { x: 480, y: 190, w: 72, h: 102 },
+  bowl: { x: 78, y: 302, w: 34, h: 22 }, // the food bowl (the water bowl is just right of it)
+  laserPen: { x: 316, y: 224, w: 20, h: 13 },
+  webcam: { x: 374, y: 144, w: 20, h: 14 },
   pikachu: { x: 396, y: 128, w: 26, h: 32 },
   ai: { x: 302, y: 168, w: 44, h: 44 },
   work: { x: 346, y: 154, w: 72, h: 56 },
@@ -40,6 +49,7 @@ export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
   piano: { x: 552, y: 190, w: 38, h: 118 },
   shop: { x: 588, y: 232, w: 52, h: 128 },
   party: { x: 0, y: 0, w: 0, h: 0 }, // the cats themselves are the hotspot
+  arcade: { x: 0, y: 0, w: 0, h: 0 }, // hotbar only
 };
 
 /* Where the gaming sprite's hands should rest: the right end of the keyboard */
@@ -67,6 +77,17 @@ export type RoomFrame = {
   toy: { name: Toy; at: number } | null;
   curtains: boolean;               // closed?
   bulb: BulbMode;
+  laser: { x: number; y: number } | null;
+  food: number;                    // kibble left in the bowl, 0..1
+  nightShift: boolean;
+  festivals: Festival[];
+  onAir: boolean;
+  laptopClip: HTMLVideoElement | null;
+  poofAt: number | null;           // time of the last outfit change
+  match: { kind: 'ace' | 'defeat'; at: number } | null;
+  tired: boolean;                  // the small hours: yawning, chai
+  cold: boolean;
+  leak: boolean;
 };
 
 /* 0/1 px chest rise every few seconds */
@@ -165,9 +186,20 @@ function drawBulb(ctx: CanvasRenderingContext2D, c: [number, number, number] | n
   rect(ctx, BULB.x - 2, BULB.y + 1, 1, 2, c ? 'rgba(255,255,255,0.85)' : '#9a96b8'); // highlight
 }
 
+// the bed's side, drawn again in front of cats underneath it (room pixels)
+const BED_FRONT = { x: 66, y: 262, w: 206, h: 29 };
+const FLOOR_FRONT = 318; // cats further back than this are under the bed
+
 export function createRoomScene() {
+  const bedFront = document.createElement('canvas');
   const sky = createSky(R.window);
-  const cats = createCats((id) => sfx.meow(id));
+  const events = { laserCaught: (_id: CatId) => {} };
+  const cats = createCats({
+    meow: (id) => sfx.meow(id),
+    land: (_id, w) => sfx.land(w),
+    nom: () => sfx.nom(),
+    laserCaught: (id) => events.laserCaught(id),
+  });
   let caughtFor = 0;
   let curtainK = 0; // 0 open … 1 closed, eased
 
@@ -179,6 +211,9 @@ export function createRoomScene() {
   function draw(ctx: CanvasRenderingContext2D, f: RoomFrame) {
     const { t, dt, animate } = f;
     const world = getWorld();
+    env.night = world.sunAlt < -10;
+    env.storm = world.weather === 'storm';
+    cats.setLaser(f.laser);
     if (animate) cats.update(dt);
     caughtFor = f.caught ? caughtFor + dt : 0;
     curtainK += ((f.curtains ? 1 : 0) - curtainK) * Math.min(1, (animate ? dt : 1) * 4);
@@ -194,6 +229,7 @@ export function createRoomScene() {
 
     // ── behind the room: things seen through its green-screen holes ──
     const lightning = sky(ctx, world, t, dt, animate);
+    const fest = new Set(f.festivals);
 
     const mon = R.monitor;
     if (f.caught && caughtFor > 0.12) {
@@ -207,13 +243,28 @@ export function createRoomScene() {
         drawCover(ctx, f.clip, pr, f.clip.videoWidth, f.clip.videoHeight);
         ctx.imageSmoothingEnabled = false;
       }
+      // Lebu walked across the keyboard
+      const lebu = cats.state.find((c) => c.cat.id === 'lebu');
+      if (lebu && lebu.level === 'desk') P.drawGggg(ctx, mon, caughtFor);
     } else {
       screen(ctx, 'screen-game', mon);
       // a little life on the game screen: muzzle flash + screen shake
       if (animate && Math.floor(t * 3) % 4 === 0) rect(ctx, mon.x + mon.w - 14, mon.y + mon.h - 12, 3, 2, '#ffe066');
+      if (f.match) P.drawMatchFlash(ctx, mon, f.match.kind, (t - f.match.at) / 2.2);
     }
     if (f.caught && caughtFor <= 0.12) rect(ctx, mon.x, mon.y, mon.w, mon.h, '#e8f4ff'); // alt-tab blink
-    screen(ctx, 'screen-music', R.laptop);
+    // laptop flips channels: music app, then project clips, with a burst of static between
+    const lap = R.laptop, slot = Math.floor(t / 7) % 4, into = t % 7;
+    if (slot > 0 && f.laptopClip && f.laptopClip.readyState >= 2) {
+      ctx.imageSmoothingEnabled = true;
+      drawCover(ctx, f.laptopClip, lap, f.laptopClip.videoWidth, f.laptopClip.videoHeight);
+      ctx.imageSmoothingEnabled = false;
+    } else screen(ctx, 'screen-music', lap);
+    if (animate && into < 0.3) {
+      for (let y = lap.y; y < lap.y + lap.h; y++) for (let x = lap.x; x < lap.x + lap.w; x += 2) {
+        if (Math.random() < 0.5) rect(ctx, x, y, 2, 1, Math.random() < 0.5 ? '#f4f1ff' : '#55528f');
+      }
+    }
     for (const { frame, name, fx, fy, span } of FRAMES) {
       const im = img(name), fr = R[frame];
       // one pixel bigger on every side so the frame art covers the edge
@@ -244,6 +295,15 @@ export function createRoomScene() {
     if (curt) { ctx.globalAlpha = Math.min(1, curtainK); ctx.drawImage(curt, 0, 0); ctx.globalAlpha = 1; }
 
     drawSubCounter(ctx, t, animate);
+    P.drawOnAir(ctx, f.onAir, t);
+    if (fest.has('tihar')) P.drawTihar(ctx, t, animate);
+    if (fest.has('christmas')) P.drawTree(ctx, t);
+    if (fest.has('birthday')) P.drawCake(ctx, t, animate);
+    if (f.tired) P.drawChai(ctx, t, animate, fest.has('birthday'));
+    if (f.leak) P.drawLeak(ctx, t, animate);
+    if (f.cold) P.drawHeater(ctx, t);
+    P.drawKibble(ctx, f.food);
+    P.drawLaserPen(ctx, !!f.laser, t);
     const bc = bulbColor(f.bulb, t);
     drawBulb(ctx, bc);
 
@@ -269,6 +329,13 @@ export function createRoomScene() {
     }
     if (lightning) { ctx.fillStyle = 'rgba(220,230,255,0.18)'; ctx.fillRect(0, 0, W, H); }
 
+    // keep a copy of the bed's side (mattress edge + rail) to draw back over cats hiding underneath
+    const hiding = cats.state.some((c) => c.level === 'floor' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w);
+    if (hiding) {
+      bedFront.width = BED_FRONT.w; bedFront.height = BED_FRONT.h;
+      bedFront.getContext('2d')!.drawImage(ctx.canvas, BED_FRONT.x, BED_FRONT.y, BED_FRONT.w, BED_FRONT.h, 0, 0, BED_FRONT.w, BED_FRONT.h);
+    }
+
     // ── player + cats, back to front ──
     const pose = f.caught ? 'front' : 'back';
     const pkey = `${f.look.outfit}-${f.look.hair}-${pose}`;
@@ -280,7 +347,14 @@ export function createRoomScene() {
     const left = Math.round(HANDS_AT.x - hands.x - hands.w / 2);
     const top = Math.round(HANDS_AT.y - hands.y - hands.h / 2);
     const floor = top + backH;
-    const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({ y: c.y, draw: () => cats.draw(ctx, c, t, animate) }));
+    const decor: Decor = {
+      tika: fest.has('kukur'), garland: fest.has('kukur'), santa: fest.has('christmas'), party: fest.has('birthday'),
+    };
+    const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({
+      // a cat in mid-leap is in front of the bed, never tucked under it
+      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor) }));
+    // drawn after every cat further back than the bed's front edge, so they all end up underneath
+    if (hiding) actors.push({ y: FLOOR_FRONT - 0.5, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
     if (pim) actors.push({
       y: floor,
       draw: () => {
@@ -292,7 +366,12 @@ export function createRoomScene() {
         } else {
           // mouse flicks: the hands twitch a pixel now and then, the mouse moves with them
           const flick = animate ? mouseFlick(t) : { x: 0, y: 0 };
-          drawBreathing(ctx, pim, left, top, animate ? breath(t, 2.2) : 0, { box: hands, dx: flick.x, dy: flick.y });
+          const mk = f.match ? (t - f.match.at) : 99;
+          const hop = f.match?.kind === 'ace' && mk < 0.6 && animate ? -Math.round(Math.sin((mk / 0.6) * Math.PI) * 3) : 0;
+          const slump = f.match?.kind === 'defeat' && mk < 2 ? 2 : 0;
+          drawBreathing(ctx, pim, left, top + hop + slump, animate ? breath(t, 2.2) : 0, { box: hands, dx: flick.x, dy: flick.y });
+          if (mk < 2.2) bubble(ctx, f.match!.kind === 'ace' ? 'LETS GOOO!' : 'NOOOO', left + 60, top + 10);
+          else if (f.tired && animate && Math.floor(t / 9) % 5 === 0 && t % 9 < 2) bubble(ctx, '*YAWN*', left + 60, top + 10);
         }
       },
     });
@@ -313,8 +392,12 @@ export function createRoomScene() {
       ctx.globalCompositeOperation = 'source-over';
     }
 
+    if (f.laser) P.drawLaserDot(ctx, f.laser, t);
+    if (f.poofAt !== null) P.drawPoof(ctx, left + 52, floor - 70, (t - f.poofAt) / 0.7);
+    if (f.nightShift) P.drawNightShift(ctx, W, H, t);
+
     // toys: a little reaction when clicked
-    if (f.toy && t - f.toy.at < 1.6) {
+    if (f.toy?.name === 'pikachu' && t - f.toy.at < 1.6) {
       const r = HOTSPOTS[f.toy.name];
       // Pikachu hops and squeaks
       const k = (t - f.toy.at) / 1.6;
@@ -328,5 +411,5 @@ export function createRoomScene() {
     return c && c.level === 'sill' && curtainK > 0.5 ? null : c;
   };
   const hiddenCat = () => (curtainK > 0.5 ? cats.state.find((c) => c.level === 'sill') ?? null : null);
-  return { draw, hitCat, hiddenCat, cats: cats.state, say: cats.say };
+  return { draw, hitCat, hiddenCat, cats: cats.state, say: cats.say, feed: cats.feed, events };
 }

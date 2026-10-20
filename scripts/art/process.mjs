@@ -147,11 +147,12 @@ const scaleTo = (img, s) => resize(img, Math.max(1, Math.round(img.w * s)), Math
   await save(resize(closed, ROOM_W, ROOM_H), 'room-curtains.png');
 }
 
-// ── Player: 5 outfits × (long/short hair) × (back = gaming, front = caught) ──
+// ── Player: 6 outfits × (long/short hair) × (back = gaming, front = caught) ──
 const PLAYER_H = 190;
 for (const [outfit, file, mirror] of [
   ['jersey', 'outfit-jersey', true], ['tee', 'outfit-tee-red', false], ['tank', 'outfit-tank', true],
   ['knit', 'outfit-knit-sweater', false], ['polo', 'outfit-polo-cargo', true],
+  ['hoodie', '../batch4/outfit-hoodie', false], // cold nights
 ]) {
   let img = key(await raw(`${IN}/batch2/${file}.png`), isMagenta);
   if (mirror) img = flip(img);
