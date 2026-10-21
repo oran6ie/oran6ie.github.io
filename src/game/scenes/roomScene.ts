@@ -333,7 +333,8 @@ export function createRoomScene() {
     if (lightning) { ctx.fillStyle = 'rgba(220,230,255,0.18)'; ctx.fillRect(0, 0, W, H); }
 
     // keep a copy of the bed's side (mattress edge + rail) to draw back over cats hiding underneath
-    const underBed = (c: (typeof cats.state)[number]) => c.level === 'floor' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w;
+    // a cat mid-leap onto the bed is still 'floor' until it lands, so never count a jumping cat as hiding
+    const underBed = (c: (typeof cats.state)[number]) => c.level === 'floor' && c.step?.kind !== 'jump' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w;
     const hiding = cats.state.some(underBed);
     if (hiding) {
       bedFront.width = BED_FRONT.w; bedFront.height = BED_FRONT.h;
