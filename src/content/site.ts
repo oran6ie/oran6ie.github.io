@@ -65,7 +65,7 @@ export const experience = [
     current: true,
     company: 'WHACK Sports',
     role: 'Senior Video Editor',
-    location: '',
+    location: 'Melbourne, Australia · Remote from India',
     desc: 'Editing sports content as Senior Video Editor at WHACK Sports.',
   },
   {

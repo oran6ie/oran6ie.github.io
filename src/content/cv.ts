@@ -23,7 +23,7 @@ export const cv = {
     {
       from: 'Jul 2026', to: 'Present',
       role: 'Senior Video Editor',
-      where: 'WHACK Sports',
+      where: 'WHACK Sports · Melbourne, Australia · Remote from India',
       desc: 'Editing sports content as Senior Video Editor at WHACK Sports.',
     },
     {
