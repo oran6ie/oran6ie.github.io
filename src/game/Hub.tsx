@@ -14,7 +14,7 @@ import { ArcadePanel, type ArcadeGame } from './arcade';
 import { badges, catPortrait, items, star, trophy } from './art/sprites';
 import { toolIconURL } from './art/toolIcons';
 import { recordRoom, type Recording } from './director';
-import { birthdayAge, FESTIVAL_INFO, festivalsToday } from './festivals';
+import { birthdayAge, FESTIVAL_INFO, festivalsToday, type Festival } from './festivals';
 import { img, MANIFEST, preload } from './images';
 import {
   AchievementsPanel, BulbPanel, ChannelPanel, ContactPanel, InventoryPanel, JourneyPanel, MemorialPanel, PaintingPanel, PartyPanel,
@@ -270,6 +270,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   });
   useEffect(() => { if (intro) { const id = setTimeout(() => setIntro(false), 2600); return () => clearTimeout(id); } }, [intro]);
   const festivals = useMemo(() => festivalsToday(), []);
+  const [banner, setBanner] = useState<Festival | null>(null);
 
   useEffect(() => {
     // the room and the player first, then everything else
@@ -300,12 +301,11 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   useEffect(() => {
     if (hour < 4.5) unlock('night-owl');
     if (!festivals.length) return;
+    // a big banner drops in, then rises away (or click it)
     const f = festivals[festivals.length - 1];
-    const id = setTimeout(() => {
-      toast(f === 'birthday' ? `It's my ${birthdayAge()}th birthday today! There's cake on the desk.` : FESTIVAL_INFO[f].line);
-      unlock('festive');
-    }, 1800);
-    return () => clearTimeout(id);
+    const show = setTimeout(() => { setBanner(f); sfx.fanfare(); unlock('festive'); }, 1600);
+    const hide = setTimeout(() => setBanner(null), 8200);
+    return () => { clearTimeout(show); clearTimeout(hide); };
   }, []);
 
   // sunrise opens the curtains, once a day
@@ -359,8 +359,8 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [laserOn]);
 
-  // Night Shift plays synthwave on the radio
-  useEffect(() => { radio.setMode(nightShift ? 'synthwave' : 'lofi'); }, [nightShift]);
+  // Night Shift plays synthwave; during Dashain the radio plays the 8-bit Dashain loop
+  useEffect(() => { radio.setMode(nightShift ? 'synthwave' : festivals.includes('dashain') ? 'dashain' : 'lofi'); }, [nightShift]);
 
   // Being "caught": hovering the player alt-tabs him to Premiere; he turns back a moment after you leave
   const setCaughtSoon = (on: boolean) => {
@@ -703,6 +703,12 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
         ))}
       </nav>
       <p className="hub-hint">Hover me or the cats · click objects · arrow keys + Enter · keys 1-0 jump{online && ' · pin a note on the wall before you go'}</p>
+      {banner && (
+        <button className={`fest-banner fest-${banner}`} onClick={() => { sfx.back(); setBanner(null); }} aria-label={`${FESTIVAL_INFO[banner].title} (click to close)`}>
+          <span className="fest-title">{banner === 'birthday' ? `IT'S MY ${birthdayAge()}TH BIRTHDAY!` : FESTIVAL_INFO[banner].title}</span>
+          <span className="fest-line">{FESTIVAL_INFO[banner].line}</span>
+        </button>
+      )}
       {nudge && !panel && !gif && (
         <aside className="guest-nudge" role="dialog" aria-label="Pin a note">
           <p><b>📌 Before you go...</b> pin a note on my wall! It stays up for everyone who visits.</p>

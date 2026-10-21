@@ -3,8 +3,9 @@
   order, falling back if one is down. laut.fm also tells us what's playing.
 */
 import { useEffect, useState } from 'react';
+import { asset } from './media';
 
-type Station = { name: string; url: string; nowPlaying?: string };
+type Station = { name: string; url: string; nowPlaying?: string; loop?: boolean; title?: string };
 const LOFI: Station[] = [
   { name: 'laut.fm/lofi', url: 'https://stream.laut.fm/lofi', nowPlaying: 'https://api.laut.fm/station/lofi/current_song' },
   { name: 'Zeno lofi', url: 'https://stream.zeno.fm/0r0xa792kwzuv' },
@@ -13,6 +14,11 @@ const LOFI: Station[] = [
 // Night Shift mode
 const SYNTH: Station[] = [
   { name: 'laut.fm/synthwave', url: 'https://stream.laut.fm/synthwave', nowPlaying: 'https://api.laut.fm/station/synthwave/current_song' },
+  ...LOFI,
+];
+// During Dashain: an original 8-bit Dashain loop (served with the site), then lofi if it fails
+const DASHAIN: Station[] = [
+  { name: 'Dashain 8-bit', url: asset('media/music/dashain-loop.ogg'), loop: true, title: 'Dashain 8-bit (looping)' },
   ...LOFI,
 ];
 let STATIONS = LOFI;
@@ -34,7 +40,7 @@ function element() {
   audio = new Audio();
   audio.preload = 'none';
   audio.volume = 0;
-  audio.addEventListener('playing', () => set({ playing: true, station: STATIONS[station].name }));
+  audio.addEventListener('playing', () => set({ playing: true, station: STATIONS[station].name, ...(STATIONS[station].title ? { title: STATIONS[station].title } : {}) }));
   audio.addEventListener('pause', () => set({ playing: false }));
   audio.addEventListener('error', () => {
     // try the next station
@@ -62,6 +68,7 @@ function start() {
   const a = element();
   // reconnect to the live edge rather than resuming a stale buffer
   a.src = STATIONS[station].url;
+  a.loop = !!STATIONS[station].loop;
   a.play().then(() => fadeTo(level())).catch(() => {
     // autoplay blocked until the visitor interacts; retry on the first click/key
     const retry = () => { if (wanted) start(); };
@@ -72,8 +79,8 @@ function start() {
 
 export const radio = {
   /* switch genre (Night Shift plays synthwave); reconnects if it's on */
-  setMode(mode: 'lofi' | 'synthwave') {
-    const next = mode === 'synthwave' ? SYNTH : LOFI;
+  setMode(mode: 'lofi' | 'synthwave' | 'dashain') {
+    const next = mode === 'synthwave' ? SYNTH : mode === 'dashain' ? DASHAIN : LOFI;
     if (next === STATIONS) return;
     STATIONS = next;
     station = 0;
@@ -99,6 +106,7 @@ export const radio = {
 
 async function pollTitle() {
   const s = STATIONS[station];
+  if (s.title) { set({ title: s.title }); return; }
   if (!s.nowPlaying || !status.playing) { set({ title: '' }); return; }
   try {
     const d = await (await fetch(s.nowPlaying)).json();

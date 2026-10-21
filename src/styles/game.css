@@ -498,3 +498,23 @@ html{-webkit-tap-highlight-color:transparent}
 .title-trailer-window{width:min(1100px,100%);padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .title-trailer-window .trailer-video{align-self:stretch}
 .channel-trailer{margin:18px 0 22px}
+
+/* ── Festival greeting: a big banner that drops in when the room opens ── */
+.fest-banner{position:fixed;left:50%;top:clamp(70px,12vh,130px);z-index:4500;translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:12px;
+  max-width:calc(100vw - 32px);padding:22px clamp(18px,4vw,44px) 20px;cursor:pointer;text-align:center;
+  background:var(--px-panel2);color:var(--px-yellow);
+  box-shadow:0 -6px 0 0 var(--px-edge),0 6px 0 0 var(--px-edge),-6px 0 0 0 var(--px-edge),6px 0 0 0 var(--px-edge),inset 0 0 0 5px var(--px-yellow),12px 12px 0 0 rgba(7,6,15,.55);
+  animation:fest-in .45s steps(5) both,fest-out .45s steps(5) 6.15s forwards}
+.fest-title{font:400 clamp(24px,5.6vw,60px)/1.1 var(--font-display);letter-spacing:2px;text-shadow:4px 4px 0 var(--px-pink),8px 8px 0 var(--px-edge)}
+.fest-line{font:400 clamp(15px,2.2vw,20px)/1.3 var(--font-body);color:var(--px-ink);text-shadow:2px 2px 0 var(--px-edge)}
+@keyframes fest-in{from{transform:translateY(-160%)}}
+@keyframes fest-out{to{transform:translateY(-200%);opacity:0}}
+/* Dashain: tika red and marigold gold, with jamara sprouting from both corners */
+.fest-dashain{background:#b0102a;box-shadow:0 -6px 0 0 var(--px-edge),0 6px 0 0 var(--px-edge),-6px 0 0 0 var(--px-edge),6px 0 0 0 var(--px-edge),inset 0 0 0 5px #ffc93c,inset 0 0 0 9px #7a0a1c,12px 12px 0 0 rgba(7,6,15,.55)}
+.fest-dashain .fest-title{color:#ffd84a;text-shadow:4px 4px 0 #6d0816,8px 8px 0 var(--px-edge)}
+.fest-dashain::before,.fest-dashain::after{content:'';position:absolute;bottom:100%;width:6px;height:6px;background:#9fe05a;
+  box-shadow:0 -6px #9fe05a,0 -12px #9fe05a,-6px -18px #c8f07a,6px -12px #7cc63c,12px -24px #c8f07a,-12px -6px #7cc63c,18px -6px #9fe05a,12px -12px #9fe05a,-6px -30px #c8f07a}
+.fest-dashain::before{left:22px}
+.fest-dashain::after{right:28px}
+@media (max-width:640px){.fest-banner{top:24vh;width:calc(100vw - 32px)}}
+@media (prefers-reduced-motion:reduce){.fest-banner{animation:none}}

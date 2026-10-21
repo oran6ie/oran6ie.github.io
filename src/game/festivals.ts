@@ -16,12 +16,13 @@ const LUNAR: Record<'dashain' | 'tihar' | 'kukur', [string, string][]> = {
   kukur: [['2026-11-08', '2026-11-08'], ['2027-10-28', '2027-10-28']], // Kukur Tihar: the day for dogs (and, here, cats)
 };
 
-export const FESTIVAL_INFO: Record<Festival, { name: string; line: string }> = {
-  dashain: { name: 'Dashain', line: 'Kites are flying over Algarah. Happy Dashain!' },
-  tihar: { name: 'Tihar', line: 'Diyas on the windowsill and marigolds everywhere. Happy Tihar!' },
-  kukur: { name: 'Kukur Tihar', line: 'Kukur Tihar: the cats got their tika and garlands today.' },
-  christmas: { name: 'Christmas', line: 'Snow, a tiny tree and cats in Santa hats. Merry Christmas!' },
-  birthday: { name: 'Birthday', line: "It's my birthday! There's cake on the desk." },
+/* The big greeting banner when the room opens: a headline and one small line under it */
+export const FESTIVAL_INFO: Record<Festival, { name: string; title: string; line: string }> = {
+  dashain: { name: 'Dashain', title: 'HAPPY DASHAIN!', line: 'Tika, jamara and an 8-bit Dashain tune on the radio' },
+  tihar: { name: 'Tihar', title: 'HAPPY TIHAR!', line: 'Diyas on the windowsill and marigolds everywhere' },
+  kukur: { name: 'Kukur Tihar', title: 'HAPPY KUKUR TIHAR!', line: 'The cats got their tika and garlands today' },
+  christmas: { name: 'Christmas', title: 'MERRY CHRISTMAS!', line: 'Snow, a tiny tree and cats in Santa hats' },
+  birthday: { name: 'Birthday', title: "IT'S MY BIRTHDAY!", line: "There's cake on the desk" },
 };
 
 function homeDate(d = new Date()) {
