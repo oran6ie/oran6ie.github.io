@@ -21,7 +21,7 @@ export const player = {
 /* Start screen */
 export const title = {
   tagline: 'Video Editor · Motion Designer',
-  menu: ['Start Game', 'Quick View', 'Options', 'Credits'] as const,
+  menu: ['Start Game', 'Watch Trailer', 'Quick View', 'Options', 'Credits'] as const,
   credits: [
     ['Design & code', 'Alankrit Thapa'],
     ['Built with', 'React + Vite'],

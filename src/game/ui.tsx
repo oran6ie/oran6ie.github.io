@@ -1,9 +1,21 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { EMAIL } from '../content/site';
 import { useEscape, useScrollLock } from '../lib/hooks';
+import { asset } from '../lib/media';
+import { radio } from '../lib/radio';
 import { spriteSize, spriteURL, type Sprite } from '../lib/pixel';
 import { sfx } from '../lib/sfx';
 import { unlock } from './achievements';
+
+/* The room's trailer (made from the room itself). The radio steps back while it plays. */
+export function TrailerVideo({ autoPlay = false }: { autoPlay?: boolean }) {
+  useEffect(() => () => radio.duck(false), []);
+  return (
+    <video className="trailer-video" src={asset('media/trailer/oran6ie-trailer.mp4')} poster={asset('media/trailer/poster.jpg')}
+      controls playsInline autoPlay={autoPlay} preload="metadata"
+      onPlay={() => radio.duck(true)} onPause={() => radio.duck(false)} onEnded={() => radio.duck(false)} />
+  );
+}
 
 /* A sprite as a crisp, scaled-up <img>. */
 export function PixelSprite({ sprite, scale = 3, className, alt = '' }: { sprite: Sprite; scale?: number; className?: string; alt?: string }) {

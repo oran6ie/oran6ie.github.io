@@ -10,7 +10,7 @@ import { img } from '../images';
 
 type Level = 'floor' | 'bed' | 'desk' | 'sill';
 type Step =
-  | { kind: 'walk'; x: number; y: number }
+  | { kind: 'walk'; x: number; y: number; run?: boolean } // run: scared, much faster
   | { kind: 'jump'; x: number; y: number; level: Level; near?: boolean } // near: land beside the take-off point
   | { kind: 'rest'; pose: string; dur: number; zz?: boolean; say?: string; face?: 1 | -1; spot?: string; dark?: boolean; eat?: boolean }
   | { kind: 'chase' }; // following the laser dot
@@ -119,10 +119,11 @@ function onSurface(level: Level, x: number, y: number) {
 function choose(c: CatState, all: CatState[]): Step[] {
   const cat = c.cat, poses = POSES[cat.id];
   const taken = new Set(all.filter((o) => o !== c).map((o) => o.spot));
-  // thunderstorm: everyone but fearless Lebu hides under the bed (Bibi first, always)
+  // thunderstorm: everyone but fearless Lebu hides under the bed (Bibi first, always, and she runs)
   if (env.storm && cat.id !== 'lebu' && (cat.id === 'bibi' || Math.random() < 0.7)) {
+    const run = cat.id === 'bibi';
     return [
-      ...route(c, 'floor', rand(UNDER_BED.x0, UNDER_BED.x1), UNDER_BED.y),
+      ...route(c, 'floor', rand(UNDER_BED.x0, UNDER_BED.x1), UNDER_BED.y).map((s) => (s.kind === 'walk' ? { ...s, run } : s)),
       { kind: 'rest', pose: 'loaf' in POSE_SET[cat.id] ? 'loaf' : 'curl', dur: rand(15, 30), dark: true, spot: 'under-bed' },
     ];
   }
@@ -246,7 +247,7 @@ export function createCats(hooks: CatHooks = {}) {
       c.t += dt;
       if (s.kind === 'walk') {
         const dx = s.x - c.x, dy = s.y - c.y, d = Math.hypot(dx, dy);
-        const v = SPEED[c.cat.id] * dt;
+        const v = SPEED[c.cat.id] * (s.run ? 4.5 : 1) * dt;
         c.pose = 'walk'; c.zz = false; c.spot = '';
         if (Math.abs(dx) > 0.5) c.dir = dx > 0 ? 1 : -1;
         if (d <= v) { c.x = s.x; c.y = s.y; c.step = null; }
@@ -296,7 +297,8 @@ export function createCats(hooks: CatHooks = {}) {
     }
   }
 
-  function draw(ctx: CanvasRenderingContext2D, c: CatState, t: number, animate: boolean, decor: Decor = {}) {
+  // hidden: tucked under the bed, so no speech bubble or Zs poking out above it
+  function draw(ctx: CanvasRenderingContext2D, c: CatState, t: number, animate: boolean, decor: Decor = {}, hidden = false) {
     const im = img(`cats/${c.cat.id}-${c.pose}`);
     if (!im) return;
     c.w = im.width; c.h = im.height;
@@ -321,6 +323,7 @@ export function createCats(hooks: CatHooks = {}) {
     ctx.restore();
     if (!c.dark) drawDecor(ctx, `${c.cat.id}-${c.pose}`, im, x, y - lift, face as 1 | -1, decor);
 
+    if (hidden) return;
     if (c.zz && animate) {
       for (let i = 0; i < 3; i++) {
         const k = (t * 0.5 + i / 3) % 1;

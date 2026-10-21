@@ -9,6 +9,9 @@ type Props = {
   className?: string;
 };
 
+// ?trailer: no real-time loop; a recording script steps frames itself with window.__pixelTick(dt)
+const MANUAL = typeof location !== 'undefined' && new URLSearchParams(location.search).has('trailer');
+
 /* Low-res canvas scaled up with crisp pixels; runs `frame` at ~30fps while visible. */
 export function PixelCanvas({ width, height, frame, className }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -18,6 +21,14 @@ export function PixelCanvas({ width, height, frame, className }: Props) {
   useEffect(() => {
     const ctx = ref.current!.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
+    if (MANUAL) {
+      let t = 0;
+      const w = window as unknown as { __pixelTick?: (dt: number) => void };
+      const tick = (dt: number) => { t += dt; frameRef.current(ctx, t, dt); };
+      w.__pixelTick = tick;
+      frameRef.current(ctx, 0, 0);
+      return () => { if (w.__pixelTick === tick) delete w.__pixelTick; };
+    }
     let raf = 0, last = performance.now(), acc = 0;
     const start = last;
     const loop = (now: number) => {

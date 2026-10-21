@@ -14,6 +14,9 @@ const GW = 320, GH = 120;
 const best = (key: string) => { try { return Number(localStorage.getItem(key) ?? 0); } catch { return 0; } };
 const saveBest = (key: string, v: number) => { try { localStorage.setItem(key, String(v)); } catch { /* ignore */ } };
 
+// ?trailer: a recording script steps the game itself (window.__arcadeTick / __arcadePress)
+const MANUAL = typeof location !== 'undefined' && new URLSearchParams(location.search).has('trailer');
+
 /* Shared game loop on a crisp low-res canvas; `press` fires on Space, click or tap */
 function useGame(step: (g: CanvasRenderingContext2D, dt: number) => void, press: () => void) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -22,6 +25,12 @@ function useGame(step: (g: CanvasRenderingContext2D, dt: number) => void, press:
   useEffect(() => {
     const g = ref.current!.getContext('2d')!;
     g.imageSmoothingEnabled = false;
+    if (MANUAL) {
+      const w = window as unknown as { __arcadeTick?: (dt: number) => void; __arcadePress?: () => void };
+      w.__arcadeTick = (dt) => stepRef.current(g, dt);
+      w.__arcadePress = () => pressRef.current();
+      return () => { delete w.__arcadeTick; delete w.__arcadePress; };
+    }
     let raf = 0, last = performance.now();
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
@@ -41,6 +50,7 @@ function CatDash() {
   const s = useRef({ mode: 'ready' as 'ready' | 'run' | 'over', y: 0, vy: 0, t: 0, speed: 90, score: 0, obstacles: [] as { x: number; r: number; passed: boolean }[], next: 1.2 });
   const [hi, setHi] = useState(() => best('at_hi_dash'));
   const GROUND = 100;
+  if (MANUAL) (window as unknown as { __dash: unknown }).__dash = s.current; // the trailer recorder auto-plays
   const press = () => {
     const g = s.current;
     sfx.warm();

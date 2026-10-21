@@ -4,9 +4,10 @@ import { sfx } from '../lib/sfx';
 import { PixelCanvas } from './PixelCanvas';
 import { createTitleScene, H, W } from './scenes/titleScene';
 import { setSetting, useSettings } from './settings';
+import { TrailerVideo } from './ui';
 
 type Props = { onStart: () => void; onQuick: () => void };
-type Sub = null | 'options' | 'credits';
+type Sub = null | 'options' | 'credits' | 'trailer';
 
 export function StartScreen({ onStart, onQuick }: Props) {
   const settings = useSettings();
@@ -29,6 +30,7 @@ export function StartScreen({ onStart, onQuick }: Props) {
     const item = title.menu[i];
     if (item === 'Start Game') { sfx.start(); onStart(); }
     else if (item === 'Quick View') { sfx.select(); onQuick(); }
+    else if (item === 'Watch Trailer') { sfx.open(); setSub('trailer'); }
     else if (item === 'Options') { sfx.select(); setSub('options'); setOptSel(0); }
     else { sfx.select(); setSub('credits'); }
   };
@@ -41,6 +43,10 @@ export function StartScreen({ onStart, onQuick }: Props) {
       const down = e.key === 'ArrowDown' || e.key === 's';
       const ok = e.key === 'Enter' || e.key === ' ';
       if (up || down || ok) e.preventDefault();
+      if (sub === 'trailer') {
+        if (e.key === 'Escape') { sfx.back(); setSub(null); }
+        return;
+      }
       if (sub === 'credits') {
         if (ok || e.key === 'Escape') { sfx.back(); setSub(null); }
         return;
@@ -123,6 +129,16 @@ export function StartScreen({ onStart, onQuick }: Props) {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {sub === 'trailer' && (
+          <div className="title-trailer" role="dialog" aria-label="Trailer">
+            <div className="px-window title-trailer-window">
+              <div className="px-window-title">Trailer</div>
+              <TrailerVideo autoPlay />
+              <button className="px-btn" onClick={() => { sfx.back(); setSub(null); }}>Back</button>
+            </div>
           </div>
         )}
 

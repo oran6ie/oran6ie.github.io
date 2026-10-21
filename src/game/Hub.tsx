@@ -24,6 +24,7 @@ import { PixelCanvas } from './PixelCanvas';
 import { go } from './route';
 import { cheer } from './scenes/cats';
 import { createRoomScene, H, HOTSPOTS, W, type Look, type Toy } from './scenes/roomScene';
+import type { BulbMode } from './bulb';
 import { getSettings, setSetting, useSettings } from './settings';
 import { GamePanel, PixelSprite, toast } from './ui';
 import { homeHour, useWorld } from './world';
@@ -106,6 +107,8 @@ function panelFor(key: LocationKey, look: Look) {
 
 const isTouch = () => typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches;
 const query = (k: string) => new URLSearchParams(location.search).get(k);
+// ?trailer: frames are stepped by a recording script, which drives the room through window.__trailer
+const TRAILER = query('trailer') !== null;
 
 // the hoodie is in the wardrobe too, and comes out by itself on cold nights
 const OUTFITS = ['jersey', 'tee', 'tank', 'knit', 'polo', 'hoodie'];
@@ -329,7 +332,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
 
   // every so often a Valorant round ends: an ACE or a DEFEAT
   useEffect(() => {
-    if (!settings.motion) return;
+    if (!settings.motion || TRAILER) return;
     let id = 0;
     const schedule = (first = false) => {
       id = window.setTimeout(() => {
@@ -564,6 +567,26 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
     left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, key,
   });
   const toyState = { curtains: settings.curtains, laser: laserOn, nightShift };
+
+  // the trailer recorder's remote control (fresh closures every render)
+  useEffect(() => {
+    if (!TRAILER) return;
+    (window as unknown as { __trailer: unknown }).__trailer = {
+      scene,
+      caught: (on: boolean) => { clearTimeout(caughtTimer.current); setCaught(on); if (on) setWantClip(true); },
+      outfit: (o: string, hair?: 'long' | 'short') => { if (hair) setLook({ outfit: o, hair }); else changeOutfit(o); },
+      look: () => look,
+      feed: () => { food.current = 0; feedCats(); },
+      laser: (p: { x: number; y: number } | null) => { setLaserOn(!!p); laser.current = p; },
+      nightShift: (on: boolean) => setNightShift(on),
+      curtains: (closed: boolean) => setSetting('curtains', closed),
+      bulb: (mode: BulbMode) => setSetting('bulb', mode),
+      match: (kind: 'ace' | 'defeat') => { match.current = { kind, at: clock.current }; },
+      toy: (name: Toy) => { toy.current = { name, at: clock.current }; },
+      say: (id: CatId, text: string) => { const c = scene.cats.find((k) => k.cat.id === id); if (c) scene.say(c, text); },
+      ready: () => !!img('room') && playerImages(look).every((n) => img(n)),
+    };
+  });
   const roomClass = ['room', catHover && 'on-cat', laserOn && 'laser-mode', intro && settings.motion && 'intro', nightShift && 'night-shift'].filter(Boolean).join(' ');
 
   return (

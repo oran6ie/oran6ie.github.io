@@ -16,7 +16,7 @@ import { BULB_PRESETS } from './bulb';
 import { go } from './route';
 import { setSetting, useSettings } from './settings';
 import { ACHIEVEMENTS, unlock, useAchievements } from './achievements';
-import { CopyEmailButton, Dialogue, PixelSprite } from './ui';
+import { CopyEmailButton, Dialogue, PixelSprite, TrailerVideo } from './ui';
 import { getNotes, online, postNote, useOnlineStats, type Note } from '../lib/online';
 import { mood } from './scenes/cats';
 import { HOME, homeTime, moonPhaseName, getMoonPhase, timeOfDay, useWorld } from './world';
@@ -583,6 +583,10 @@ export function ChannelPanel() {
         <a className="px-btn channel-sub" href={`${youtube.url}?sub_confirmation=1`} target="_blank" rel="noopener noreferrer">Subscribe</a>
       </header>
       <p className="body-text small">Lyric videos, music edits and AMVs. My Radio by Bershy lyric videos took off and grew the channel past 10K subscribers.</p>
+      <div className="channel-trailer">
+        <h4 className="px-h3">▶ The room's trailer</h4>
+        <TrailerVideo />
+      </div>
       {playing && (
         <div className="detail-media channel-player">
           <VideoEmbed value={`https://youtu.be/${playing}`} autoplay />

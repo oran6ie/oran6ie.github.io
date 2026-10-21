@@ -333,7 +333,8 @@ export function createRoomScene() {
     if (lightning) { ctx.fillStyle = 'rgba(220,230,255,0.18)'; ctx.fillRect(0, 0, W, H); }
 
     // keep a copy of the bed's side (mattress edge + rail) to draw back over cats hiding underneath
-    const hiding = cats.state.some((c) => c.level === 'floor' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w);
+    const underBed = (c: (typeof cats.state)[number]) => c.level === 'floor' && c.y < FLOOR_FRONT && c.x > BED_FRONT.x && c.x < BED_FRONT.x + BED_FRONT.w;
+    const hiding = cats.state.some(underBed);
     if (hiding) {
       bedFront.width = BED_FRONT.w; bedFront.height = BED_FRONT.h;
       bedFront.getContext('2d')!.drawImage(ctx.canvas, BED_FRONT.x, BED_FRONT.y, BED_FRONT.w, BED_FRONT.h, 0, 0, BED_FRONT.w, BED_FRONT.h);
@@ -355,7 +356,7 @@ export function createRoomScene() {
     };
     const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({
       // a cat in mid-leap is in front of the bed, never tucked under it
-      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor) }));
+      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor, underBed(c)) }));
     // drawn after every cat further back than the bed's front edge, so they all end up underneath
     if (hiding) actors.push({ y: FLOOR_FRONT - 0.5, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
     if (pim) actors.push({
