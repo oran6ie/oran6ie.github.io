@@ -356,7 +356,14 @@ export function createRoomScene() {
     };
     const actors: { y: number; draw: () => void }[] = cats.state.filter((c) => c.level !== 'sill').map((c) => ({
       // a cat in mid-leap is in front of the bed, never tucked under it
-      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => cats.draw(ctx, c, t, animate, decor, underBed(c)) }));
+      y: c.step?.kind === 'jump' ? Math.max(c.y, FLOOR_FRONT + 4) : c.y, draw: () => {
+        if (!underBed(c)) { cats.draw(ctx, c, t, animate, decor); return; }
+        // under the bed: only what's below the rail shows (a raised tail used to poke up over the mattress)
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0, BED_FRONT.y + BED_FRONT.h, W, H); ctx.clip();
+        cats.draw(ctx, c, t, animate, decor, true);
+        ctx.restore();
+      } }));
     // drawn after every cat further back than the bed's front edge, so they all end up underneath
     if (hiding) actors.push({ y: FLOOR_FRONT - 0.5, draw: () => ctx.drawImage(bedFront, BED_FRONT.x, BED_FRONT.y) });
     if (pim) actors.push({

@@ -317,7 +317,7 @@ export function createCats(hooks: CatHooks = {}) {
     const glance = animate && resting && !c.zz && Math.sin(t * 0.7 + c.cat.id.charCodeAt(0)) > 0.93;
     const face = glance ? -c.dir : c.dir;
     ctx.save();
-    if (c.dark) ctx.filter = 'brightness(0.45) saturate(0.6)'; // in the shadow under the bed
+    if (c.dark || hidden) ctx.filter = 'brightness(0.45) saturate(0.6)'; // in the shadow under the bed, walking in too
     if (face === -1) { ctx.translate(x + im.width, 0); ctx.scale(-1, 1); ctx.translate(-x, 0); }
     ctx.drawImage(im, x, y);
     if (lift) {
