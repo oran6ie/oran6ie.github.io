@@ -18,7 +18,7 @@ const LUNAR: Record<'dashain' | 'tihar' | 'kukur', [string, string][]> = {
 
 /* The big greeting banner when the room opens: a headline and one small line under it */
 export const FESTIVAL_INFO: Record<Festival, { name: string; title: string; line: string }> = {
-  dashain: { name: 'Dashain', title: 'HAPPY DASHAIN!', line: 'Tika, jamara and an 8-bit Dashain tune on the radio' },
+  dashain: { name: 'Dashain', title: 'HAPPY DASHAIN!', line: 'Tika, jamara and 8-bit Dashain music on the radio' },
   tihar: { name: 'Tihar', title: 'HAPPY TIHAR!', line: 'Diyas on the windowsill and marigolds everywhere' },
   kukur: { name: 'Kukur Tihar', title: 'HAPPY KUKUR TIHAR!', line: 'The cats got their tika and garlands today' },
   christmas: { name: 'Christmas', title: 'MERRY CHRISTMAS!', line: 'Snow, a tiny tree and cats in Santa hats' },

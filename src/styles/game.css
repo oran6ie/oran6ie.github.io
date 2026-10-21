@@ -518,3 +518,6 @@ html{-webkit-tap-highlight-color:transparent}
 .fest-dashain::after{right:28px}
 @media (max-width:640px){.fest-banner{top:24vh;width:calc(100vw - 32px)}}
 @media (prefers-reduced-motion:reduce){.fest-banner{animation:none}}
+.hud-radio.switch{cursor:pointer;font:inherit;color:inherit}
+.hud-radio.switch b{color:var(--px-yellow);font-weight:400}
+.hud-radio.switch:hover .hud-radio-text,.hud-radio.switch:focus-visible .hud-radio-text{color:var(--px-yellow)}

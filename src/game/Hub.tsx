@@ -189,10 +189,18 @@ function Hud({ onOpen, look, radioStatus }: { onOpen: (k: LocationKey) => void; 
           </label>
         )}
         {settings.radio && radioStatus.playing && (
-          <div className="hud-radio" aria-live="polite">
-            <span className="hud-radio-eq" aria-hidden="true"><i /><i /><i /></span>
-            <span className="hud-radio-text">{radioStatus.title || 'Lofi radio'}</span>
-          </div>
+          radioStatus.switchable ? (
+            // two tracks to choose from (the Dashain loops): click to swap
+            <button className="hud-radio switch" title="Switch track" onClick={() => { sfx.select(); radio.next(); }}>
+              <span className="hud-radio-eq" aria-hidden="true"><i /><i /><i /></span>
+              <span className="hud-radio-text">{radioStatus.title} <b aria-hidden="true">⇄</b></span>
+            </button>
+          ) : (
+            <div className="hud-radio" aria-live="polite">
+              <span className="hud-radio-eq" aria-hidden="true"><i /><i /><i /></span>
+              <span className="hud-radio-text">{radioStatus.title || 'Lofi radio'}</span>
+            </div>
+          )
         )}
         <button className="px-btn small ghost" onClick={() => { sfx.back(); go(''); }}>Menu</button>
       </nav>

@@ -94,8 +94,12 @@ function route(c: CatState, level: Level, x: number, y: number): Step[] {
     if (level === 'sill') steps.push({ kind: 'jump', x: SILL.x, y: SILL.y, level: 'sill' });
   }
   if (level === 'desk') {
-    steps.push({ kind: 'walk', x: DESK.x - 6, y: FLOOR.y0 + 6 });
-    steps.push({ kind: 'jump', x: DESK.x, y: DESK.y, level: 'desk' });
+    // already up there: just walk along the desk (walking to the floor spot from up here was the "float")
+    if (cur === 'desk') steps.push({ kind: 'walk', x: Math.max(322, Math.min(395, x)), y: DESK.y });
+    else {
+      steps.push({ kind: 'walk', x: DESK.x - 6, y: FLOOR.y0 + 6 });
+      steps.push({ kind: 'jump', x: DESK.x, y: DESK.y, level: 'desk' });
+    }
   }
   return steps;
 }

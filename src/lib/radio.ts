@@ -16,9 +16,10 @@ const SYNTH: Station[] = [
   { name: 'laut.fm/synthwave', url: 'https://stream.laut.fm/synthwave', nowPlaying: 'https://api.laut.fm/station/synthwave/current_song' },
   ...LOFI,
 ];
-// During Dashain: an original 8-bit Dashain loop (served with the site), then lofi if it fails
+// During Dashain: two 8-bit loops served with the site (click the now-playing label to swap), then lofi if they fail
 const DASHAIN: Station[] = [
-  { name: 'Dashain 8-bit', url: asset('media/music/dashain-loop.ogg'), loop: true, title: 'Dashain 8-bit (looping)' },
+  { name: 'Dashain Aayo 8-bit', url: asset('media/music/dashain-aayo-loop.ogg'), loop: true, title: 'Dashain Aayo · 8-bit' },
+  { name: 'Malashri 8-bit', url: asset('media/music/dashain-loop.ogg'), loop: true, title: 'Malashri · 8-bit' },
   ...LOFI,
 ];
 let STATIONS = LOFI;
@@ -31,7 +32,7 @@ let station = 0;
 let wanted = false;
 let fadeTimer = 0;
 const listeners = new Set<() => void>();
-export type RadioStatus = { playing: boolean; title: string; station: string };
+export type RadioStatus = { playing: boolean; title: string; station: string; switchable?: boolean };
 let status: RadioStatus = { playing: false, title: '', station: STATIONS[0].name };
 const set = (s: Partial<typeof status>) => { status = { ...status, ...s }; listeners.forEach((l) => l()); };
 
@@ -40,7 +41,7 @@ function element() {
   audio = new Audio();
   audio.preload = 'none';
   audio.volume = 0;
-  audio.addEventListener('playing', () => set({ playing: true, station: STATIONS[station].name, ...(STATIONS[station].title ? { title: STATIONS[station].title } : {}) }));
+  audio.addEventListener('playing', () => set({ playing: true, station: STATIONS[station].name, switchable: STATIONS.filter((s) => s.loop).length > 1 && !!STATIONS[station].loop, ...(STATIONS[station].title ? { title: STATIONS[station].title } : {}) }));
   audio.addEventListener('pause', () => set({ playing: false }));
   audio.addEventListener('error', () => {
     // try the next station
@@ -85,6 +86,13 @@ export const radio = {
     STATIONS = next;
     station = 0;
     set({ title: '', station: STATIONS[0].name });
+    if (wanted) { audio?.pause(); start(); }
+  },
+  /* swap to the next of the looping tracks (the two Dashain loops) */
+  next() {
+    const loops = STATIONS.map((s, i) => (s.loop ? i : -1)).filter((i) => i >= 0);
+    if (loops.length < 2) return;
+    station = loops[(loops.indexOf(station) + 1) % loops.length];
     if (wanted) { audio?.pause(); start(); }
   },
   setVolume(v: number) {
