@@ -5,13 +5,13 @@
 
 export const cv = {
   mono: 'AT',
-  role: 'Lead Video Editor & Sr. Graphic Designer',
+  role: 'Senior Video Editor · WHACK Sports',
   eyebrow: 'Creative Operations · Motion & Visual · REF AT-2026-KOL',
   first: 'Alankrit',
   last: 'Thapa',
-  subtitle: 'Lead Video Editor & Senior Graphic Designer',
+  subtitle: 'Senior Video Editor & Motion Designer',
   location: 'Kolkata, India',
-  bio: 'Lead Video Editor and Motion Designer with a BFA — specialising in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery. Available for full-time and remote roles.',
+  bio: 'Senior Video Editor and Motion Designer with a BFA — specialising in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery. Available for full-time and remote roles.',
   skills: [
     { name: 'Adobe Premiere Pro', pct: 96 },
     { name: 'Adobe After Effects', pct: 94 },
@@ -21,7 +21,13 @@ export const cv = {
   ],
   experience: [
     {
-      from: 'Apr 2025', to: 'Present',
+      from: 'Jul 2026', to: 'Present',
+      role: 'Senior Video Editor',
+      where: 'WHACK Sports',
+      desc: 'Editing sports content as Senior Video Editor at WHACK Sports.',
+    },
+    {
+      from: 'Apr 2025', to: 'Apr 2026',
       role: 'Lead Video Editor & Senior Graphic Designer',
       where: 'Deployed · India · Remote / On-site',
       desc: 'Spearheading post-production for promotional campaigns and e-commerce assets. Blending high-fidelity video editing with motion graphics to produce conversion-optimised content across Amazon, YouTube, and digital storefronts.',

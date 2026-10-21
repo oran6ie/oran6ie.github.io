@@ -207,7 +207,7 @@ export function JourneyPanel() {
           <div>
             <div className="journey-meta">{x.from} — {x.to}{x.current && <span className="blink"> · You are here</span>}</div>
             <div className="journey-role">{x.role}</div>
-            <div className="journey-where">{x.company.split(' · ')[0]} · {x.location}</div>
+            <div className="journey-where">{[x.company.split(' · ')[0], x.location].filter(Boolean).join(' · ')}</div>
             <p className="body-text small">{x.desc}</p>
           </div>
         </li>

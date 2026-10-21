@@ -49,7 +49,7 @@ export function PlayerCv() {
                   <div>
                     <div className="pcv-when">{x.from} — {x.to}{x.current ? ' · Current' : ''}</div>
                     <div className="pcv-role">{x.role}</div>
-                    <div className="pcv-where">{x.company.split(' · ')[0]} · {x.location}</div>
+                    <div className="pcv-where">{[x.company.split(' · ')[0], x.location].filter(Boolean).join(' · ')}</div>
                     <p>{x.desc}</p>
                   </div>
                 </li>

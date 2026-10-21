@@ -11,7 +11,7 @@ export const player = {
   name: 'ALANKRIT',
   surname: 'THAPA',
   className: 'Video Editor · Motion Designer',
-  title: 'Lead Video Editor & Senior Graphic Designer',
+  title: 'Senior Video Editor at WHACK Sports',
   home: 'Kalimpong, W.B.',
   base: 'Kolkata, India',
   status: 'Available — accepting new quests',

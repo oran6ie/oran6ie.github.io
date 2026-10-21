@@ -14,17 +14,17 @@ export const LINKS = {
 
 export const hero = {
   name: 'Alankrit Thapa',
-  meta: ['Kalimpong, W.B.', 'REF · AT-2026', 'Status · Deployed'],
+  meta: ['Kalimpong, W.B.', 'REF · AT-2026', 'Status · WHACK Sports'],
   // Cycled by the typewriter under the name
-  roles: ['Lead Video Editor', 'Senior Graphic Designer', 'Motion Designer', 'Visual Storyteller'],
-  bio: 'Lead Video Editor and Motion Designer with a BFA — specializing in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery.',
+  roles: ['Senior Video Editor', 'Motion Designer', 'Graphic Designer', 'Visual Storyteller'],
+  bio: 'Senior Video Editor and Motion Designer with a BFA — specializing in high-energy promotional content, cinematic apparel campaigns, and digital narratives that hold attention. Clean cuts, dynamic motion, conversion-optimised assets from raw footage to final delivery.',
   stats: [
-    { value: '4+', label: 'Years Active' },
+    { value: '5+', label: 'Years Active' },
     { value: "'21", label: 'Active Since' },
   ],
   ticker: [
-    'Lead Video Editor', 'Motion Designer', 'Graphic Designer', 'Kolkata, India', 'Available Full-Time',
-    'BFA Applied Arts', 'Premiere Pro', 'After Effects', '4+ Years', 'Narrative Edit', 'VFX', 'UI Motion',
+    'Senior Video Editor', 'WHACK Sports', 'Motion Designer', 'Graphic Designer', 'Kolkata, India',
+    'BFA Applied Arts', 'Premiere Pro', 'After Effects', '5+ Years', 'Narrative Edit', 'VFX', 'UI Motion',
   ],
 };
 
@@ -32,7 +32,7 @@ export const intro = {
   sup: 'Creative Operations · Motion & Visual',
   first: 'Alankrit',
   last: 'Thapa',
-  role: 'Lead Video Editor & Senior Graphic Designer',
+  role: 'Senior Video Editor · WHACK Sports',
 };
 
 export const about = {
@@ -60,9 +60,17 @@ export const languages = [
 
 export const experience = [
   {
-    from: 'Apr 2025',
+    from: 'Jul 2026',
     to: 'Present',
     current: true,
+    company: 'WHACK Sports',
+    role: 'Senior Video Editor',
+    location: '',
+    desc: 'Editing sports content as Senior Video Editor at WHACK Sports.',
+  },
+  {
+    from: 'Apr 2025',
+    to: 'Apr 2026',
     company: 'Deployed · India',
     role: 'Lead Video Editor & Senior Graphic Designer',
     location: 'India · Remote / On-site',
