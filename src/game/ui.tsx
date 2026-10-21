@@ -11,7 +11,7 @@ import { unlock } from './achievements';
 export function TrailerVideo({ autoPlay = false }: { autoPlay?: boolean }) {
   useEffect(() => () => radio.duck(false), []);
   return (
-    <video className="trailer-video" src={asset('media/trailer/oran6ie-trailer.mp4')} poster={asset('media/trailer/poster.jpg')}
+    <video className="trailer-video" src={asset('media/trailer/oran6ie-trailer-v2.mp4')} poster={asset('media/trailer/poster.jpg')}
       controls playsInline autoPlay={autoPlay} preload="metadata"
       onPlay={() => radio.duck(true)} onPause={() => radio.duck(false)} onEnded={() => radio.duck(false)} />
   );
