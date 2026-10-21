@@ -18,7 +18,7 @@ import { birthdayAge, FESTIVAL_INFO, festivalsToday, type Festival } from './fes
 import { img, MANIFEST, preload } from './images';
 import {
   AchievementsPanel, BulbPanel, ChannelPanel, ContactPanel, InventoryPanel, JourneyPanel, MemorialPanel, PaintingPanel, PartyPanel,
-  GuestbookPanel, PianoPanel, PlayerPanel, QuestPanel, ShopPanel, WindowPanel, yearsActive,
+  GuestbookPanel, NoteForm, PianoPanel, PlayerPanel, QuestPanel, ShopPanel, WindowPanel, yearsActive,
 } from './panels';
 import { PixelCanvas } from './PixelCanvas';
 import { go } from './route';
@@ -239,8 +239,9 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   const wallNotes = useWallNotes();
   const lastTopi = useRef(0);
 
-  // before you go: once per visit, ask anyone who hasn't pinned a note yet to leave one
-  // (when the mouse heads for the tab bar, or after a while in the room)
+  // before you go: once per visit, ask anyone who hasn't pinned a note yet to leave one, with the form right there.
+  // Browsers don't let a page show its own popup when the tab closes, so this catches the moment before:
+  // the mouse heading for the tab bar (desktop), coming back after switching away (phones), or a while in the room.
   const [nudge, setNudge] = useState(false);
   const nudgeState = useRef({ panel, pinned: got.has('guest') });
   nudgeState.current = { panel, pinned: got.has('guest') };
@@ -250,17 +251,30 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
     const t0 = performance.now();
     const show = () => {
       const s = nudgeState.current;
-      if (done || s.pinned || s.panel) return;
+      if (done || s.pinned || s.panel === 'guestbook') return;
       done = true;
       try { if (sessionStorage.getItem('at_nudge')) return; sessionStorage.setItem('at_nudge', '1'); } catch { /* ignore */ }
       sfx.select();
       setNudge(true);
     };
     const onLeave = (e: { clientY: number }) => { if (e.clientY <= 0) show(); };
-    const id = setInterval(() => { if (performance.now() - t0 > 75e3) show(); }, 5e3);
+    let hiddenAt = 0;
+    const onVisibility = () => {
+      if (document.hidden) hiddenAt = performance.now();
+      else if (hiddenAt && performance.now() - hiddenAt > 3000 && performance.now() - t0 > 20e3) show();
+    };
+    const id = setInterval(() => { if (performance.now() - t0 > 90e3) show(); }, 5e3);
     document.documentElement.addEventListener('mouseleave', onLeave);
-    return () => { clearInterval(id); document.documentElement.removeEventListener('mouseleave', onLeave); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { clearInterval(id); document.documentElement.removeEventListener('mouseleave', onLeave); document.removeEventListener('visibilitychange', onVisibility); };
   }, []);
+
+  useEffect(() => {
+    if (!nudge) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { sfx.back(); setNudge(false); } };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [nudge]);
 
   // room toys and moments
   const food = useRef(0);
@@ -717,14 +731,15 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
           <span className="fest-line">{FESTIVAL_INFO[banner].line}</span>
         </button>
       )}
-      {nudge && !panel && !gif && (
-        <aside className="guest-nudge" role="dialog" aria-label="Pin a note">
-          <p><b>📌 Before you go...</b> pin a note on my wall! It stays up for everyone who visits.</p>
-          <div className="btn-row">
-            <button className="px-btn small" onClick={() => { setNudge(false); open('guestbook'); }}>Pin a note</button>
-            <button className="px-btn small ghost" onClick={() => { sfx.back(); setNudge(false); }}>Not now</button>
-          </div>
-        </aside>
+      {nudge && panel !== 'guestbook' && !gif && (
+        <div className="guest-nudge-back" onClick={() => { sfx.back(); setNudge(false); }}>
+          <aside className="guest-nudge" role="dialog" aria-modal="true" aria-label="Pin a note before you go" onClick={(e) => e.stopPropagation()}>
+            <h2 className="guest-nudge-title">📌 Before you go...</h2>
+            <p className="guest-nudge-line">Pin a note on my wall! It stays up for everyone who visits.</p>
+            <NoteForm autoFocus={!isTouch()} onSent={() => window.setTimeout(() => setNudge(false), 2600)} />
+            <button className="guest-nudge-skip" onClick={() => { sfx.back(); setNudge(false); }}>Not now</button>
+          </aside>
+        </div>
       )}
 
       {panel && (

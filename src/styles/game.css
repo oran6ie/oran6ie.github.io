@@ -481,15 +481,18 @@ html{-webkit-tap-highlight-color:transparent}
 /* ── Guestbook: HUD button and the "before you go" note ── */
 .hud-pin{background:var(--px-yellow);box-shadow:0 -3px 0 0 var(--px-edge),0 3px 0 0 var(--px-edge),-3px 0 0 0 var(--px-edge),3px 0 0 0 var(--px-edge),inset 0 -3px 0 0 #c9a227,inset 0 3px 0 0 #fff4b8}
 @media (max-width:640px){.hud-pin{display:none}}
-.guest-nudge{position:fixed;right:16px;bottom:110px;z-index:4000;max-width:min(320px,calc(100vw - 32px));padding:12px 14px;
-  background:#fbf6e8;color:#3a2a2a;font:400 15px/1.35 var(--font-body);rotate:-1.5deg;
-  box-shadow:0 -3px 0 0 var(--px-edge),0 3px 0 0 var(--px-edge),-3px 0 0 0 var(--px-edge),3px 0 0 0 var(--px-edge),0 10px 0 3px rgba(0,0,0,.4);
+.guest-nudge-back{position:fixed;inset:0;z-index:4000;display:grid;place-items:center;padding:16px;background:rgba(7,6,15,.6);animation:px-fade .15s steps(3)}
+.guest-nudge{position:relative;width:min(460px,100%);padding:26px 24px 18px;background:#fbf6e8;color:#3a2a2a;rotate:-1deg;
+  box-shadow:0 -4px 0 0 var(--px-edge),0 4px 0 0 var(--px-edge),-4px 0 0 0 var(--px-edge),4px 0 0 0 var(--px-edge),12px 14px 0 2px rgba(0,0,0,.45);
   animation:nudge-in .35s steps(4)}
-.guest-nudge::before{content:'';position:absolute;top:-8px;left:50%;width:10px;height:10px;margin-left:-5px;background:var(--px-red);box-shadow:0 0 0 2px var(--px-edge)}
-.guest-nudge p{margin:0 0 8px}
-.guest-nudge b{font-family:var(--font-display);font-size:11px;font-weight:400;display:block;margin-bottom:4px;text-transform:uppercase}
-.guest-nudge .btn-row{display:flex;gap:6px;flex-wrap:wrap}
-@keyframes nudge-in{from{opacity:0;translate:0 20px}}
+.guest-nudge::before{content:'';position:absolute;top:-10px;left:50%;width:14px;height:14px;margin-left:-7px;background:var(--px-red);box-shadow:0 0 0 3px var(--px-edge)}
+.guest-nudge-title{font:400 18px/1.3 var(--font-display);color:#b0102a;margin:0 0 10px;text-transform:uppercase}
+.guest-nudge-line{font:400 18px/1.35 var(--font-body);margin:0 0 14px}
+.guest-nudge .guestbook-thanks{color:#3a2a2a}
+.guest-nudge-skip{display:block;margin:12px auto 0;font:400 10px/1 var(--font-display);text-transform:uppercase;color:#7a6a6a;padding:8px;cursor:var(--cursor-hand)}
+.guest-nudge-skip:hover,.guest-nudge-skip:focus-visible{color:#3a2a2a}
+@media (max-width:640px){.guest-nudge-back{place-items:end center}.guest-nudge{rotate:0deg;margin-bottom:8px}}
+@keyframes nudge-in{from{opacity:0;translate:0 -24px}}
 @media (prefers-reduced-motion:reduce){.work-btn,.guest-nudge{animation:none}}
 
 /* ── The trailer: start-screen window and YouTube panel ── */

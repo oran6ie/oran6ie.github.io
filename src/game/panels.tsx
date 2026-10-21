@@ -389,39 +389,43 @@ function PetsCounter() {
 
 /* ── Guestbook: notes pinned on the corkboard (approved before they show) ── */
 const NOTE_COLORS = ['#ffe066', '#ff9fd8', '#8ff0ff', '#a8f0b8', '#ffc08a'];
-export function GuestbookPanel() {
-  const [notes, setNotes] = useState<Note[] | null>(null);
+/* The note form: used in the guestbook panel and in the "before you go" note */
+export function NoteForm({ autoFocus = false, onSent }: { autoFocus?: boolean; onSent?: () => void }) {
   const [form, setForm] = useState({ name: '', msg: '', color: 0, website: '' });
   const [state, setState] = useState<'' | 'sending' | 'sent'>('');
   const [error, setError] = useState('');
-  useEffect(() => { getNotes().then(setNotes).catch(() => setNotes([])); }, []);
   const send = async (e: FormEvent) => {
     e.preventDefault();
     setState('sending'); setError('');
-    try { await postNote(form); setState('sent'); sfx.coin(); unlock('guest'); }
+    try { await postNote(form); setState('sent'); sfx.coin(); unlock('guest'); onSent?.(); }
     catch (err) { setState(''); setError((err as Error).message); sfx.locked(); }
   };
+  if (state === 'sent') return <p className="guestbook-thanks">📌 Thanks, {form.name}! Your note is pinned and will show up once I've read it.</p>;
+  return (
+    <form className="guestbook-form" onSubmit={send}>
+      <input className="px-input" placeholder="Your name" maxLength={24} required autoFocus={autoFocus} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-label="Your name" />
+      <textarea className="px-input" placeholder="Say hi, leave a tip for the cats..." maxLength={140} required rows={3} value={form.msg} onChange={(e) => setForm({ ...form, msg: e.target.value })} aria-label="Message" />
+      <input className="hp" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} aria-hidden="true" />
+      <div className="guestbook-row">
+        <div className="note-colors" role="radiogroup" aria-label="Note colour">
+          {NOTE_COLORS.map((c, i) => (
+            <button key={c} type="button" role="radio" aria-checked={form.color === i} className={form.color === i ? 'note-color on' : 'note-color'} style={{ background: c }} onClick={() => setForm({ ...form, color: i })} aria-label={`Colour ${i + 1}`} />
+          ))}
+        </div>
+        <span className="guestbook-count">{form.msg.length}/140</span>
+        <button className="px-btn" disabled={state === 'sending'}>{state === 'sending' ? 'Pinning...' : 'Pin it'}</button>
+      </div>
+      {error && <p className="guestbook-error">{error}</p>}
+    </form>
+  );
+}
+
+export function GuestbookPanel() {
+  const [notes, setNotes] = useState<Note[] | null>(null);
+  useEffect(() => { getNotes().then(setNotes).catch(() => setNotes([])); }, []);
   return (
     <div className="guestbook">
-      {state === 'sent' ? (
-        <p className="guestbook-thanks">📌 Thanks, {form.name}! Your note is pinned and will show up once I've read it.</p>
-      ) : (
-        <form className="guestbook-form" onSubmit={send}>
-          <input className="px-input" placeholder="Your name" maxLength={24} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-label="Your name" />
-          <textarea className="px-input" placeholder="Say hi, leave a tip for the cats..." maxLength={140} required rows={3} value={form.msg} onChange={(e) => setForm({ ...form, msg: e.target.value })} aria-label="Message" />
-          <input className="hp" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} aria-hidden="true" />
-          <div className="guestbook-row">
-            <div className="note-colors" role="radiogroup" aria-label="Note colour">
-              {NOTE_COLORS.map((c, i) => (
-                <button key={c} type="button" role="radio" aria-checked={form.color === i} className={form.color === i ? 'note-color on' : 'note-color'} style={{ background: c }} onClick={() => setForm({ ...form, color: i })} aria-label={`Colour ${i + 1}`} />
-              ))}
-            </div>
-            <span className="guestbook-count">{form.msg.length}/140</span>
-            <button className="px-btn" disabled={state === 'sending'}>{state === 'sending' ? 'Pinning...' : 'Pin it'}</button>
-          </div>
-          {error && <p className="guestbook-error">{error}</p>}
-        </form>
-      )}
+      <NoteForm />
       <div className="notes">
         {notes === null && <p className="body-text small">Loading notes...</p>}
         {notes?.length === 0 && <p className="body-text small">No notes yet. Be the first!</p>}
