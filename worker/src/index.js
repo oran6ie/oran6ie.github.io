@@ -4,7 +4,7 @@
   POST /pet   { n }        → adds up to 50 pets at once (the page batches them)
   POST /hello { id }       → "I'm here": keeps a visitor counted for 90 seconds
   GET  /notes              → approved guestbook notes, newest first
-  POST /notes { name, msg, color } → a new note, hidden until approved
+  POST /notes { name, msg, color } → a new note, hidden until approved; returns its id
   GET  /admin              → moderation page (needs the ADMIN_TOKEN secret)
 */
 const json = (data, status = 200, headers = {}) =>
@@ -71,8 +71,8 @@ export default {
         const ip = await ipHash(req);
         const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM notes WHERE ip = ? AND at > ?').bind(ip, Date.now() - 10 * 60e3).first();
         if ((recent?.n ?? 0) >= 2) return json({ error: 'You just pinned a note. Try again in a few minutes.' }, 429, h);
-        await env.DB.prepare('INSERT INTO notes (name, msg, color, ip, at) VALUES (?, ?, ?, ?, ?)').bind(name, msg, color, ip, Date.now()).run();
-        return json({ ok: true }, 200, h);
+        const r = await env.DB.prepare('INSERT INTO notes (name, msg, color, ip, at) VALUES (?, ?, ?, ?, ?)').bind(name, msg, color, ip, Date.now()).run();
+        return json({ ok: true, id: r.meta?.last_row_id }, 200, h);
       }
 
       // ── moderation ──

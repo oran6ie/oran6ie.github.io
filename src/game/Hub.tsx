@@ -7,10 +7,10 @@ import youtube from '../content/youtube.json';
 import type { Sprite } from '../lib/pixel';
 import { asset } from '../lib/media';
 import { radio, useRadioStatus, type RadioStatus } from '../lib/radio';
-import { addPet, online, useOnlineStats } from '../lib/online';
+import { addPet, online, useOnlineStats, useWallNotes } from '../lib/online';
 import { haptic, sfx } from '../lib/sfx';
 import { ACHIEVEMENTS, track, unlock, useAchievements } from './achievements';
-import { ArcadePanel } from './arcade';
+import { ArcadePanel, type ArcadeGame } from './arcade';
 import { badges, catPortrait, items, star, trophy } from './art/sprites';
 import { toolIconURL } from './art/toolIcons';
 import { recordRoom, type Recording } from './director';
@@ -80,6 +80,7 @@ const WIDE: LocationKey[] = ['work', 'ai', 'party', 'memorial', 'channel', 'arca
 /* Which cat to highlight when the Party panel opens from clicking a cat, and which Trophies tab to show */
 let partyFocus: CatId | null = null;
 let trophiesTab: 'mine' | 'yours' = 'mine';
+let arcadeGame: ArcadeGame = 'dash';
 
 function panelFor(key: LocationKey, look: Look) {
   switch (key) {
@@ -98,7 +99,7 @@ function panelFor(key: LocationKey, look: Look) {
     case 'piano': return <PianoPanel />;
     case 'channel': return <ChannelPanel />;
     case 'bulb': return <BulbPanel />;
-    case 'arcade': return <ArcadePanel />;
+    case 'arcade': return <ArcadePanel initialGame={arcadeGame} />;
     case 'guestbook': return <GuestbookPanel />;
   }
 }
@@ -165,6 +166,9 @@ function Hud({ onOpen, look, radioStatus }: { onOpen: (k: LocationKey) => void; 
         <button className="px-btn small hud-stars" title="Badges you have earned in the room" onClick={() => { trophiesTab = 'yours'; onOpen('achievements'); }}>
           Badges {got.size}/{ACHIEVEMENTS.length}
         </button>
+        {online && !got.has('guest') && (
+          <button className="px-btn small hud-pin" title="Leave a note on my wall" onClick={() => onOpen('guestbook')}>📌 Pin a note</button>
+        )}
         <button className="px-btn small" onClick={() => { sfx.select(); go('quick'); }}>Quick view</button>
         <a className="px-btn small" href={`${import.meta.env.BASE_URL}cv/`}>CV</a>
         <button className="px-btn small" aria-pressed={settings.radio} title={radioStatus.title ? `Now playing: ${radioStatus.title}` : '24/7 lofi radio'}
@@ -210,6 +214,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   const [caught, setCaught] = useState(false);
   const caughtTimer = useRef(0);
   const touchTurnBack = useRef(0);
+  const openOnClick = useRef(true); // false when a finger pressed the player before he'd turned around
   const toy = useRef<{ name: Toy; at: number } | null>(null);
   const clock = useRef(0);
   const [catHover, setCatHover] = useState<{ id: CatId; x: number; y: number } | null>(null);
@@ -219,6 +224,32 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   const roomRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(2);
   const radioStatus = useRadioStatus();
+  const got = useAchievements();
+  const wallNotes = useWallNotes();
+  const lastTopi = useRef(0);
+
+  // before you go: once per visit, ask anyone who hasn't pinned a note yet to leave one
+  // (when the mouse heads for the tab bar, or after a while in the room)
+  const [nudge, setNudge] = useState(false);
+  const nudgeState = useRef({ panel, pinned: got.has('guest') });
+  nudgeState.current = { panel, pinned: got.has('guest') };
+  useEffect(() => {
+    if (!online) return;
+    let done = false;
+    const t0 = performance.now();
+    const show = () => {
+      const s = nudgeState.current;
+      if (done || s.pinned || s.panel) return;
+      done = true;
+      try { if (sessionStorage.getItem('at_nudge')) return; sessionStorage.setItem('at_nudge', '1'); } catch { /* ignore */ }
+      sfx.select();
+      setNudge(true);
+    };
+    const onLeave = (e: { clientY: number }) => { if (e.clientY <= 0) show(); };
+    const id = setInterval(() => { if (performance.now() - t0 > 75e3) show(); }, 5e3);
+    document.documentElement.addEventListener('mouseleave', onLeave);
+    return () => { clearInterval(id); document.documentElement.removeEventListener('mouseleave', onLeave); };
+  }, []);
 
   // room toys and moments
   const food = useRef(0);
@@ -516,7 +547,11 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
         miko: ['MEW', 'MRRR...'], lebu: ['MEOW!', '...', 'MEOW?'], bibi: ['FOOD?', 'MEOW?'], topi: ['MRRP!', 'PRRR', 'MEOW!'],
       };
       const pool = lines[c.cat.id];
-      scene.say(c, pool[Math.floor(Math.random() * pool.length)]);
+      // double-click Topi and she races you in Cat Dash
+      const now = performance.now(), race = c.cat.id === 'topi' && now - lastTopi.current < 450;
+      lastTopi.current = c.cat.id === 'topi' && !race ? now : 0;
+      if (race) { scene.say(c, 'RACE YOU!'); arcadeGame = 'dash'; window.setTimeout(() => open('arcade'), 550); }
+      else scene.say(c, pool[Math.floor(Math.random() * pool.length)]);
       setTalking(c.cat.id);
       clearTimeout(talkTimer.current);
       talkTimer.current = window.setTimeout(() => setTalking(null), 1500);
@@ -556,6 +591,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
                 t, dt, animate: settings.motion, caught, look, clip, toy: toy.current, curtains: settings.curtains, bulb: settings.bulb,
                 laser: laserOn ? laser.current : null, food: food.current, nightShift, festivals, onAir: ON_AIR,
                 laptopClip: wantLaptop ? laptopClip : null, poofAt: poofAt.current, match: match.current, tired, cold, leak,
+                guestNotes: online ? wallNotes : null, guestInvite: !got.has('guest'),
               });
             }}
           />
@@ -571,12 +607,16 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
                 onMouseEnter={() => { setKbd(false); if (focus !== k) { sfx.move(); setFocus(k); } }}
                 onMouseLeave={() => setFocus((f) => (f === k ? null : f))}
                 onFocus={() => setFocus(k)}
+                onPointerDown={(e) => { if (k === 'player') openOnClick.current = e.pointerType !== 'touch' || caught; }}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (catClick(e)) return;
                   if (k === 'window' && settings.curtains) { toggleCurtains(); return; }
                   // touch screens can't hover: the first tap catches me, a second tap opens the card
-                  if (k === 'player' && isTouch() && !caught) {
+                  // (decided at press time: the tap's emulated hover turns me around before the click lands)
+                  const openIt = openOnClick.current;
+                  openOnClick.current = true;
+                  if (k === 'player' && !openIt) {
                     setFocus('player');
                     clearTimeout(touchTurnBack.current);
                     touchTurnBack.current = window.setTimeout(() => setFocus((f) => (f === 'player' ? null : f)), 4500);
@@ -607,10 +647,18 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
             <div className="cat-tag" style={{ left: `${catHover.x}%`, top: `${catHover.y}%` }}>
               <b>{hovered.name} {hovered.gender === 'Female' ? '♀' : '♂'}</b>
               <span>{hovered.title} · {hovered.traits[0]}</span>
-              <i>Click to say hi</i>
+              <i>{isTouch() ? 'Tap' : 'Click'} to say hi{hovered.id === 'topi' && ` · double-${isTouch() ? 'tap' : 'click'} to race`}</i>
             </div>
           )}
           {rec !== null && <div className="rec-badge" aria-live="polite">● REC {Math.round(rec * 100)}%</div>}
+          {caught && !laserOn && rec === null && (
+            // caught slacking: make me get back to editing (Beat Cut)
+            <button className="work-btn" style={{ left: `${(447 / W) * 100}%`, top: `${(318 / H) * 100}%` }}
+              onMouseEnter={() => setCaughtSoon(true)} onMouseLeave={() => setCaughtSoon(false)} onFocus={() => setCaughtSoon(true)}
+              onClick={(e) => { e.stopPropagation(); arcadeGame = 'beat'; open('arcade'); }}>
+              ▶ Make me work!
+            </button>
+          )}
         </div>
       </div>
 
@@ -623,7 +671,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
             className={focus === k ? 'hotbar-slot focus' : 'hotbar-slot'}
             onMouseEnter={() => setFocus(k)}
             onMouseLeave={() => setFocus((f) => (f === k ? null : f))}
-            onClick={() => { if (k === 'achievements') trophiesTab = 'mine'; open(k); }}
+            onClick={() => { if (k === 'achievements') trophiesTab = 'mine'; if (k === 'arcade') arcadeGame = 'dash'; open(k); }}
           >
             {i < 10 && <span className="hotbar-key">{(i + 1) % 10}</span>}
             <Icon k={k} look={look} />
@@ -631,7 +679,16 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
           </button>
         ))}
       </nav>
-      <p className="hub-hint">Hover me or the cats · click objects · arrow keys + Enter · keys 1-0 jump</p>
+      <p className="hub-hint">Hover me or the cats · click objects · arrow keys + Enter · keys 1-0 jump{online && ' · pin a note on the wall before you go'}</p>
+      {nudge && !panel && !gif && (
+        <aside className="guest-nudge" role="dialog" aria-label="Pin a note">
+          <p><b>📌 Before you go...</b> pin a note on my wall! It stays up for everyone who visits.</p>
+          <div className="btn-row">
+            <button className="px-btn small" onClick={() => { setNudge(false); open('guestbook'); }}>Pin a note</button>
+            <button className="px-btn small ghost" onClick={() => { sfx.back(); setNudge(false); }}>Not now</button>
+          </div>
+        </aside>
+      )}
 
       {panel && (
         <GamePanel

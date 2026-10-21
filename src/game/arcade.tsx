@@ -156,8 +156,9 @@ function BeatCut() {
   return <div className="arcade-game">{canvas}<p className="body-text small">Edit to the beat: press Space or tap as each cut reaches the red playhead. 80% for a trophy.</p></div>;
 }
 
-export function ArcadePanel() {
-  const [game, setGame] = useState<'dash' | 'beat'>('dash');
+export type ArcadeGame = 'dash' | 'beat';
+export function ArcadePanel({ initialGame = 'dash' }: { initialGame?: ArcadeGame }) {
+  const [game, setGame] = useState<ArcadeGame>(initialGame);
   return (
     <div className="arcade">
       <div className="px-tabs" role="tablist">

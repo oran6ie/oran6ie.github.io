@@ -61,5 +61,26 @@ export function addPet() {
 
 /* ── guestbook ── */
 export type Note = { id: number; name: string; msg: string; color: number; at: number };
-export const getNotes = () => call<{ notes: Note[] }>('/notes').then((r) => r.notes);
-export const postNote = (n: { name: string; msg: string; color: number; website: string }) => call<{ ok: true }>('/notes', n);
+
+/* the notes drawn on the room's wall: the approved ones, plus your own while it waits for approval */
+let wall: number[] | null = null, approved: Note[] = [];
+const wallListeners = new Set<() => void>();
+const myNote = () => { try { return JSON.parse(localStorage.getItem('at_my_note') ?? 'null') as { id: number; color: number } | null; } catch { return null; } };
+function setWall() {
+  const mine = myNote();
+  wall = approved.map((n) => n.color);
+  if (mine && !approved.some((n) => n.id === mine.id)) wall.unshift(mine.color);
+  wallListeners.forEach((l) => l());
+}
+
+export const getNotes = () => call<{ notes: Note[] }>('/notes').then((r) => { approved = r.notes; setWall(); return r.notes; });
+export async function postNote(n: { name: string; msg: string; color: number; website: string }) {
+  const r = await call<{ ok: true; id?: number }>('/notes', n);
+  if (r.id) { try { localStorage.setItem('at_my_note', JSON.stringify({ id: r.id, color: n.color })); } catch { /* ignore */ } setWall(); }
+  return r;
+}
+
+export function useWallNotes() {
+  useEffect(() => { if (online && wall === null) getNotes().catch(setWall); }, []);
+  return useSyncExternalStore((l) => { wallListeners.add(l); return () => wallListeners.delete(l); }, () => wall);
+}

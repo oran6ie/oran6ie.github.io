@@ -1,6 +1,6 @@
 /*
   Small code-drawn props and effects layered onto the room: kibble, the laser
-  pen and dot, the ON AIR sign, festival decorations, the roof leak, the heater,
+  pen and dot, the ON AIR sign, the guestbook notes on the wall, festival decorations, the roof leak, the heater,
   a cup of chai, a birthday cake, Night Shift lighting and match-result flashes.
   Coordinates are room pixels (640×360).
 */
@@ -50,6 +50,53 @@ export function drawOnAir(ctx: CanvasRenderingContext2D, on: boolean, t: number)
   rect(ctx, x, y, w, h, '#07060f');
   rect(ctx, x + 1, y + 1, w - 2, h - 2, lit ? '#d0142c' : '#3a1218');
   pixelText(ctx, 'ON AIR', x + 2, y + 3, lit ? '#ffe4e4' : '#6e2a32');
+}
+
+/*
+  The guestbook on the wall right of the corkboard: one little note per visitor
+  note (in its colour), and a blank "+" note in the next free spot that bobs to
+  say "pin one too". `invite` makes it glow until this visitor has pinned one.
+*/
+export const GUEST_NOTE_COLORS = ['#ffe066', '#ff9fd8', '#8ff0ff', '#a8f0b8', '#ffc08a'];
+export function drawGuestWall(ctx: CanvasRenderingContext2D, notes: number[], t: number, animate: boolean, invite: boolean) {
+  const x0 = 474, y0 = 66;
+  // a little see-through so the paper takes on the room's dim light, like the corkboard's own notes
+  ctx.globalAlpha = 0.84;
+  // the paper banner
+  rect(ctx, x0 + 1, y0 + 1, 40, 9, 'rgba(7,6,15,0.45)');
+  rect(ctx, x0, y0, 40, 9, '#f4ead0');
+  rect(ctx, x0, y0 + 8, 40, 1, '#c9b48e');
+  pixelText(ctx, 'GUESTBOOK', x0 + 2, y0 + 2, '#5a3a2a');
+  rect(ctx, x0 + 19, y0 - 1, 2, 2, '#e0303a');
+  const rnd = seeded(7);
+  const slot = (i: number) => ({ x: x0 + 1 + (i % 3) * 13 + Math.round(rnd() * 2 - 1), y: y0 + 13 + Math.floor(i / 3) * 14 + Math.round(rnd() * 2 - 1) });
+  const shown = notes.slice(0, 8);
+  shown.forEach((c, i) => {
+    const { x, y } = slot(i);
+    rect(ctx, x + 1, y + 1, 11, 11, 'rgba(7,6,15,0.45)');
+    rect(ctx, x, y, 11, 11, GUEST_NOTE_COLORS[c] ?? GUEST_NOTE_COLORS[0]);
+    rect(ctx, x + 2, y + 4, 7, 1, 'rgba(40,20,30,0.35)');
+    rect(ctx, x + 2, y + 6, 5, 1, 'rgba(40,20,30,0.35)');
+    rect(ctx, x + 2, y + 8, 6, 1, 'rgba(40,20,30,0.35)');
+    rect(ctx, x + 5, y, 2, 2, '#e0303a');
+  });
+  // the blank one, waiting for you
+  const { x, y: sy } = slot(shown.length);
+  const y = sy - (animate && Math.floor(t * 1.6) % 2 === 0 ? 1 : 0);
+  ctx.globalAlpha = 1;
+  if (invite) {
+    const a = animate ? 0.25 + 0.2 * Math.sin(t * 4) : 0.35;
+    const g = ctx.createRadialGradient(x + 5.5, y + 5.5, 1, x + 5.5, y + 5.5, 14);
+    g.addColorStop(0, `rgba(255,224,102,${a})`); g.addColorStop(1, 'rgba(255,224,102,0)');
+    ctx.fillStyle = g; ctx.fillRect(x - 10, y - 10, 31, 31);
+  }
+  ctx.globalAlpha = 0.84;
+  rect(ctx, x + 1, y + 1, 11, 11, 'rgba(7,6,15,0.45)');
+  rect(ctx, x, y, 11, 11, '#fbf6e8');
+  for (let i = 0; i < 11; i += 2) { rect(ctx, x + i, y, 1, 1, '#c9b48e'); rect(ctx, x + i, y + 10, 1, 1, '#c9b48e'); rect(ctx, x, y + i, 1, 1, '#c9b48e'); rect(ctx, x + 10, y + i, 1, 1, '#c9b48e'); }
+  pixelText(ctx, '+', x + 4, y + 3, '#d0142c');
+  rect(ctx, x + 5, y - 1, 2, 2, '#4a8cff');
+  ctx.globalAlpha = 1;
 }
 
 /* Lebu walked across the keyboard: "gggggggg" fills the editor timeline */

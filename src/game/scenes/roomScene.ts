@@ -33,7 +33,7 @@ export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
   channel: { x: 74, y: 44, w: 52, h: 24 },
   bulb: { x: 298, y: 0, w: 18, h: 50 },
   journey: { x: 322, y: 64, w: 70, h: 84 },
-  guestbook: { x: 392, y: 64, w: 78, h: 60 }, // the notes pinned on the right of the corkboard
+  guestbook: { x: 392, y: 64, w: 126, h: 62 }, // the right of the corkboard and the visitors' notes on the wall beside it
   inventory: { x: 420, y: 178, w: 28, h: 34 },  // the manga stack
   katana: { x: 368, y: 34, w: 142, h: 22 },
   wardrobe: { x: 480, y: 190, w: 72, h: 102 },
@@ -88,6 +88,8 @@ export type RoomFrame = {
   tired: boolean;                  // the small hours: yawning, chai
   cold: boolean;
   leak: boolean;
+  guestNotes: number[] | null;     // colours of the guestbook notes on the wall (null: offline, no wall)
+  guestInvite: boolean;            // this visitor hasn't pinned one yet
 };
 
 /* 0/1 px chest rise every few seconds */
@@ -296,6 +298,7 @@ export function createRoomScene() {
 
     drawSubCounter(ctx, t, animate);
     P.drawOnAir(ctx, f.onAir, t);
+    if (f.guestNotes) P.drawGuestWall(ctx, f.guestNotes, t, animate, f.guestInvite);
     if (fest.has('tihar')) P.drawTihar(ctx, t, animate);
     if (fest.has('christmas')) P.drawTree(ctx, t);
     if (fest.has('birthday')) P.drawCake(ctx, t, animate);

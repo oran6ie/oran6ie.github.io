@@ -468,3 +468,26 @@ html{-webkit-tap-highlight-color:transparent}
 .hud-online{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:var(--px-green)}
 .hud-online i{width:8px;height:8px;background:var(--px-green);box-shadow:0 0 6px var(--px-green);animation:rec-blink 2s steps(2) infinite}
 @media (max-width:640px){.hud-stars{display:none}}
+
+/* ── Caught slacking: "make me work" opens Beat Cut ── */
+.work-btn{position:absolute;transform:translate(-50%,-50%);z-index:4;cursor:pointer;white-space:nowrap;
+  font:400 10px/1 var(--font-display);text-transform:uppercase;letter-spacing:1px;color:var(--px-edge);background:var(--px-yellow);padding:8px 10px;border:0;
+  box-shadow:0 -3px 0 0 var(--px-edge),0 3px 0 0 var(--px-edge),-3px 0 0 0 var(--px-edge),3px 0 0 0 var(--px-edge),inset 0 -3px 0 0 #c9a227,0 6px 0 3px rgba(0,0,0,.35);
+  animation:work-in .3s steps(3) .5s both,work-bob 1.2s steps(2) .8s infinite}
+.work-btn:hover,.work-btn:focus-visible{background:#fff1a8;outline:none}
+@keyframes work-in{from{opacity:0;transform:translate(-50%,-20%)}}
+@keyframes work-bob{50%{transform:translate(-50%,calc(-50% - 2px))}}
+
+/* ── Guestbook: HUD button and the "before you go" note ── */
+.hud-pin{background:var(--px-yellow);box-shadow:0 -3px 0 0 var(--px-edge),0 3px 0 0 var(--px-edge),-3px 0 0 0 var(--px-edge),3px 0 0 0 var(--px-edge),inset 0 -3px 0 0 #c9a227,inset 0 3px 0 0 #fff4b8}
+@media (max-width:640px){.hud-pin{display:none}}
+.guest-nudge{position:fixed;right:16px;bottom:110px;z-index:4000;max-width:min(320px,calc(100vw - 32px));padding:12px 14px;
+  background:#fbf6e8;color:#3a2a2a;font:400 15px/1.35 var(--font-body);rotate:-1.5deg;
+  box-shadow:0 -3px 0 0 var(--px-edge),0 3px 0 0 var(--px-edge),-3px 0 0 0 var(--px-edge),3px 0 0 0 var(--px-edge),0 10px 0 3px rgba(0,0,0,.4);
+  animation:nudge-in .35s steps(4)}
+.guest-nudge::before{content:'';position:absolute;top:-8px;left:50%;width:10px;height:10px;margin-left:-5px;background:var(--px-red);box-shadow:0 0 0 2px var(--px-edge)}
+.guest-nudge p{margin:0 0 8px}
+.guest-nudge b{font-family:var(--font-display);font-size:11px;font-weight:400;display:block;margin-bottom:4px;text-transform:uppercase}
+.guest-nudge .btn-row{display:flex;gap:6px;flex-wrap:wrap}
+@keyframes nudge-in{from{opacity:0;translate:0 20px}}
+@media (prefers-reduced-motion:reduce){.work-btn,.guest-nudge{animation:none}}
