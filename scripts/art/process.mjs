@@ -131,21 +131,7 @@ const scaleTo = (img, s) => resize(img, Math.max(1, Math.round(img.w * s)), Math
   };
 }
 
-// ── Closed curtains: only the pixels that differ from the open room, in the window area ──
-{
-  const open = await raw(`${IN}/batch2/room-no-chair.png`);
-  const closed = await raw(`${IN}/batch3/room-curtains-closed.png`);
-  const X0 = 670, Y0 = 260, X1 = 1290, Y1 = 915;
-  const d = closed.data, o = open.data;
-  for (let y = 0; y < closed.h; y++) for (let x = 0; x < closed.w; x++) {
-    const i = (y * closed.w + x) * 4;
-    const inside = x >= X0 && x <= X1 && y >= Y0 && y <= Y1;
-    const diff = Math.abs(d[i] - o[i]) + Math.abs(d[i + 1] - o[i + 1]) + Math.abs(d[i + 2] - o[i + 2]);
-    const greenish = d[i + 1] > 22 && d[i + 1] > d[i] * 1.35 && d[i + 1] > d[i + 2] * 1.35;
-    if (!inside || diff < 45 || greenish) d[i + 3] = 0;
-  }
-  await save(resize(closed, ROOM_W, ROOM_H), 'room-curtains.png');
-}
+// (the window and curtains are drawn in code now; scripts/art/window.mjs paints them out of room.png)
 
 // ── Player: 6 outfits × (long/short hair) × (back = gaming, front = caught) ──
 const PLAYER_H = 190;

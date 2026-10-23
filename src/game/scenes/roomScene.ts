@@ -10,12 +10,14 @@ import { pixelText, rect } from '../../lib/pixel';
 import { bulbColor, type BulbMode } from '../bulb';
 import { sfx } from '../../lib/sfx';
 import { drawCover, img, MANIFEST, type Region } from '../images';
-import { getWorld } from '../world';
+import { getMoonPhase, getWorld, homeHour, type World } from '../world';
 import type { CatId } from '../../content/cats';
 import type { Festival } from '../festivals';
 import { bubble, createCats, env, type Decor } from './cats';
 import * as P from './props';
-import { ambient, createSky } from './sky';
+import { createOutside, createWindow } from './outside';
+import { createCurtains } from './curtains';
+import { ambient } from './sky';
 
 export const W = MANIFEST.room.w;
 export const H = MANIFEST.room.h;
@@ -27,9 +29,9 @@ export type Toy = 'pikachu' | 'curtainL' | 'curtainR' | 'katana' | 'wardrobe' | 
 export const HOTSPOTS: Record<LocationKey | Toy, Region> = {
   contact: { x: 0, y: 62, w: 56, h: 264 },
   painting: { x: 66, y: 76, w: 72, h: 120 },
-  window: { x: 210, y: 84, w: 46, h: 118 },
-  curtainL: { x: 158, y: 70, w: 50, h: 142 },
-  curtainR: { x: 258, y: 70, w: 36, h: 142 },
+  window: { x: 198, y: 85, w: 72, h: 110 },
+  curtainL: { x: 166, y: 64, w: 34, h: 148 },
+  curtainR: { x: 268, y: 64, w: 32, h: 148 },
   channel: { x: 74, y: 44, w: 52, h: 24 },
   bulb: { x: 298, y: 0, w: 18, h: 50 },
   journey: { x: 322, y: 64, w: 70, h: 84 },
@@ -188,13 +190,66 @@ function drawBulb(ctx: CanvasRenderingContext2D, c: [number, number, number] | n
   rect(ctx, BULB.x - 2, BULB.y + 1, 1, 2, c ? 'rgba(255,255,255,0.85)' : '#9a96b8'); // highlight
 }
 
+/*
+  The window is drawn in code (the room art has plain wall there): a two-sash slider in a blue frame,
+  the sill under it. Opening it slides the left sash across behind the right one (outside.js
+  createWindow draws the sashes, birds that visit the sill and rain blowing in). block: what fills
+  the screen when the camera pushes in on it.
+*/
+const GLASS = { x: 198, y: 85, w: 72, h: 110 };
+const RAIL = { x: 232, w: 5, travel: 33, cols: ['#000b0e', '#516d83', '#586782', '#526780', '#6abebf'] };
+export const WINDOW = { glass: GLASS, block: { x: 166, y: 62, w: 136, h: 152 }, look: { x: 176, y: 100 } };
+const OPEN_KEY = 'at_window_open';
+
+/* The slice of the view from the terrace (outside.js) that the window shows, and the sky state it needs */
+export const WINDOW_CROP = { x: 38, y: 64, w: GLASS.w, h: GLASS.h };
+export const outsideState = (w: World) => ({ ...w, hour: homeHour(), moonPhase: getMoonPhase() });
+
+/* The frame and sill, in the colours of the old generated window */
+function drawFrame(ctx: CanvasRenderingContext2D) {
+  const { x, y, w, h } = GLASS, x0 = x - 5, x1 = x + w + 4, y1 = y + h;
+  rect(ctx, x0 - 3, y - 11, x1 - x0 + 7, 4, '#1a193c');                       // the reveal's shadow above
+  rect(ctx, x0, y - 7, x1 - x0 + 1, y1 + 5 - (y - 7), '#000008');             // outline
+  // head: light, dark line, two blues, a teal lip catching the outside's light
+  rect(ctx, x0 + 1, y - 6, x1 - x0 - 1, 1, '#5b6483');
+  rect(ctx, x0 + 1, y - 4, x1 - x0 - 1, 1, '#5b6482');
+  rect(ctx, x0 + 1, y - 3, x1 - x0 - 1, 1, '#536382');
+  rect(ctx, x0 + 1, y - 2, x1 - x0 - 1, 1, '#6296aa');
+  // jambs: the left is lit from the glass, the right is in its own shade
+  rect(ctx, x0 + 1, y - 1, 1, h + 2, '#5b6482'); rect(ctx, x0 + 2, y - 1, 1, h + 2, '#536382'); rect(ctx, x0 + 3, y - 1, 1, h + 2, '#6296aa');
+  rect(ctx, x1 - 3, y - 1, 1, h + 2, '#4b5878'); rect(ctx, x1 - 2, y - 1, 1, h + 2, '#536382'); rect(ctx, x1 - 1, y - 1, 1, h + 2, '#5b6482');
+  // bottom rail
+  rect(ctx, x0 + 1, y1 + 1, x1 - x0 - 1, 1, '#6aa6b0');
+  rect(ctx, x0 + 1, y1 + 2, x1 - x0 - 1, 1, '#647188');
+  rect(ctx, x0 + 1, y1 + 3, x1 - x0 - 1, 1, '#637186');
+  // the sill, a little wider than the frame: top, edge, front, then its shadow on the wall
+  rect(ctx, x0 - 4, y1 + 5, x1 - x0 + 9, 5, '#0a0b1e');
+  rect(ctx, x0 - 3, y1 + 5, x1 - x0 + 7, 1, '#6873a1');
+  rect(ctx, x0 - 3, y1 + 6, x1 - x0 + 7, 1, '#4d588a');
+  rect(ctx, x0 - 3, y1 + 8, x1 - x0 + 7, 1, '#3d4670');
+  rect(ctx, x0 - 3, y1 + 10, x1 - x0 + 7, 1, 'rgba(0,0,0,0.25)');
+}
+
+/* The curtains: grommet panels on a rod, fern print (curtains.js) */
+const CURTAIN_PAL = {
+  cloth: ['#4e4048', '#5e4d53', '#725e66', '#8c797f', '#9e8b8d', '#ad9b9b'],
+  print: ['#1e1620', '#2a1e2a', '#322e3a', '#3d3842', '#4a4450', '#564e5a'],
+  rim: ['#a3b5a2', '#bfe1c4'], line: '#090819', shadow: '#000000',
+  rod: ['#604659', '#554e5f', '#8a7084'], finial: ['#000004', '#48282e', '#60393e', '#7e4c50'],
+};
+const SUBS = { x: 76, y: 46, w: 48, h: 20 };
+// more things that glow in the dark: the shop's neon sign and lit front, the heater on cold nights
+const NEON = { x: 592, y: 238, w: 28, h: 24 };
+const VENDING = { x: 594, y: 264, w: 30, h: 70 };
+const HEATER = { x: 274, y: 292, w: 17, h: 24 };
+
 // the bed's side, drawn again in front of cats underneath it (room pixels)
 const BED_FRONT = { x: 66, y: 262, w: 206, h: 29 };
 const FLOOR_FRONT = 318; // cats further back than this are under the bed
 
 export function createRoomScene() {
   const bedFront = document.createElement('canvas');
-  const sky = createSky(R.window);
+  const sky = createOutside(WINDOW_CROP);
   const events = { laserCaught: (_id: CatId) => {} };
   const cats = createCats({
     meow: (id) => sfx.meow(id),
@@ -203,7 +258,88 @@ export function createRoomScene() {
     laserCaught: (id) => events.laserCaught(id),
   });
   let caughtFor = 0;
-  let curtainK = 0; // 0 open … 1 closed, eased
+  let curtainK = 0; // 0 open … 1 closed, as far as the curtains have actually got
+  const curtains = createCurtains({
+    top: 66, bottom: 209, rod: { x0: 163, x1: 304, y: 71, h: 2 }, folds: 5, pal: CURTAIN_PAL,
+    panels: [{ outer: 167, open: 196, shut: 236 }, { outer: 300, open: 271, shut: 232 }],
+  });
+  let curtainsSet = false;
+  let wasOpen = false;
+  try { wasOpen = localStorage.getItem(OPEN_KEY) === '1'; } catch { /* storage blocked */ }
+  const win = createWindow({
+    style: 'slider', glass: GLASS, rail: RAIL, open: wasOpen,
+    sill: { x0: 191, x1: 276, y: 200, front: 204 },
+    busy: () => cats.state.some((c) => c.level === 'sill'),       // birds won't land next to a cat
+  });
+  let lastT = 0;
+
+  // Where the outside shows through the glass, for the close-up: all of it, less what the curtains cover
+  const maskCv = document.createElement('canvas');
+  maskCv.width = GLASS.w; maskCv.height = GLASS.h;
+  function mask() {
+    const g = maskCv.getContext('2d')!;
+    g.fillStyle = '#000'; g.fillRect(0, 0, GLASS.w, GLASS.h);
+    for (const [a, b] of curtains.spans()) g.clearRect(Math.round(a) - GLASS.x, 0, Math.round(b - a) + 1, GLASS.h);
+    return maskCv;
+  }
+
+  /*
+    After dark with the bulb off the room goes dark in hard bands, lit only by what's there: the
+    monitor, laptop and subscriber counter; through open curtains, the moon or (moonless) just the
+    other houses' lights. Gentler than Som's room, so visitors can still find their way.
+  */
+  const DW = W / 2, DH = H / 2;
+  const darkCv = document.createElement('canvas');
+  darkCv.width = DW; darkCv.height = DH;
+  const darkG = darkCv.getContext('2d')!;
+  let darkKey = '', darkOn = false;
+  function updateDark(world: World, bulbOn: boolean, cold: boolean) {
+    const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+    const night = clamp01((-world.sunAlt - 2) / 8);
+    const overcast = world.weather === 'clear' ? world.cloud * 0.3 : world.weather === 'cloudy' ? 0.3 + world.cloud * 0.25 : 0.65;
+    const moon = world.moonAlt > 0 ? clamp01(world.moonAlt / 10) * world.moonFraction * (1 - overcast * 0.9) : 0;
+    const h = homeHour(), late = h > 0.5 && h < 5, open = 1 - curtainK;
+    const base = bulbOn ? 0 : (0.1 + 0.2 * curtainK) + (0.72 - 0.1 - 0.2 * curtainK) * night;
+    const winI = open * (1 + (Math.max(moon * 0.8, late ? 0.14 : 0.22) - 1) * night);
+    const key = [base, winI, moon, curtainK, +cold].map((v) => v.toFixed(2)).join('|');
+    if (key === darkKey) return;
+    darkKey = key;
+    darkOn = base > 0.01;
+    if (!darkOn) return;
+    const im = darkG.createImageData(DW, DH), d = im.data;
+    const dist = (x: number, y: number, r: Region) => Math.hypot(Math.max(r.x - x, 0, x - (r.x + r.w - 1)), Math.max(r.y - y, 0, y - (r.y + r.h - 1)));
+    const band = (dd: number, steps: number[][]) => { for (const [lim, v] of steps) if (dd <= lim) return v; return 0; };
+    const SCR = [[0, 1], [6, 0.7], [18, 0.45], [36, 0.22], [56, 0.08]], WIN = [[6, 0.8], [20, 0.5], [40, 0.25], [70, 0.1]], LED = [[0, 1], [8, 0.4], [22, 0.15]];
+    const GLOW = [[0, 1], [8, 0.6], [22, 0.38], [40, 0.2], [62, 0.08]];
+    const spans = curtains.spans();
+    // what comes through the glass lands on the bed and floor as a slanted patch, split by the meeting
+    // stile and cut off where the curtains are drawn
+    const patch = (x: number, y: number) => {
+      if (y < 236 || y > 306) return 0;
+      const gx = x - (y - 236) * 0.32;
+      if (gx < GLASS.x || gx >= GLASS.x + GLASS.w || (gx >= RAIL.x && gx < RAIL.x + RAIL.w)) return 0;
+      if (spans.some(([a, b]) => gx >= a && gx <= b)) return 0;
+      return winI * (y < 244 || y > 298 ? 0.3 : 0.55);
+    };
+    for (let yy = 0; yy < DH; yy++) for (let xx = 0; xx < DW; xx++) {
+      const x = xx * 2 + 1, y = yy * 2 + 1;
+      const ls = Math.max(band(dist(x, y, R.monitor), SCR), band(dist(x, y, R.laptop), SCR), band(dist(x, y, SUBS), LED) * 0.7);
+      const gd = dist(x, y, GLASS);
+      const lw = Math.max(gd === 0 ? Math.max(1 - curtainK, winI) : winI * band(gd, WIN), patch(x, y));
+      const ln = Math.max(band(dist(x, y, NEON), GLOW), band(dist(x, y, VENDING), GLOW) * 0.6);   // the shop's sign and its lit front
+      const lh = cold ? band(dist(x, y, HEATER), GLOW) * 0.9 : 0;
+      const lit = Math.max(ls, lw, ln, lh);
+      const a = Math.round((base * (1 - lit)) / 0.12) * 0.12;
+      // the shadow takes a little of its light's colour: blue by the screens, pink by the neon, orange by
+      // the heater, warm (town) or cool (moon) by the window
+      const tint = lit === ls ? [8, 30, 60] : lit === ln ? [60, 12, 42] : lit === lh ? [66, 26, 8] : moon < 0.2 && night > 0.5 ? [44, 26, 14] : [14, 18, 50];
+      const tk = Math.min(1, lit * 1.2) * 0.6, i = (yy * DW + xx) * 4;
+      d[i] = 10 + (tint[0] - 10) * tk; d[i + 1] = 8 + (tint[1] - 8) * tk; d[i + 2] = 26 + (tint[2] - 26) * tk;
+      d[i + 3] = Math.round(Math.min(0.85, a) * 255);
+    }
+    darkG.putImageData(im, 0, 0);
+  }
+  const drawSillCats = (ctx: CanvasRenderingContext2D) => { for (const c of cats.state) if (c.level === 'sill') cats.draw(ctx, c, lastT, true); };
 
   function screen(ctx: CanvasRenderingContext2D, name: string, r: Region) {
     const im = img(name);
@@ -218,7 +354,10 @@ export function createRoomScene() {
     cats.setLaser(f.laser);
     if (animate) cats.update(dt);
     caughtFor = f.caught ? caughtFor + dt : 0;
-    curtainK += ((f.curtains ? 1 : 0) - curtainK) * Math.min(1, (animate ? dt : 1) * 4);
+    curtains.set(f.curtains, !curtainsSet || !animate);
+    curtainsSet = true;
+    curtains.update(animate ? dt : 0);
+    curtainK = curtains.k;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, W, H);
     // don't show a half-built room: wait for the room and the player
@@ -230,7 +369,8 @@ export function createRoomScene() {
     }
 
     // ── behind the room: things seen through its green-screen holes ──
-    const lightning = sky(ctx, world, t, dt, animate);
+    const st = outsideState(world);
+    lastT = t;
     const fest = new Set(f.festivals);
 
     const mon = R.monitor;
@@ -290,11 +430,22 @@ export function createRoomScene() {
     const room = img('room');
     if (room) ctx.drawImage(room, 0, 0);
 
-    // closed curtains: generated art of the same room, faded in over the window
-    const curt = curtainK > 0.01 ? img('room-curtains') : null;
-    // a cat napping on the windowsill sleeps behind them, revealed when they open
+    // the window: frame and sill, the view through the glass, then the sashes, birds and rain
+    drawFrame(ctx);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(GLASS.x, GLASS.y, GLASS.w, GLASS.h); ctx.clip();
+    ctx.translate(GLASS.x, GLASS.y);
+    const outside = sky(ctx, st, t, dt, animate);
+    const lightning = outside.flash;
+    ctx.restore();
+    if (animate) win.update(st, dt);
+    win.draw(ctx, st, t, 1);
+
+    // a cat napping on the windowsill sleeps behind the curtains, revealed when they open
     for (const c of cats.state) if (c.level === 'sill') cats.draw(ctx, c, t, animate);
-    if (curt) { ctx.globalAlpha = Math.min(1, curtainK); ctx.drawImage(curt, 0, 0); ctx.globalAlpha = 1; }
+    // with the window open the curtains stir in the breeze (more in rain or a storm)
+    curtains.breeze = win.k * (world.weather === 'storm' ? 1.6 : world.weather === 'rain' ? 1 : 0.55);
+    curtains.draw(ctx);
 
     drawSubCounter(ctx, t, animate);
     P.drawOnAir(ctx, f.onAir, t);
@@ -323,11 +474,23 @@ export function createRoomScene() {
       ctx.fillStyle = `rgba(255,140,70,${(0.16 * amb.golden).toFixed(3)})`;
       ctx.fillRect(0, 0, W, H);
       // light spilling in from the window
-      const g = ctx.createRadialGradient(232, 150, 10, 232, 230, 200);
+      const g = ctx.createRadialGradient(234, 150, 10, 234, 230, 200);
       g.addColorStop(0, `rgba(255,240,210,${((0.28 * amb.day + 0.2 * amb.golden) * (1 - 0.85 * curtainK)).toFixed(3)})`);
       g.addColorStop(1, 'rgba(255,240,210,0)');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
+      // and a slanted patch of daylight on the bed and floor, either side of the meeting stile
+      const pa = (0.16 * amb.day + 0.12 * amb.golden) * (1 - curtainK);
+      if (pa > 0.01) {
+        ctx.fillStyle = `rgba(255,236,200,${pa.toFixed(3)})`;
+        const [l, r] = curtains.spans();
+        for (const [a, b] of [[Math.max(GLASS.x, l[1]), Math.min(RAIL.x, r[0])], [RAIL.x + RAIL.w, Math.min(GLASS.x + GLASS.w, r[0])]]) {
+          if (b <= a) continue;
+          ctx.beginPath();
+          ctx.moveTo(a, 238); ctx.lineTo(b, 238); ctx.lineTo(b + 21, 304); ctx.lineTo(a + 21, 304);
+          ctx.fill();
+        }
+      }
       ctx.globalCompositeOperation = 'source-over';
     }
     if (lightning) { ctx.fillStyle = 'rgba(220,230,255,0.18)'; ctx.fillRect(0, 0, W, H); }
@@ -389,6 +552,10 @@ export function createRoomScene() {
     });
     actors.sort((a, b) => a.y - b.y).forEach((a) => a.draw());
 
+    // ── the dark: bulb off at night ──
+    updateDark(world, !!bc, f.cold);
+    if (darkOn) ctx.drawImage(darkCv, 0, 0, W, H);
+
     // the smart bulb's coloured light washes over everything
     if (bc) {
       const [cr, cg, cb] = bc;
@@ -415,6 +582,7 @@ export function createRoomScene() {
       const k = (t - f.toy.at) / 1.6;
       bubble(ctx, k < 0.4 ? 'PIKA' : 'PIKACHU!', r.x + r.w / 2, r.y - Math.round(Math.abs(Math.sin(k * Math.PI * 3)) * 3));
     }
+    return outside;
   }
 
   // a cat hidden behind closed curtains can't be hovered
@@ -423,5 +591,10 @@ export function createRoomScene() {
     return c && c.level === 'sill' && curtainK > 0.5 ? null : c;
   };
   const hiddenCat = () => (curtainK > 0.5 ? cats.state.find((c) => c.level === 'sill') ?? null : null);
-  return { draw, hitCat, hiddenCat, cats: cats.state, say: cats.say, feed: cats.feed, events };
+  // what the window close-up (outside.js openView) needs
+  const view = {
+    win, outside: sky, mask, front: drawSillCats, dark: () => (darkOn ? darkCv : null),
+    setOpen: (open: boolean) => { win.setOpen(open); try { localStorage.setItem(OPEN_KEY, open ? '1' : '0'); } catch { /* ignore */ } },
+  };
+  return { draw, hitCat, hiddenCat, cats: cats.state, say: cats.say, feed: cats.feed, events, window: view };
 }

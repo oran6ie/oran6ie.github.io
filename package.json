@@ -8,7 +8,7 @@
     "build": "node scripts/youtube.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "youtube": "node scripts/youtube.mjs",
-    "art": "node scripts/art/process.mjs && node scripts/art/memorial.mjs"
+    "art": "node scripts/art/process.mjs && node scripts/art/window.mjs && node scripts/art/memorial.mjs"
   },
   "dependencies": {
     "gifenc": "^1.0.3",

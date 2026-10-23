@@ -141,7 +141,7 @@ export function drawNightShift(ctx: CanvasRenderingContext2D, W: number, H: numb
 /* Tihar: diyas on the windowsill and a marigold garland along the curtain rod */
 export function drawTihar(ctx: CanvasRenderingContext2D, t: number, animate: boolean) {
   for (let i = 0; i < 5; i++) {
-    const x = 212 + i * 10, y = 199;
+    const x = 204 + i * 14, y = 197;
     rect(ctx, x, y + 2, 5, 2, '#a0522d'); rect(ctx, x + 1, y + 4, 3, 1, '#6b3420');
     const flick = animate ? Math.round(Math.sin(t * 9 + i * 1.7)) : 0;
     rect(ctx, x + 2, y - 1 + flick, 1, 2, '#ffd23f'); rect(ctx, x + 2, y + 1, 1, 1, '#ff7a1a');
@@ -149,7 +149,7 @@ export function drawTihar(ctx: CanvasRenderingContext2D, t: number, animate: boo
     g.addColorStop(0, 'rgba(255,190,80,0.35)'); g.addColorStop(1, 'rgba(255,190,80,0)');
     ctx.fillStyle = g; ctx.fillRect(x - 8, y - 9, 20, 18);
   }
-  garland(ctx, 148, 70, 302, 8);   // curtain rod
+  garland(ctx, 160, 70, 308, 8);   // curtain rod
   garland(ctx, 4, 64, 54, 6);      // over the door
 }
 

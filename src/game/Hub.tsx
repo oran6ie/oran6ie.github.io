@@ -23,11 +23,12 @@ import {
 import { PixelCanvas } from './PixelCanvas';
 import { go } from './route';
 import { cheer } from './scenes/cats';
-import { createRoomScene, H, HOTSPOTS, W, type Look, type Toy } from './scenes/roomScene';
+import { createOutsideSound, openView } from './scenes/outside';
+import { createRoomScene, H, HOTSPOTS, outsideState, W, WINDOW, WINDOW_CROP, type Look, type Toy } from './scenes/roomScene';
 import type { BulbMode } from './bulb';
 import { getSettings, setSetting, useSettings } from './settings';
 import { GamePanel, PixelSprite, toast } from './ui';
-import { homeHour, useWorld } from './world';
+import { getWorld, homeHour, useWorld } from './world';
 
 /* Left-to-right order for arrow keys; the first ten are on the hotbar (keys 1–9, 0) */
 const ORDER: LocationKey[] = ['contact', 'channel', 'painting', 'window', 'bulb', 'ai', 'journey', ...(online ? ['guestbook' as const] : []), 'work', 'player', 'achievements', 'inventory', 'memorial', 'piano', 'shop', 'party'];
@@ -297,19 +298,50 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   useEffect(() => {
     // the room and the player first, then everything else
     preload(['room', ...playerImages(look),
-      'screen-game', 'screen-editor', 'screen-music', 'memorial-shadow', 'memorial-sanbi', 'memorial-kittens', 'room-curtains',
+      'screen-game', 'screen-editor', 'screen-music', 'memorial-shadow', 'memorial-sanbi', 'memorial-kittens',
       ...Object.keys(MANIFEST.sprites).filter((k) => k.startsWith('cats/'))]);
   }, [look]);
 
-  const open = (k: LocationKey) => { sfx.warm(); sfx.open(); go(k); };
+  const open = (k: LocationKey) => { sfx.warm(); sfx.open(); if (k === 'window') lookOutside(); else go(k); };
+
+  // The camera pushes in on the window until it fills the room, with the forecast beside it
+  // (scenes/outside.js). Up close you can open the window; it stays open when you come back.
+  const closeOutside = useRef<(() => void) | null>(null);
+  const zoomK = useRef(0);
+  useEffect(() => () => closeOutside.current?.(), []);
+  const lookOutside = () => {
+    const room = roomRef.current, canvas = room?.querySelector('canvas');
+    if (!room || !canvas || closeOutside.current) return;
+    track('panel', 'window', EXPLORE.length);
+    outSound.start();
+    const v = scene.window;
+    closeOutside.current = openView(room, {
+      room: canvas, roomSize: { w: W, h: H }, glass: WINDOW.glass, block: WINDOW.block, crop: WINDOW_CROP, look: WINDOW.look,
+      outside: v.outside, mask: v.mask, win: v.win, front: v.front, dark: v.dark,
+      state: () => outsideState(getWorld()), cardSide: 'left',
+      reducedMotion: !settings.motion,
+      buttons: [{ label: 'CLOSE CURTAINS', title: 'Close the curtains', onClick: () => { closeOutside.current?.(); toggleCurtains(); } }],
+      onWindow: (isOpen) => { v.setOpen(isOpen); sfx.select(); },
+      onZoom: (k) => { zoomK.current = k; },
+      onClose: () => { closeOutside.current = null; sfx.back(); },
+    });
+  };
+
+  // What you hear outside (outside.js): birds, crickets, wind, rain, the town. Muffled behind shut
+  // glass, louder with the window open. Browsers only start sound after a click or key press.
+  const outSound = useMemo(createOutsideSound, []);
+  const soundAt = useRef(0);
+  useEffect(() => {
+    const start = () => outSound.start();
+    addEventListener('pointerdown', start, { once: true });
+    addEventListener('keydown', start, { once: true });
+    return () => { removeEventListener('pointerdown', start); removeEventListener('keydown', start); outSound.set({ muted: true }); };
+  }, [outSound]);
   useEffect(() => { if (panel && EXPLORE.includes(panel)) track('panel', panel, EXPLORE.length); }, [panel]);
 
-  // room tone always; rain on the window when it's raining in Algarah (quieter with curtains closed)
+  // room tone always (the rain is part of the outside sound now)
   const world = useWorld();
-  useEffect(() => {
-    const rain = { rain: 1, storm: 1, drizzle: 0.5 }[world.weather as string] ?? 0;
-    sfx.ambience(1, rain * (settings.curtains ? 0.6 : 1));
-  }, [world.weather, settings.curtains]);
+  useEffect(() => { sfx.ambience(1, 0); }, []);
   useEffect(() => () => { sfx.ambience(0, 0); sfx.purr(false); radio.setMode('lofi'); }, []);
 
   // time of day and weather in Algarah
@@ -632,12 +664,17 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
             frame={(ctx, t, dt) => {
               clock.current = t;
               if (settings.motion) food.current = Math.max(0, food.current - dt / 14);
-              scene.draw(ctx, {
+              const ev = scene.draw(ctx, {
                 t, dt, animate: settings.motion, caught, look, clip, toy: toy.current, curtains: settings.curtains, bulb: settings.bulb,
                 laser: laserOn ? laser.current : null, food: food.current, nightShift, festivals, onAir: ON_AIR,
                 laptopClip: wantLaptop ? laptopClip : null, poofAt: poofAt.current, match: match.current, tired, cold, leak,
                 guestNotes: online ? wallNotes : null, guestInvite: !got.has('guest'),
               });
+              if (t - soundAt.current > 0.25 || t < soundAt.current) {
+                soundAt.current = t;
+                outSound.set({ open: scene.window.win.k, zoom: zoomK.current, curtains: settings.curtains, muted: !settings.sound, st: outsideState(getWorld()) });
+              }
+              if (ev) outSound.tick(dt, ev);
             }}
           />
           {ORDER.filter((k) => k !== 'party').map((k) => {

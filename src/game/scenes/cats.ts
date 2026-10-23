@@ -18,7 +18,7 @@ type Step =
 const FLOOR = { x0: 62, x1: 584, y0: 322, y1: 352 };
 const BED = { x0: 150, x1: 262, y: 256 };
 const DESK = { x: 382, y: 229 };
-const SILL = { x: 232, y: 201 };
+const SILL = { x: 234, y: 203 };
 const SPOTS = {
   catbed: { x: 184, y: 316 },
   bowl: { x: 122, y: 323 },
@@ -106,7 +106,7 @@ function route(c: CatState, level: Level, x: number, y: number): Step[] {
 
 /* Where a cat would stand to reach the laser dot: on the bed, desk or sill when the dot is up there */
 function laserSpot(p: { x: number; y: number }): { level: Level; x: number; y: number } {
-  if (p.x >= 206 && p.x <= 258 && p.y >= 178 && p.y <= 206) return { level: 'sill', ...onSurface('sill', p.x, p.y) };
+  if (p.x >= 190 && p.x <= 278 && p.y >= 180 && p.y <= 208) return { level: 'sill', ...onSurface('sill', p.x, p.y) };
   if (p.x >= 66 && p.x <= 290 && p.y >= 205 && p.y <= 292) return { level: 'bed', ...onSurface('bed', p.x, p.y) };
   if (p.x >= 292 && p.x <= 400 && p.y >= 190 && p.y <= 240) return { level: 'desk', ...onSurface('desk', p.x, p.y) };
   return { level: 'floor', ...onSurface('floor', p.x, p.y) };
