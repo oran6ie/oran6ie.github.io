@@ -11,7 +11,7 @@ export const BIRTHDAY = { month: 2, day: 10, year: 2001 }; // 10 February 2001
 
 // [first day, last day] inclusive, YYYY-MM-DD in Nepal/India time
 const LUNAR: Record<'dashain' | 'tihar' | 'kukur', [string, string][]> = {
-  dashain: [['2026-10-12', '2026-10-26'], ['2027-10-01', '2027-10-15']], // Vijaya Dashami: 21 Oct 2026, ~9 Oct 2027
+  dashain: [['2026-10-12', '2026-10-23'], ['2027-10-01', '2027-10-11']], // Vijaya Dashami: 21 Oct 2026, ~9 Oct 2027 (ends 2 days after)
   tihar: [['2026-11-07', '2026-11-11'], ['2027-10-27', '2027-10-31']],
   kukur: [['2026-11-08', '2026-11-08'], ['2027-10-28', '2027-10-28']], // Kukur Tihar: the day for dogs (and, here, cats)
 };
