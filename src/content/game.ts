@@ -81,7 +81,7 @@ export const locations = {
   journey: { label: 'World Map', hint: 'Experience' },
   achievements: { label: 'Trophies', hint: 'Highlights' },
   inventory: { label: 'Inventory', hint: 'Tools & skills' },
-  shop: { label: 'Shop', hint: 'Get a site like this' },
+  shop: { label: 'Shop', hint: 'Rates & services' },
   contact: { label: 'Mailbox', hint: 'Contact' },
   party: { label: 'Party', hint: 'Meet the cats' },
   memorial: { label: 'In Memory', hint: 'Cats we miss' },

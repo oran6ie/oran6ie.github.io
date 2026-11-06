@@ -116,7 +116,7 @@ export function Toaster() {
   return msg ? <div key={msg.id} className="px-toast" role="status">{msg.text}</div> : null;
 }
 
-async function copyText(text: string) {
+export async function copyText(text: string) {
   try {
     await navigator.clipboard.writeText(text);
   } catch {

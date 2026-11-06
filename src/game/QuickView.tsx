@@ -29,6 +29,7 @@ export function QuickView() {
         <div className="quick-actions">
           <CopyEmailButton>Email me</CopyEmailButton>
           <a className="px-btn ghost" href={`${BASE}cv/`}>View CV</a>
+          <a className="px-btn ghost" href="#shop">Rate card</a>
           <button className="px-btn ghost" onClick={() => { sfx.warm(); sfx.start(); go('hub'); }}>Play the portfolio</button>
         </div>
       </header>

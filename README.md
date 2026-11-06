@@ -5,6 +5,7 @@ Portfolio of Alankrit Thapa, built with React + Vite and published to GitHub Pag
 - `/` main portfolio
 - `/ai/` AI Works
 - `/cv/` printable CV
+- `/#shop` rate card, opens below the room from the vending machine (`/rates/` redirects there)
 
 ## Updating content
 
@@ -16,6 +17,7 @@ Everything you'd normally change lives in `src/content/`:
 | `projects.ts` | Selected Work cards (order, titles, links, preview clips) |
 | `aiProjects.ts` | AI Works projects and their 4 pipeline stages |
 | `cv.ts` | Wording specific to the CV page |
+| `rates.ts` | Rate card prices, services and terms (the vending machine in the room) |
 
 Images and clips go in `public/media/` and are referenced without the `public/`
 prefix, e.g. `media/work/radio-bershy.mp4`. Full `https://` links (Cloudinary

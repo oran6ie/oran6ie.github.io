@@ -25,6 +25,7 @@ import { go } from './route';
 import { cheer } from './scenes/cats';
 import { createOutsideSound, openView } from './scenes/outside';
 import { createRoomScene, H, HOTSPOTS, outsideState, W, WINDOW, WINDOW_CROP, type Look, type Toy } from './scenes/roomScene';
+import { RateCard } from './RateCard';
 import type { BulbMode } from './bulb';
 import { getSettings, setSetting, useSettings } from './settings';
 import { GamePanel, PixelSprite, toast } from './ui';
@@ -175,6 +176,7 @@ function Hud({ onOpen, look, radioStatus }: { onOpen: (k: LocationKey) => void; 
         )}
         <button className="px-btn small" onClick={() => { sfx.select(); go('quick'); }}>Quick view</button>
         <a className="px-btn small" href={`${import.meta.env.BASE_URL}cv/`}>CV</a>
+        <button className="px-btn small" onClick={() => onOpen('shop')}>Rates</button>
         <button className="px-btn small" aria-pressed={settings.radio} title={radioStatus.title ? `Now playing: ${radioStatus.title}` : '24/7 lofi radio'}
           onClick={() => { setSetting('radio', !settings.radio); sfx.warm(); sfx.select(); }}>
           {settings.radio ? 'Radio on' : 'Radio off'}
@@ -252,7 +254,8 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
     const t0 = performance.now();
     const show = () => {
       const s = nudgeState.current;
-      if (done || s.pinned || s.panel === 'guestbook') return;
+      // not over the rate card: someone reading prices shouldn't get a pop-up (it can still come after)
+      if (done || s.pinned || s.panel === 'guestbook' || s.panel === 'shop') return;
       done = true;
       try { if (sessionStorage.getItem('at_nudge')) return; sessionStorage.setItem('at_nudge', '1'); } catch { /* ignore */ }
       sfx.select();
@@ -302,7 +305,14 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
       ...Object.keys(MANIFEST.sprites).filter((k) => k.startsWith('cats/'))]);
   }, [look]);
 
-  const open = (k: LocationKey) => { sfx.warm(); sfx.open(); if (k === 'window') lookOutside(); else go(k); };
+  // #shop is the rate card, which opens below the room (RateCard) instead of in a panel;
+  // asked for again after scrolling back up to the room, it just scrolls down to it
+  const open = (k: LocationKey) => {
+    sfx.warm(); sfx.open();
+    if (k === 'window') lookOutside();
+    else if (k === 'shop' && panel === 'shop') document.querySelector('.rc')?.scrollIntoView({ behavior: settings.motion ? 'smooth' : 'instant' });
+    else go(k);
+  };
 
   // The camera pushes in on the window until it fills the room, with the forecast beside it
   // (scenes/outside.js). Up close you can open the window; it stays open when you come back.
@@ -644,6 +654,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
   const roomClass = ['room', catHover && 'on-cat', laserOn && 'laser-mode', intro && settings.motion && 'intro', nightShift && 'night-shift'].filter(Boolean).join(' ');
 
   return (
+    <>
     <div className="hub">
       <Hud onOpen={open} look={look} radioStatus={radioStatus} />
 
@@ -779,7 +790,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
         </div>
       )}
 
-      {panel && (
+      {panel && panel !== 'shop' && (
         <GamePanel
           key={panel}
           title={locations[panel].label}
@@ -803,5 +814,7 @@ export function Hub({ panel }: { panel: LocationKey | null }) {
         </GamePanel>
       )}
     </div>
+    <RateCard open={panel === 'shop'} onClose={() => go('hub')} portrait={portraitSrc(look)} />
+    </>
   );
 }
